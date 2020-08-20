@@ -20,8 +20,6 @@ export function add(app: App, params: Operand[]) {
 
 	let memSize = dest.requiredMemSize || src.requiredMemSize;
 
-	console.log(memSize);
-
 	let lhs = src.getValueInt(app, memSize);
 	let rhs = dest.getValueInt(app, memSize);
 

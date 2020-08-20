@@ -13,7 +13,6 @@ export class Register32 {
 	}
 
 	set _16(value) {
-		console.log(this.number.toString(2), value.toString(2));
 		this.number = (this.number & 0xffff0000) | (value & 0x0000ffff);
 	}
 	get _16() {
