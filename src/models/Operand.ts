@@ -1,4 +1,4 @@
-import { App } from '../index';
+import { App } from '../App';
 
 export enum OperandTypes {
 	const,
