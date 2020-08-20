@@ -1,0 +1,34 @@
+{
+	"name": "x86webEmulator",
+	"version": "1.0.0",
+	"description": "An x86 Emulator. JS &amp; Webpack",
+	"main": "dist/index.js",
+	"scripts": {
+		"test": "jest --verbose --passWithNoTests",
+		"build": "tsc",
+		"pack": "npx webpack --config webpack.config.js",
+		"start": "node dist/main.js",
+		"dev": "node prebuild"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Unamed001/x86webEmulator.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/Unamed001/x86webEmulator/issues"
+	},
+	"homepage": "https://github.com/Unamed001/x86webEmulator#readme",
+	"devDependencies": {
+		"jest": "^26.4.1",
+		"ts-jest": "^26.2.0",
+		"typescript": "^4.0.0",
+		"webpack": "^4.44.1",
+		"webpack-cli": "^3.3.12"
+	},
+	"dependencies": {
+		"@types/jest": "^26.0.10"
+	}
+}
