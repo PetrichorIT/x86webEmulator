@@ -9,6 +9,7 @@
 		"test:register": "jest --verbose src/models/Register32.test.ts",
 		"test:transport": "jest --verbose src/x86/transport.test.ts",
 		"test:logic": "jest --verbose src/x86/logic.test.ts",
+		"test:arithmetic": "jest --verbose src/x86/arithmetic.test.ts",
 
 		"build": "tsc",
 		"pack": "npx webpack --config webpack.config.js",
