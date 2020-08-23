@@ -20,7 +20,9 @@ export class App {
 			edi: new Register32(0),
 
 			esp: new Register32(0),
-			ebp: new Register32(0)
+			ebp: new Register32(0),
+
+			eip: new Register32(0)
 		};
 
 		this.flags = {
@@ -42,3 +44,5 @@ export class App {
 		}
 	}
 }
+
+import * as x86 from './x86';
