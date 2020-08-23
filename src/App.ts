@@ -1,8 +1,9 @@
 import Register32 from './models/Register32';
 import Operand, { OperandTypes } from './models/Operand';
 
-type Command = { name: string; params: Operand[] };
-type CommandFunction = (app: App, params: Operand[]) => void;
+export type Label = { label: string };
+export type Command = { name: string; params: Operand[] };
+export type CommandFunction = (app: App, params: Operand[]) => void;
 
 export class App {
 	registers: { [key: string]: Register32 };
@@ -44,18 +45,19 @@ export class App {
 		this.instructions = [];
 	}
 
-	runProgram(commands: Command[], position?: number) {
+	runProgram(commands: (Command | Label)[], position?: number) {
 		position = position || 0x7fff;
 		this.writeProgram(commands, position);
 		this.registers.eip._32 = position;
 	}
 
-	writeProgram(commands: Command[], position: number) {
+	writeProgram(commands: (Command | Label)[], position: number) {
 		// TODO: Resolve Labels
+
 		let pos = position;
 		let idx = this.instructions.length;
 		for (const command of commands) {
-			this.instructions.push(command);
+			this.instructions.push(command as Command);
 			this.memory.writeUInt32LE(idx++, pos);
 			pos += 4;
 		}

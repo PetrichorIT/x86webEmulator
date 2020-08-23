@@ -1,23 +1,15 @@
-import { App } from './App';
-import { Operand, OperandTypes } from './models/Operand';
-import * as x86 from './x86';
+import { createInterface } from 'readline';
+import { Parser } from './parsers';
+import { Command } from './App';
 
-const app = new App(x86);
+const rl = createInterface(process.stdin, process.stdout);
 
-app.runProgram(
-	[
-		{ name: 'mov', params: [ new Operand(OperandTypes.register, 'eax'), new Operand(OperandTypes.const, 0xff) ] },
-		{ name: 'mov', params: [ new Operand(OperandTypes.register, 'ebx'), new Operand(OperandTypes.const, 0x01) ] },
+rl.on('line', (l) => {
+	let psd = new Parser().parse(l)[0] as Command;
+	console.log(psd.name, psd.params);
+});
 
-		{
-			name: 'dec',
-			params: [ new Operand(OperandTypes.register, 'eax') ]
-		}
-	],
-	0x4
-);
-
-app.instructionCycle();
-app.instructionCycle();
-app.instructionCycle();
-console.log(app);
+rl.on('SIGINT', () => {
+	console.log('Closing Parser');
+	process.exit(0);
+});
