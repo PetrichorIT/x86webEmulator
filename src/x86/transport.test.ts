@@ -62,3 +62,47 @@ describe('@Test MOV', () => {
 		expect(app.memory.readUInt32LE(0xff)).toEqual(0xaa);
 	});
 });
+
+describe('@Test PUSH', () => {
+	let app: App = new App(t);
+	app.registers.esp._32 = 100;
+
+	it('PUSH const', () => {
+		t.push(app, [ new Operand(OperandTypes.const, 0xf0f0f0f0) ]);
+		t.push(app, [ new Operand(OperandTypes.const, 0xa0a0a0a0) ]);
+		expect(app.memory.readUInt32LE(96)).toEqual(0xf0f0f0f0);
+		expect(app.memory.readUInt32LE(92)).toEqual(0xa0a0a0a0);
+		expect(app.registers.esp._32).toEqual(92);
+	});
+
+	it('PUSH reg32', () => {
+		app.registers.eax._32 = 0xe;
+
+		t.push(app, [ new Operand(OperandTypes.register, 'eax') ]);
+		expect(app.memory.readUInt32LE(88)).toEqual(0xe);
+		expect(app.registers.esp._32).toEqual(88);
+	});
+});
+
+describe('@Test POP', () => {
+	let app: App = new App(t);
+	app.registers.esp._32 = 100;
+	app.registers.ebp._32 = 100;
+
+	it('init(_:push)', () => {
+		t.push(app, [ new Operand(OperandTypes.const, 0xf0f0f0f0) ]);
+		t.push(app, [ new Operand(OperandTypes.const, 0xa0a0a0a0) ]);
+		t.push(app, [ new Operand(OperandTypes.const, 0x40404040) ]);
+	});
+
+	it('POP reg32', () => {
+		t.pop(app, [ new Operand(OperandTypes.register, 'eax') ]);
+		expect(app.registers.eax._32).toEqual(0x40404040);
+		t.pop(app, [ new Operand(OperandTypes.register, 'ebx') ]);
+		expect(app.registers.ebx._32).toEqual(0xa0a0a0a0);
+		t.pop(app, [ new Operand(OperandTypes.register, 'ecx') ]);
+		expect(app.registers.ecx._32).toEqual(0xf0f0f0f0);
+
+		expect(() => t.pop(app, [ new Operand(OperandTypes.register, 'edx') ])).toThrowError();
+	});
+});
