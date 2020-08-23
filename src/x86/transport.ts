@@ -1,5 +1,6 @@
 import { App } from '../App';
 import Operand, { OperandTypes } from '../models/Operand';
+import { operandMemSize } from './common';
 
 export function mov(app: App, params: Operand[]) {
 	let dest = params[0];
@@ -7,7 +8,7 @@ export function mov(app: App, params: Operand[]) {
 
 	if (dest.isMemory && src.isMemory) throw new Error('Mem2Mem');
 
-	let memSize = dest.requiredMemSize || src.requiredMemSize;
+	let memSize = operandMemSize([ dest, src ]);
 	let val = src.getValue(app, memSize);
 
 	dest.setValue(app, memSize, val);

@@ -4,7 +4,9 @@ export enum OperandTypes {
 	const,
 	register,
 	mDirect,
-	mIndirect
+	mIndirect,
+	mIndexed,
+	mDIndexed
 }
 
 export class Operand {
@@ -46,20 +48,37 @@ export class Operand {
 			if (this.value[1].toLowerCase() === 'l') return app.registers['e' + this.value[0] + 'x']._8L;
 			throw new Error('Unidenified register');
 		}
+
 		if (this.type === OperandTypes.mDirect) {
-			switch (memSize) {
-				case 1:
-					return app.memory.readUInt8(this.value);
-				case 2:
-					return app.memory.readUInt16LE(this.value);
-				case 4:
-					return app.memory.readUInt32LE(this.value);
-				default:
-					throw new Error('Invalid memsize Size');
-			}
+			return this.getMemUInt(app, this.value, memSize);
+		}
+
+		if (this.type === OperandTypes.mIndirect) {
+			return this.getMemUInt(app, app.registers[this.value]._32, memSize);
+		}
+
+		if (this.type === OperandTypes.mIndexed) {
+			return this.getMemUInt(app, app.registers[this.value[0]]._32 + this.value[1], memSize);
+		}
+
+		if (this.type === OperandTypes.mDIndexed) {
+			return this.getMemUInt(app, app.registers[this.value[0]]._32 + app.registers[this.value[1]]._32, memSize);
 		}
 
 		throw new Error('NEEDED' + this.type);
+	}
+
+	private getMemUInt(app: App, position: number, memSize: number): number {
+		switch (memSize) {
+			case 1:
+				return app.memory.readUInt8(position);
+			case 2:
+				return app.memory.readUInt16LE(position);
+			case 4:
+				return app.memory.readUInt32LE(position);
+			default:
+				throw new Error('Invalid memsize Size');
+		}
 	}
 
 	getValueInt(app: App, memSize: number | undefined): number {
@@ -71,23 +90,42 @@ export class Operand {
 			if (this.value[1].toLowerCase() === 'l') return app.registers['e' + this.value[0] + 'x']._8L;
 			throw new Error('Unidenified register');
 		}
+
 		if (this.type === OperandTypes.mDirect) {
-			switch (memSize) {
-				case 1:
-					return app.memory.readInt8(this.value);
-				case 2:
-					return app.memory.readInt16LE(this.value);
-				case 4:
-					return app.memory.readInt32LE(this.value);
-				default:
-					throw new Error('Invalid memsize Size');
-			}
+			return this.getMemInt(app, this.value, memSize);
+		}
+
+		if (this.type === OperandTypes.mIndirect) {
+			return this.getMemInt(app, app.registers[this.value]._32, memSize);
+		}
+
+		if (this.type === OperandTypes.mIndexed) {
+			return this.getMemInt(app, app.registers[this.value[0]]._32 + this.value[1], memSize);
+		}
+
+		if (this.type === OperandTypes.mDIndexed) {
+			return this.getMemInt(app, app.registers[this.value[0]]._32 + app.registers[this.value[1]]._32, memSize);
 		}
 
 		throw new Error('NEEDED' + this.type);
 	}
 
+	private getMemInt(app: App, position: number, memSize: number): number {
+		switch (memSize) {
+			case 1:
+				return app.memory.readInt8(position);
+			case 2:
+				return app.memory.readInt16LE(position);
+			case 4:
+				return app.memory.readInt32LE(position);
+			default:
+				throw new Error('Invalid memsize Size');
+		}
+	}
+
 	setValue(app: App, memSize: number | undefined, newValue: number): void {
+		if (this.requiredMemSize && memSize && this.requiredMemSize !== memSize) throw new Error('B');
+
 		if (this.type === OperandTypes.const) throw new Error('CONST Cant be set');
 		if (this.type === OperandTypes.register) {
 			if (this.value[0].toLowerCase() === 'e') {
@@ -108,20 +146,41 @@ export class Operand {
 			}
 			throw new Error('Unidenified register');
 		}
+
 		if (this.type === OperandTypes.mDirect) {
-			switch (memSize) {
-				case 1:
-					app.memory.writeUInt8(newValue);
-					return;
-				case 2:
-					app.memory.writeUInt16LE(newValue);
-					return;
-				case 4:
-					app.memory.writeUInt32LE(newValue);
-					return;
-				default:
-					throw new Error('Invalid memsize Size');
-			}
+			return this.setMemUInt(app, this.value, memSize, newValue);
+		}
+
+		if (this.type === OperandTypes.mIndirect) {
+			return this.setMemUInt(app, app.registers[this.value]._32, memSize, newValue);
+		}
+
+		if (this.type === OperandTypes.mIndexed) {
+			return this.setMemUInt(app, app.registers[this.value[0]]._32 + this.value[1], memSize, newValue);
+		}
+
+		if (this.type === OperandTypes.mDIndexed) {
+			return this.setMemUInt(
+				app,
+				app.registers[this.value[0]]._32 + app.registers[this.value[1]]._32,
+				memSize,
+				newValue
+			);
+		}
+	}
+	private setMemUInt(app: App, position: number, memSize: number, value: number): void {
+		switch (memSize) {
+			case 1:
+				app.memory.writeUInt8(value, position);
+				break;
+			case 2:
+				app.memory.writeUInt16LE(value, position);
+				break;
+			case 4:
+				app.memory.writeUInt32LE(value, position);
+				break;
+			default:
+				throw new Error('Invalid memsize Size');
 		}
 	}
 }

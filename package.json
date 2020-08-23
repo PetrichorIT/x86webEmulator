@@ -4,7 +4,11 @@
 	"description": "An x86 Emulator. JS &amp; Webpack",
 	"main": "dist/index.js",
 	"scripts": {
-		"test": "jest --verbose --passWithNoTests",
+		"test": "jest",
+		"test:operand": "jest --verbose src/models/Operand.test.ts",
+		"test:register": "jest --verbose src/models/Register32.test.ts",
+		"test:transport": "jest --verbose src/x86/transport.test.ts",
+
 		"build": "tsc",
 		"pack": "npx webpack --config webpack.config.js",
 		"start": "node dist/main.js",
