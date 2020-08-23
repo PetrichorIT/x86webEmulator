@@ -3,7 +3,7 @@ import Operand, { OperandTypes } from '../models/Operand';
 
 export function and(app: App, params: Operand[]) {
 	let lhsOp = params[0];
-	let rhsOp = params[0];
+	let rhsOp = params[1];
 
 	if (lhsOp.type === OperandTypes.const) throw new Error('noConst');
 
@@ -20,7 +20,7 @@ export function and(app: App, params: Operand[]) {
 
 export function or(app: App, params: Operand[]) {
 	let lhsOp = params[0];
-	let rhsOp = params[0];
+	let rhsOp = params[1];
 
 	if (lhsOp.type === OperandTypes.const) throw new Error('noConst');
 
@@ -37,7 +37,7 @@ export function or(app: App, params: Operand[]) {
 
 export function xor(app: App, params: Operand[]) {
 	let lhsOp = params[0];
-	let rhsOp = params[0];
+	let rhsOp = params[1];
 
 	if (lhsOp.type === OperandTypes.const) throw new Error('noConst');
 
@@ -69,9 +69,10 @@ export function not(app: App, params: Operand[]) {
 
 export function shl(app: App, params: Operand[]) {
 	let lhsOp = params[0];
-	let rhsOp = params[0];
+	let rhsOp = params[1];
 
 	if (lhsOp.type === OperandTypes.const) throw new Error('noConst');
+	if (lhsOp.isMemory) throw new Error('noMEM');
 	if (rhsOp.type !== OperandTypes.const) throw new Error('needConst');
 
 	let memSize = lhsOp.requiredMemSize;
@@ -85,15 +86,16 @@ export function shl(app: App, params: Operand[]) {
 
 export function shr(app: App, params: Operand[]) {
 	let lhsOp = params[0];
-	let rhsOp = params[0];
+	let rhsOp = params[1];
 
 	if (lhsOp.type === OperandTypes.const) throw new Error('noConst');
+	if (lhsOp.isMemory) throw new Error('noMEM');
 	if (rhsOp.type !== OperandTypes.const) throw new Error('needConst');
 
 	let memSize = lhsOp.requiredMemSize;
 
 	let lhs = lhsOp.getValue(app, memSize);
-	let res = lhs >> rhsOp.getValue(app, 4);
+	let res = lhs >>> rhsOp.getValue(app, 4);
 
 	lhsOp.setValue(app, memSize, res);
 	app.registers.eip._32 += 4;
