@@ -13,6 +13,8 @@ export class App {
 	instructions: Command[];
 	commandHandlers: { [key: string]: CommandFunction };
 
+	subscriber: (() => void)[];
+
 	constructor(commandHandlers: { [key: string]: CommandFunction }) {
 		this.registers = {
 			eax: new Register32(0),
@@ -43,6 +45,11 @@ export class App {
 
 		this.commandHandlers = commandHandlers;
 		this.instructions = [];
+		this.subscriber = [];
+	}
+
+	subscribe(newSubscriber: () => void) {
+		this.subscriber.push(newSubscriber);
 	}
 
 	runProgram(commands: (Command | Label)[], position?: number) {
@@ -76,5 +83,7 @@ export class App {
 		let instrc = this.instructions[iLoc];
 
 		this.commandHandlers[instrc.name](this, instrc.params);
+
+		this.subscriber.forEach((s) => s());
 	}
 }

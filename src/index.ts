@@ -1,15 +1,17 @@
-import { createInterface } from 'readline';
-import { Parser } from './parsers';
-import { Command } from './App';
+import { App } from './App';
+import * as x86 from './x86';
+import Register32 from './models/Register32';
+import { DOMRegister } from './dom/DOMRegister';
+import { DOMFlag } from './dom/DOMFlag';
 
-const rl = createInterface(process.stdin, process.stdout);
+let app = new App(x86);
 
-rl.on('line', (l) => {
-	let psd = new Parser().parse(l)[0] as Command;
-	console.log(psd.name, psd.params);
-});
+for (const regName in app.registers) {
+	let dom = new DOMRegister(app, regName);
+}
 
-rl.on('SIGINT', () => {
-	console.log('Closing Parser');
-	process.exit(0);
-});
+for (const flgName in app.flags) {
+	let dom = new DOMFlag(app, flgName);
+}
+
+setInterval(() => console.log(app), 5000);

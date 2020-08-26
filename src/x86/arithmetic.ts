@@ -32,7 +32,8 @@ export function add(app: App, params: Operand[]) {
 	const resTNeg = resT < 0;
 
 	app.flags.SF = resTNeg;
-	// app.flags.OF = ()
+	app.flags.OF = false;
+
 	dest.setValue(app, memSize, resT);
 	app.registers.eip._32 += 4;
 }
