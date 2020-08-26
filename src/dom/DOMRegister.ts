@@ -81,3 +81,5 @@ export class DOMRegister {
 		this.byte0.value = filledString.substr(6, 2);
 	}
 }
+
+export default DOMRegister;

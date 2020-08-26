@@ -1,4 +1,3 @@
-import Register32 from '../models/Register32';
 import { App } from '../App';
 
 export class DOMFlag {
@@ -28,7 +27,6 @@ export class DOMFlag {
 		registerDOM.appendChild(this.flagDOM);
 
 		document.querySelector('.flags-box').appendChild(registerDOM);
-		// LINK DOM
 
 		this.update(app.flags[flagName]);
 		app.subscribe(() => this.update(app.flags[flagName]));
@@ -42,3 +40,5 @@ export class DOMFlag {
 		this.flagDOM.checked = value;
 	}
 }
+
+export default DOMFlag;
