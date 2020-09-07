@@ -25,8 +25,8 @@ export class App {
 			esi: new Register32(0),
 			edi: new Register32(0),
 
-			esp: new Register32(0),
-			ebp: new Register32(0),
+			esp: new Register32(0x7fff),
+			ebp: new Register32(0x7fff),
 
 			eip: new Register32(0)
 		};
@@ -44,7 +44,7 @@ export class App {
 		this.memory = Buffer.alloc(0xffff);
 
 		this.commandHandlers = commandHandlers;
-		this.instructions = [];
+		this.instructions = [ undefined ];
 		this.subscriber = [];
 	}
 
@@ -56,13 +56,36 @@ export class App {
 		position = position || 0x7fff;
 		this.writeProgram(commands, position);
 		this.registers.eip._32 = position;
+
+		this.subscriber.forEach((s) => s());
 	}
 
 	writeProgram(commands: (Command | Label)[], position: number) {
-		// TODO: Resolve Labels
-
 		let pos = position;
+		let labels: { [key: string]: number } = {};
+		let relPos = 0;
+
+		for (let i = 0; i < commands.length; i++) {
+			if ((commands[i] as Label).label) {
+				labels[(commands[i] as Label).label] = pos + relPos;
+			} else {
+				relPos += 4;
+			}
+		}
+
+		commands = commands.filter((v: any) => v.label === undefined).map((c: Command) => {
+			for (let i = 0; i < c.params.length; i++) {
+				if (c.params[i].type === OperandTypes.label) {
+					c.params[i] = new Operand(OperandTypes.const, labels[c.params[i].value]);
+				}
+			}
+			return c;
+		});
+
+		console.log(commands);
+
 		let idx = this.instructions.length;
+
 		for (const command of commands) {
 			this.instructions.push(command as Command);
 			this.memory.writeUInt32LE(idx++, pos);
@@ -81,6 +104,7 @@ export class App {
 
 		if (iLoc >= this.instructions.length) throw new Error('NOP');
 		let instrc = this.instructions[iLoc];
+		if (!instrc) throw new Error('NOP');
 
 		this.commandHandlers[instrc.name](this, instrc.params);
 

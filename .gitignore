@@ -105,3 +105,4 @@ dist
 
 prebuild/
 public/scss
+public/js/main.js

@@ -9,6 +9,10 @@
     
     <title>x86 Emulator</title>
     <link rel="stylesheet" href="css/main.css">
+    
+    <link rel="stylesheet" href="css/codemirror.css">
+    <link rel="stylesheet" href="css/material-darker.css">
+
 </head>
 <body>
     
@@ -18,7 +22,16 @@
             x86 Emulator
         </div>
         <div class="body-box">
-            <div class="input-box"></div>
+            <div class="input-box">
+                <div class="editor-box">
+                    <textarea id="editor" autocomplete="false"></textarea>
+                </div>
+                <div class="button-box">
+                    <button id="compile">©</button>
+                    <button id="step">➡︎</button>
+                    <button id="run">►</button>
+                </div>
+            </div>
             <div class="info-box">
                 <div class="row">
                     <div class="registers-box">
@@ -40,7 +53,6 @@
         </div>
     </div>
 
-
-    <script src="dist/main.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>

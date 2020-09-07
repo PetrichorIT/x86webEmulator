@@ -71,3 +71,7 @@ export function jnz(app: App, params: Operand[]) {
 export function nop(app: App, params: Operand[]) {
 	app.registers.eip._32 += 4;
 }
+
+export function exit(app: App, params: Operand[]) {
+	throw new Error('NOP');
+}

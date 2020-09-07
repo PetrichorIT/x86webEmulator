@@ -44,6 +44,49 @@ body {
   height: calc(100% - 75px);
 }
 
+.content-box .body-box .input-box .editor-box {
+  width: 80%;
+  margin-left: 25px;
+}
+
+.content-box .body-box .input-box .button-box {
+  margin-top: 25px;
+  margin-left: 25px;
+}
+
+.content-box .body-box .input-box .button-box button {
+  outline: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  height: 40px;
+  width: 40px;
+  font-size: 20px;
+  color: #f0f0f0;
+  border-radius: 5px;
+  -webkit-transition: .2s;
+  transition: .2s;
+  cursor: pointer;
+}
+
+.content-box .body-box .input-box .button-box #compile {
+  background-color: #055d97;
+}
+
+.content-box .body-box .input-box .button-box #compile:hover {
+  background-color: rgba(5, 93, 151, 0.5);
+}
+
+.content-box .body-box .input-box .button-box #run,
+.content-box .body-box .input-box .button-box #step {
+  background-color: #39850e;
+}
+
+.content-box .body-box .input-box .button-box #run:hover,
+.content-box .body-box .input-box .button-box #step:hover {
+  background-color: rgba(57, 133, 14, 0.5);
+}
+
 .content-box .body-box .info-box {
   width: 40%;
   height: calc(100% - 75px);

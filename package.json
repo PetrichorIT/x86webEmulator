@@ -10,7 +10,6 @@
 		"test:transport": "jest --verbose src/x86/transport.test.ts",
 		"test:logic": "jest --verbose src/x86/logic.test.ts",
 		"test:arithmetic": "jest --verbose src/x86/arithmetic.test.ts",
-
 		"build": "tsc",
 		"pack": "npx webpack --config webpack.config.js",
 		"start": "node dist/main.js",
@@ -35,6 +34,8 @@
 		"webpack-cli": "^3.3.12"
 	},
 	"dependencies": {
-		"@types/jest": "^26.0.10"
+		"@types/codemirror": "0.0.98",
+		"@types/jest": "^26.0.10",
+		"codemirror": "^5.57.0"
 	}
 }

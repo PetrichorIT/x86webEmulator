@@ -6,7 +6,8 @@ export enum OperandTypes {
 	mDirect,
 	mIndirect,
 	mIndexed,
-	mDIndexed
+	mDIndexed,
+	label
 }
 
 export class Operand {

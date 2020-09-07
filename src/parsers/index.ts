@@ -17,10 +17,14 @@ export class Parser {
 				let ddotpos = this.currentLine.indexOf(':');
 				commands.push({ label: this.currentLine.substr(0, ddotpos) });
 			} else {
-				let whPos = this.currentLine.indexOf(' ') || this.currentLine.length - 1;
+				let whPos = this.currentLine.indexOf(' ');
+				if (whPos === -1) {
+					whPos = this.currentLine.length;
+				}
 				let commandName = this.currentLine.substr(0, whPos).toLowerCase();
 				let params: Operand[] = [];
 
+				console.log(commandName, this.currentLine, whPos);
 				this.currentLine = this.currentLine.substr(whPos);
 				let i = 0;
 				while (this.currentLine !== '' && i < 16) {
@@ -32,6 +36,7 @@ export class Parser {
 			}
 		}
 
+		console.log(commands);
 		return commands;
 	}
 
@@ -102,7 +107,9 @@ export class Parser {
 				let desc = this.currentLine.substr(0, whPos).trim().toLowerCase();
 				this.currentLine = this.currentLine.substr(whPos + 1);
 
-				if (!validRegisters.includes(desc)) throw new Error('INV REG');
+				if (!validRegisters.includes(desc)) {
+					return new Operand(OperandTypes.label, desc);
+				}
 
 				return new Operand(OperandTypes.register, desc);
 			}
