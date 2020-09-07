@@ -11,6 +11,7 @@ export class Parser {
 		for (const line of lines) {
 			this.currentLine = line.trim();
 			if (this.currentLine === '') continue;
+			if (this.currentLine[0] === ';') continue;
 
 			if (this.currentLine.includes(':')) {
 				// LABEL
@@ -29,20 +30,19 @@ export class Parser {
 				let i = 0;
 				while (this.currentLine !== '' && i < 16) {
 					i++;
+					this.currentLine = this.currentLine.trim();
+					if (this.currentLine[0] === ';') break;
+
 					params.push(this.parseOperand());
 				}
 
 				commands.push({ name: commandName, params: params });
 			}
 		}
-
-		console.log(commands);
 		return commands;
 	}
 
 	private parseOperand(): Operand {
-		this.currentLine = this.currentLine.trim();
-
 		if (this.currentLine[0] === ',') this.currentLine = this.currentLine.substr(1).trimLeft();
 
 		if (this.currentLine[0] === '[') {

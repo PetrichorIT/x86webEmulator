@@ -99,15 +99,20 @@ export class App {
 		}
 	}
 
-	instructionCycle() {
+	/**
+	 * Executes an instruction based on the current EIP.
+	 * Returns if an instruction was available (invalid)
+	 */
+	instructionCycle(): boolean {
 		const iLoc = this.memory.readUInt32LE(this.registers.eip._32);
 
-		if (iLoc >= this.instructions.length) throw new Error('NOP');
+		if (iLoc >= this.instructions.length) return false;
 		let instrc = this.instructions[iLoc];
-		if (!instrc) throw new Error('NOP');
+		if (!instrc) return false;
 
 		this.commandHandlers[instrc.name](this, instrc.params);
 
 		this.subscriber.forEach((s) => s());
+		return true;
 	}
 }
