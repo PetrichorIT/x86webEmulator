@@ -33,7 +33,6 @@ body {
 
 .content-box .body-box {
   position: relative;
-  height: 100%;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;

@@ -1,8 +1,8 @@
 import Register32 from './models/Register32';
 import Operand, { OperandTypes } from './models/Operand';
 
-export type Label = { label: string };
-export type Command = { name: string; params: Operand[] };
+export type Label = { label: string; lineNumber: number };
+export type Command = { name: string; params: Operand[]; lineNumber: number };
 export type CommandFunction = (app: App, params: Operand[]) => void;
 
 export class App {
@@ -81,8 +81,6 @@ export class App {
 			}
 			return c;
 		});
-
-		console.log(commands);
 
 		let idx = this.instructions.length;
 

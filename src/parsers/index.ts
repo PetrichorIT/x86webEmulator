@@ -8,7 +8,9 @@ export class Parser {
 		let lines = code.split('\n');
 		let commands: (Command | Label)[] = [];
 
-		for (const line of lines) {
+		for (let idx = 0; idx < lines.length; idx++) {
+			const line = lines[idx];
+
 			this.currentLine = line.trim();
 			if (this.currentLine === '') continue;
 			if (this.currentLine[0] === ';') continue;
@@ -16,7 +18,7 @@ export class Parser {
 			if (this.currentLine.includes(':')) {
 				// LABEL
 				let ddotpos = this.currentLine.indexOf(':');
-				commands.push({ label: this.currentLine.substr(0, ddotpos) });
+				commands.push({ label: this.currentLine.substr(0, ddotpos), lineNumber: idx });
 			} else {
 				let whPos = this.currentLine.indexOf(' ');
 				if (whPos === -1) {
@@ -25,7 +27,6 @@ export class Parser {
 				let commandName = this.currentLine.substr(0, whPos).toLowerCase();
 				let params: Operand[] = [];
 
-				console.log(commandName, this.currentLine, whPos);
 				this.currentLine = this.currentLine.substr(whPos);
 				let i = 0;
 				while (this.currentLine !== '' && i < 16) {
@@ -36,7 +37,7 @@ export class Parser {
 					params.push(this.parseOperand());
 				}
 
-				commands.push({ name: commandName, params: params });
+				commands.push({ name: commandName, params: params, lineNumber: idx });
 			}
 		}
 		return commands;

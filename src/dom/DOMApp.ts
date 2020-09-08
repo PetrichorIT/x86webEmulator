@@ -72,6 +72,8 @@ export class DOMApp {
 
 		this.debugBox = document.getElementById('debug-box') as HTMLDivElement;
 
+		this.app.subscribe(() => this.onInstructionCycle());
+
 		_firstBuild = false;
 	}
 
@@ -83,6 +85,14 @@ export class DOMApp {
 		this.debugBox.appendChild(art);
 
 		setTimeout(() => art.remove(), type === 'error' ? 30000 : 10000);
+	}
+
+	private onInstructionCycle() {
+		let nextInstrIdx = this.app.memory.readUInt32LE(this.app.registers.eip._32);
+		this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
+		if (nextInstrIdx >= this.app.instructions.length) return;
+		let line = this.app.instructions[nextInstrIdx].lineNumber;
+		this.editor.markText({ line, ch: 0 }, { line, ch: 255 }, { css: 'background-color: rgba(17, 165, 175, 0.5);' });
 	}
 
 	private onCompile() {
