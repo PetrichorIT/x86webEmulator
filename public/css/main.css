@@ -67,6 +67,7 @@ body {
   -webkit-transition: .2s;
   transition: .2s;
   cursor: pointer;
+  font-weight: bold;
 }
 
 .content-box .body-box .input-box .button-box #compile {
@@ -85,6 +86,66 @@ body {
 .content-box .body-box .input-box .button-box #run:hover,
 .content-box .body-box .input-box .button-box #step:hover {
   background-color: rgba(57, 133, 14, 0.5);
+}
+
+.content-box .body-box .input-box .button-box .upload-btn-box,
+.content-box .body-box .input-box .button-box .download-btn-box {
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.content-box .body-box .input-box .button-box .upload-btn-box .btn,
+.content-box .body-box .input-box .button-box .download-btn-box .btn {
+  cursor: pointer;
+  height: 40px;
+  width: 40px;
+  margin: 0;
+  border: none;
+  color: #f0f0f0;
+  background-color: #3c3c3c;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: bold;
+  -webkit-transition: .2s;
+  transition: .2s;
+}
+
+.content-box .body-box .input-box .button-box .upload-btn-box:hover .btn,
+.content-box .body-box .input-box .button-box .download-btn-box:hover .btn {
+  background-color: rgba(60, 60, 60, 0.5);
+}
+
+.content-box .body-box .input-box .button-box .upload-btn-box input[type=file],
+.content-box .body-box .input-box .button-box .download-btn-box input[type=file] {
+  cursor: pointer;
+  font-size: 100px;
+  position: absolute;
+  height: 40px;
+  width: 40px;
+  left: 0;
+  top: 0;
+  opacity: 0;
+}
+
+.content-box .body-box .input-box .debug-box {
+  width: 80%;
+  margin-left: 25px;
+  padding-top: 25px;
+}
+
+.content-box .body-box .input-box .debug-box article {
+  display: block;
+  margin: 0;
+  padding: 2.5px;
+  font-size: 14px;
+  opacity: 0.5;
+}
+
+.content-box .body-box .input-box .debug-box .error {
+  color: red;
 }
 
 .content-box .body-box .info-box {

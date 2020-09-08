@@ -2,7 +2,7 @@ import * as CodeMirror from 'codemirror';
 
 export function initSyntax() {
 	CodeMirror.defineMode('x86', function(_config: CodeMirror.EditorConfiguration, parserOptions: any) {
-		let keywords = /^(mov|pop|push|dec|inc|neg|adc|add|sbc|sub|cmp|mul|div|and|not|x?or|shr|shl|nop|call|jmp|jz|jnz|je|jne)/i;
+		let keywords = /^(mov|pop|push|dec|inc|neg|adc|add|sbc|sub|cmp|mul|div|and|not|x?or|shr|shl|nop|call|ret|jmp|jz|jnz|je|jne)/i;
 		let registers = /^(eax|ax|ah|al|ebx|bx|bh|bl|ecx|cx|ch|cl|edx|dx|dh|dl|esp|ebp|edi|eip)/i;
 		let label = /[A-z]{1,255}:/;
 		let number = /(0x[0-9a-fA-F]+|0b[01]+|[\d]+)/;
