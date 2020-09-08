@@ -6,6 +6,7 @@ import DOMMemory from './DOMMemory';
 import DOMFlag from './DOMFlag';
 import { initSyntax } from '../parsers/syntax';
 import Parser from '../parsers';
+import PersistentStorage from './common';
 
 let _firstBuild: boolean = true;
 
@@ -54,6 +55,8 @@ export class DOMApp {
 			indentUnit: 4,
 			lineNumberFormatter: (i) => '0x' + i.toString(16)
 		});
+
+		this.editor.getDoc().setValue(PersistentStorage.getData('_editor_snapshot') || '');
 
 		this.compileButton = document.getElementById('compile') as HTMLButtonElement;
 		this.compileButton.addEventListener('click', () => this.onCompile());
@@ -104,6 +107,8 @@ export class DOMApp {
 
 		this.debug(`Writing new Snapshot $${tsmp}`);
 		this.app.runProgram(p);
+
+		PersistentStorage.setData('_editor_snapshot', this.editor.getDoc().getValue());
 
 		this.debug(`Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
 	}
