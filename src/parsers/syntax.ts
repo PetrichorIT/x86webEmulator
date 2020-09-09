@@ -1,6 +1,9 @@
 import * as CodeMirror from 'codemirror';
+import * as x86 from '../x86';
 
-export const syn_keywords = /^(exit|mov|pop|push|dec|inc|neg|adc|add|sbc|sub|cmp|mul|div|and|not|x?or|shr|shl|nop|call|ret|jmp|jz|jnz|je|jne)/i;
+export const syn_keywords = new RegExp(`^(${Object.getOwnPropertyNames(x86).join('|')})`, 'i');
+console.log(syn_keywords);
+// export const syn_keywords = /^(exit|mov|pop|push|dec|inc|neg|adc|add|sbc|sub|cmp|mul|div|and|not|x?or|shr|shl|nop|call|ret|jmp|jz|jnz|je|jne)/i;
 export const syn_registers = /^(eax|ax|ah|al|ebx|bx|bh|bl|ecx|cx|ch|cl|edx|dx|dh|dl|esp|ebp|edi|eip)/i;
 
 export function initSyntax() {

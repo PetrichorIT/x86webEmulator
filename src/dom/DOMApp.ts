@@ -100,17 +100,25 @@ export class DOMApp {
 
 	private onCompile() {
 		const tsmp = new Date().getTime();
-
 		this.debug(`Parsing new Snapshot $${tsmp}`);
-		let p = new Parser().parse(this.editor.getDoc().getValue(), this.app);
-		this.debug(`Parsed Snapshot $${tsmp} - Got ${p.length} instructions`);
 
-		this.debug(`Writing new Snapshot $${tsmp}`);
-		this.app.runProgram(p);
+		try {
+			let p = new Parser().parse(this.editor.getDoc().getValue(), this.app);
+			this.debug(`Parsed Snapshot $${tsmp} - Got ${p.length} instructions`);
 
-		PersistentStorage.setData('_editor_snapshot', this.editor.getDoc().getValue());
+			this.debug(`Writing new Snapshot $${tsmp}`);
+			this.app.runProgram(p);
 
-		this.debug(`Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
+			PersistentStorage.setData('_editor_snapshot', this.editor.getDoc().getValue());
+			this.debug(`Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
+		} catch (e) {
+			if (e.message.startsWith('C')) {
+				// Compil error
+				this.debug(e, 'error');
+			} else {
+				throw e;
+			}
+		}
 	}
 
 	private async onRun() {
