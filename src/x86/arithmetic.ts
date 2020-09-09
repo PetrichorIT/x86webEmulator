@@ -26,11 +26,10 @@ export function add(app: App, params: Operand[]) {
 	let res = lhs & +rhs;
 	let resT = (lhs + rhs) & bitMask(memSize);
 
-	app.flags.ZF = resT === 0;
-	app.flags.CF = resT !== res;
-
 	const resTNeg = resT < 0;
 
+	app.flags.ZF = resT === 0;
+	app.flags.CF = resT !== res;
 	app.flags.SF = resTNeg;
 	app.flags.OF = false;
 
