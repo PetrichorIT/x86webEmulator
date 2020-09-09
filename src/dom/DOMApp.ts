@@ -102,7 +102,7 @@ export class DOMApp {
 		const tsmp = new Date().getTime();
 
 		this.debug(`Parsing new Snapshot $${tsmp}`);
-		let p = new Parser().parse(this.editor.getDoc().getValue());
+		let p = new Parser().parse(this.editor.getDoc().getValue(), this.app);
 		this.debug(`Parsed Snapshot $${tsmp} - Got ${p.length} instructions`);
 
 		this.debug(`Writing new Snapshot $${tsmp}`);
@@ -128,6 +128,7 @@ export class DOMApp {
 				this.debug(`Runtime error: ${e}`, 'error');
 			}
 		} finally {
+			console.log(this.app);
 			this.debug(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 			this.running = false;
 		}

@@ -1,11 +1,11 @@
-import { Command, Label } from '../App';
+import { Command, Label, App } from '../App';
 import Operand, { OperandTypes } from '../models/Operand';
 import { syn_keywords, syn_registers } from './syntax';
 
 export class Parser {
 	private currentLine: string = '';
 
-	parse(code: string): (Command | Label)[] {
+	parse(code: string, app: App): (Command | Label)[] {
 		let lines = code.split('\n');
 		let commands: (Command | Label)[] = [];
 
@@ -35,7 +35,7 @@ export class Parser {
 				if (endIdx === -1) throw new Error('C002 - Missing second " after string start');
 				let importName = this.currentLine.substr(0, endIdx);
 
-				this.import(importName);
+				commands = commands.concat(this.import(importName, app, idx));
 			} else {
 				let whPos = this.currentLine.indexOf(' ');
 				if (whPos === -1) {
@@ -44,7 +44,7 @@ export class Parser {
 				let commandName = this.currentLine.substr(0, whPos).toLowerCase();
 				let params: Operand[] = [];
 
-				if (syn_keywords.test(commandName.toLowerCase()))
+				if (!syn_keywords.test(commandName.toLowerCase()))
 					throw new Error(`C003 - Invalid instruction name "${commandName}"`);
 
 				this.currentLine = this.currentLine.substr(whPos);
@@ -60,10 +60,28 @@ export class Parser {
 				commands.push({ name: commandName, params: params, lineNumber: idx });
 			}
 		}
+		console.log(commands);
 		return commands;
 	}
 
-	private import(pckg: string) {}
+	private import(pckg: string, app: App, lineNumber: number): (Command | Label)[] {
+		let pckgInstr = app.libs[pckg];
+		if (pckgInstr === undefined) throw new Error(`C011 - Invalid package name  "${pckg}"`);
+
+		const lbName = '__pckg_' + pckg + '_end';
+
+		pckgInstr.unshift({
+			name: 'jmp',
+			params: [ new Operand(OperandTypes.label, lbName) ],
+			lineNumber
+		});
+		pckgInstr.push({ label: lbName, lineNumber });
+
+		return pckgInstr.map((v: Command | Label) => {
+			v.lineNumber = lineNumber;
+			return v;
+		});
+	}
 
 	private parseOperand(): Operand {
 		if (this.currentLine[0] === ',') this.currentLine = this.currentLine.substr(1).trimLeft();
