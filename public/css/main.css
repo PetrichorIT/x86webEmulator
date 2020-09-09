@@ -279,14 +279,15 @@ body {
 
 .content-box .body-box .info-box .memory-box .memory-content {
   padding-top: 10px;
+  position: relative;
 }
 
 .content-box .body-box .info-box .memory-box .memory-content .row input[type="text"] {
   outline: none;
   border: none;
-  padding: 2.5px 5px;
+  padding: .5% .25%;
   text-align: center;
-  margin: 2.5px;
+  margin: .5%;
   font-size: 15px;
   color: #141414;
   background-color: #d2d2d2;
@@ -300,14 +301,14 @@ body {
 }
 
 .content-box .body-box .info-box .memory-box .memory-content .row .mem8 {
-  width: 40px;
+  width: 7%;
 }
 
 .content-box .body-box .info-box .memory-box .memory-content .row .mem16 {
-  width: 80px;
+  width: 14%;
 }
 
 .content-box .body-box .info-box .memory-box .memory-content .row .mem32 {
-  width: 160px;
+  width: 28%;
 }
 /*# sourceMappingURL=main.css.map */

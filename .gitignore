@@ -104,5 +104,6 @@ dist
 .tern-port
 
 prebuild/
-public/scss
+public/css/main.css
+public/css/main.map.css
 public/js/main.js
