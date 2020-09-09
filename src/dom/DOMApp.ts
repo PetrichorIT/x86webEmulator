@@ -5,7 +5,7 @@ import DOMRegister from './DOMRegister';
 import DOMMemory from './DOMMemory';
 import DOMFlag from './DOMFlag';
 import { initSyntax } from '../parsers/syntax';
-import Parser from '../parsers';
+import Parser from '../parsers/parser';
 import PersistentStorage from './common';
 
 let _firstBuild: boolean = true;

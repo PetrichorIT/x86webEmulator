@@ -1,6 +1,6 @@
 import { Command, Label, App } from '../App';
 import Operand, { OperandTypes } from '../models/Operand';
-import { syn_keywords, syn_registers } from './syntax';
+import { syn_keywords, syn_registers } from './const';
 
 export class Parser {
 	private currentLine: string = '';
