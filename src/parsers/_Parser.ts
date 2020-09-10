@@ -112,6 +112,9 @@ export class Parser {
 					});
 				}
 
+				this.currentLine.eatWhitespaces();
+				if (this.currentLine.eol()) continue;
+
 				// Normal Instruction
 				const preCN = this.currentLine.position;
 				const commandName = this.currentLine.eatWhile(/[A-z_0-9]/).toLowerCase();
@@ -131,6 +134,8 @@ export class Parser {
 
 					let preOpParse = this.currentLine.position;
 					this.currentLine.eat(',');
+					this.currentLine.eatWhitespaces();
+
 					if (this.currentLine.peek() === '[') {
 						this.currentLine.next();
 						this.currentLine.eatWhitespaces();
@@ -160,6 +165,7 @@ export class Parser {
 									from: preOpParse,
 									to: this.currentLine.position
 								});
+							this.currentLine.next();
 							contents = contents.trim();
 
 							if (contents.includes('+') || contents.includes('-')) {
@@ -208,6 +214,8 @@ export class Parser {
 											from: preSecondParse,
 											to: this.currentLine.position
 										});
+									this.currentLine.next();
+									sReg = sReg.toLowerCase();
 
 									if (!syn_registers.test(sReg))
 										throw new CompilerError('C014 - Invalid register', lineIdx, {
@@ -267,3 +275,5 @@ export class Parser {
 		return instructions;
 	}
 }
+
+export default Parser;
