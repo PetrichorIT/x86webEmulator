@@ -64,6 +64,10 @@ export class App {
 	}
 
 	writeProgram(commands: (Command | Label)[], position: number) {
+		console.log('Writing Programm');
+		console.log(commands);
+		console.log(this.instructions);
+
 		let pos = position;
 		let labels: { [key: string]: number } = {};
 		let relPos = 0;

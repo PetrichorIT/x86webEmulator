@@ -105,5 +105,5 @@ dist
 
 prebuild/
 public/css/main.css
-public/css/main.map.css
+public/css/main.css.map
 public/js/main.js

@@ -71,12 +71,8 @@ export function sub(app: App, params: Operand[]) {
 	let lhs = lhsOp.getValueInt(app, memSize);
 	let rhs = rhsOp.getValueInt(app, memSize);
 
-	console.log(lhs, rhs);
-
 	let res = lhs - rhs;
 	let resT = (lhs - rhs) & bitMask(memSize);
-
-	console.log(res, resT);
 
 	app.flags.ZF = resT === 0;
 	app.flags.CF = resT !== res;

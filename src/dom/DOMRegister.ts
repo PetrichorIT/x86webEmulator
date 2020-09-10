@@ -63,8 +63,6 @@ export class DOMRegister {
 		const b1 = this.byte1.value.substr(this.byte1.value.length - 2, 2);
 		const b0 = this.byte0.value.substr(this.byte0.value.length - 2, 2);
 
-		console.log(b3, b2, b1, b0);
-
 		let num = parseInt(b3 + b2 + b1 + b0, 16);
 		if (isNaN(num)) throw new Error('A');
 

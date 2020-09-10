@@ -73,20 +73,17 @@ export class DOMMemory {
 	}
 
 	private updateAddresse() {
-		console.log('UP-A');
 		this.startAdresse = parseInt(this.memAddrControl.value) || 0;
 		this.update();
 	}
 
 	private updateMemSize() {
-		console.log('UP-S');
 		this.memSize = parseInt(this.memSizeControl.value);
 		this.setupContent();
 		this.update();
 	}
 
 	private updateAsInt() {
-		console.log('UP-I');
 		this.asInt = this.memAsIntControl.checked;
 		this.update();
 	}

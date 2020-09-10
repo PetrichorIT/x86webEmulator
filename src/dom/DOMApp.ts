@@ -93,7 +93,8 @@ export class DOMApp {
 	private onInstructionCycle() {
 		let nextInstrIdx = this.app.memory.readUInt32LE(this.app.registers.eip._32);
 		this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
-		if (nextInstrIdx >= this.app.instructions.length) return;
+		if (nextInstrIdx >= this.app.instructions.length || nextInstrIdx === 0) return;
+		console.log(this.app.instructions, nextInstrIdx);
 		let line = this.app.instructions[nextInstrIdx].lineNumber;
 		this.editor.markText({ line, ch: 0 }, { line, ch: 255 }, { css: 'background-color: rgba(17, 165, 175, 0.5);' });
 	}
@@ -136,7 +137,6 @@ export class DOMApp {
 				this.debug(`Runtime error: ${e}`, 'error');
 			}
 		} finally {
-			console.log(this.app);
 			this.debug(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 			this.running = false;
 		}

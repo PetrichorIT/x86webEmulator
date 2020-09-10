@@ -60,6 +60,8 @@ export class Parser {
 				commands.push({ name: commandName, params: params, lineNumber: idx });
 			}
 		}
+
+		console.log('Parsed Commands: ');
 		console.log(commands);
 		return commands;
 	}
