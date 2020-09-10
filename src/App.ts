@@ -51,10 +51,17 @@ export class App {
 		this.libs = {};
 	}
 
+	/**
+	 * Adds a new RX like subscriber to the update cycle initialted by change in the app state
+	 */
 	subscribe(newSubscriber: () => void) {
 		this.subscriber.push(newSubscriber);
 	}
 
+	/**
+	 * Write a given set of instructions into the application memory at the given position (default 0x7fff)
+	 * and prepares the app for execution of said programm
+	 */
 	runProgram(commands: (Command | Label)[], position?: number) {
 		position = position || 0x7fff;
 		this.writeProgram(commands, position);
@@ -63,11 +70,10 @@ export class App {
 		this.subscriber.forEach((s) => s());
 	}
 
+	/**
+	 * Write a given set of instructions into the application memory at the given position
+	 */
 	writeProgram(commands: (Command | Label)[], position: number) {
-		console.log('Writing Programm');
-		console.log(commands);
-		console.log(this.instructions);
-
 		let pos = position;
 		let labels: { [key: string]: number } = {};
 		let relPos = 0;
@@ -98,12 +104,22 @@ export class App {
 		}
 	}
 
+	/**
+	 * Writes the given bytes starting at the address assending 
+	 */
 	writeMemoryBytes(adresse: number, bytes: number[]) {
 		for (const byte of bytes) {
 			this.memory.writeUInt8(byte, adresse++);
 		}
 	}
 
+	/**
+	 * Loads a code snippet as Lib.
+	 * This lib can than be used by using the #include statement.
+	 * @param name The name used to include the library (also prefix for internal labels)
+	 * @param code The code that should be implemented
+	 * @param entryPoints The internal labels that should NOT be prefixed
+	 */
 	loadLib(name: string, code: string, entryPoints?: string[]) {
 		entryPoints = entryPoints || [ name ];
 		let parsed = new Parser().parse(code, this);
@@ -130,7 +146,7 @@ export class App {
 
 	/**
 	 * Executes an instruction based on the current EIP.
-	 * Returns if an instruction was available (invalid)
+	 * Returns a flag that shows if an instruction was available (and thus executed)
 	 */
 	instructionCycle(): boolean {
 		const iLoc = this.memory.readUInt32LE(this.registers.eip._32);

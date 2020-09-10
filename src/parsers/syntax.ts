@@ -5,9 +5,9 @@ export function initSyntax() {
 	CodeMirror.defineMode('x86', function(_config: CodeMirror.EditorConfiguration, parserOptions: any) {
 		return {
 			startState: () => {
-				return { context: 0 };
+				return undefined;
 			},
-			token: (stream, state) => {
+			token: (stream) => {
 				if (stream.eatSpace()) return null;
 
 				let w;

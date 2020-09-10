@@ -57,6 +57,9 @@ export class DOMRegister {
 		app.subscribe(() => this.update(app.registers[registerName]._32));
 	}
 
+	/**
+	 * User initiated change of the registers content
+	 */
 	private domUpdate() {
 		const b3 = this.byte3.value.substr(this.byte3.value.length - 2, 2);
 		const b2 = this.byte2.value.substr(this.byte2.value.length - 2, 2);
@@ -69,6 +72,9 @@ export class DOMRegister {
 		this.register._32 = num;
 	}
 
+	/**
+	 * Application initiated change due to the end of one instruction cycle
+	 */
 	private update(value: number) {
 		const hex = value.toString(16);
 		const filledString = '0'.repeat(8 - hex.length) + hex;

@@ -37,6 +37,9 @@ export class DOMApp {
 		this.build();
 	}
 
+	/**
+	 * Intiatial setup of the DOMApp Controller
+	 */
 	private build() {
 		for (const regName in this.app.registers) {
 			this.registers[regName] = new DOMRegister(this.app, regName);
@@ -80,7 +83,12 @@ export class DOMApp {
 		_firstBuild = false;
 	}
 
-	private debug(message: string, type?: string) {
+	/**
+	 * Prints debug output to the debug component in the DOM
+	 * @param message Message to be send
+	 * @param type Message type 
+	 */
+	private debug(message: string, type?: 'error' | 'info') {
 		type = type || 'info';
 		const art = document.createElement('article');
 		art.classList.add(type);
@@ -90,6 +98,9 @@ export class DOMApp {
 		setTimeout(() => art.remove(), type === 'error' ? 30000 : 10000);
 	}
 
+	/**
+	 * Handels debug / editor updates after the end of an instrcution cycle
+	 */
 	private onInstructionCycle() {
 		let nextInstrIdx = this.app.memory.readUInt32LE(this.app.registers.eip._32);
 		this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
@@ -99,6 +110,9 @@ export class DOMApp {
 		this.editor.markText({ line, ch: 0 }, { line, ch: 255 }, { css: 'background-color: rgba(17, 165, 175, 0.5);' });
 	}
 
+	/**
+	 * Handles actions if the compile button is pressed
+	 */
 	private onCompile() {
 		const tsmp = new Date().getTime();
 		this.debug(`Parsing new Snapshot $${tsmp}`);
@@ -122,6 +136,9 @@ export class DOMApp {
 		}
 	}
 
+	/**
+	 * Handles actions if the run button is pressed
+	 */
 	private async onRun() {
 		if (this.running) return;
 		this.running = true;
@@ -142,11 +159,17 @@ export class DOMApp {
 		}
 	}
 
+	/**
+	 * Handles actions if the step button is pressed
+	 */
 	private onStep() {
 		this.debug(`Stepping to instruction at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		this.app.instructionCycle();
 	}
 
+	/**
+	 * Reads and intergrates a given file as code input for the editor.
+	 */
 	private onFileInput() {
 		const file = this.fileInputButton.files[0];
 
@@ -164,6 +187,9 @@ export class DOMApp {
 		fr.readAsText(file);
 	}
 
+	/**
+	 * Exports the current content of the editor as textfile, to be downloaded by the user.
+	 */
 	private onDownload() {
 		const prefix = `; x86 Assembler Export\n; Exported from ${location.origin}\n\n`;
 		let text = this.editor.getDoc().getValue();

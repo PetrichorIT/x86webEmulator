@@ -5,6 +5,11 @@ import { syn_keywords, syn_registers } from './const';
 export class Parser {
 	private currentLine: string = '';
 
+	/**
+	 * Parses the given code snippet into pre-write instructions.
+	 * Resolve #include statements
+	 * Throws Compile Errors
+	 */
 	parse(code: string, app: App): (Command | Label)[] {
 		let lines = code.split('\n');
 		let commands: (Command | Label)[] = [];
@@ -66,11 +71,16 @@ export class Parser {
 		return commands;
 	}
 
-	private import(pckg: string, app: App, lineNumber: number): (Command | Label)[] {
-		let pckgInstr = app.libs[pckg];
-		if (pckgInstr === undefined) throw new Error(`C011 - Invalid package name  "${pckg}"`);
+	/**
+	 * Processes an #include statement by inserting all nessasarcy instructions at the given line 
+	 * (of the #include statement). Uses the application object to determine the existence of the requeste lib,
+	 * identified by the libName.
+	 */
+	private import(libName: string, app: App, lineNumber: number): (Command | Label)[] {
+		let pckgInstr = app.libs[libName];
+		if (pckgInstr === undefined) throw new Error(`C011 - Invalid package name  "${libName}"`);
 
-		const lbName = '__pckg_' + pckg + '_end';
+		const lbName = '__pckg_' + libName + '_end';
 
 		pckgInstr.unshift({
 			name: 'jmp',
@@ -85,6 +95,10 @@ export class Parser {
 		});
 	}
 
+	/**
+	 * Try to parse the next tokens of the given line as and Operand.
+	 * Expects the current line to be left-trimmed
+	 */
 	private parseOperand(): Operand {
 		if (this.currentLine[0] === ',') this.currentLine = this.currentLine.substr(1).trimLeft();
 

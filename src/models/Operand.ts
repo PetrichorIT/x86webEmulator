@@ -40,6 +40,10 @@ export class Operand {
 		return undefined;
 	}
 
+	/**
+	 * Extracts the real value as UInt from the operand, based on the (given?) memory size
+	 * and the given application. 
+	 */
 	getValue(app: App, memSize: number | undefined): number {
 		if (this.type === OperandTypes.const) return this.value;
 		if (this.type === OperandTypes.register) {
@@ -82,6 +86,10 @@ export class Operand {
 		}
 	}
 
+	/**
+	 * Extracts the real value as Int from the operand, based on the (given?) memory size
+	 * and the given application. 
+	 */
 	getValueInt(app: App, memSize: number | undefined): number {
 		if (this.type === OperandTypes.const) return this.value;
 		if (this.type === OperandTypes.register) {
@@ -124,6 +132,10 @@ export class Operand {
 		}
 	}
 
+	/**
+	 * Set the given newValue to the position referenced in this operand, based on the memory size,
+	 * by using the given application object.
+	 */
 	setValue(app: App, memSize: number | undefined, newValue: number): void {
 		if (this.requiredMemSize && memSize && this.requiredMemSize !== memSize) throw new Error('B');
 

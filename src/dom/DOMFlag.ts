@@ -32,10 +32,16 @@ export class DOMFlag {
 		app.subscribe(() => this.update(app.flags[flagName]));
 	}
 
+	/**
+	 * User initiated change of the registers content
+	 */
 	private domUpdate() {
 		this.app.flags[this.flagName] = this.flagDOM.checked;
 	}
 
+	/**
+	 * Application initiated change due to the end of one instruction cycle
+	 */
 	private update(value: boolean) {
 		this.flagDOM.checked = value;
 	}

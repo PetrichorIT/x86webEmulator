@@ -72,22 +72,34 @@ export class DOMMemory {
 		this.app.subscribe(() => this.update());
 	}
 
+	/**
+	 * User initiated change of the address-space to be show in the memory component.
+	 */
 	private updateAddresse() {
 		this.startAdresse = parseInt(this.memAddrControl.value) || 0;
 		this.update();
 	}
 
+	/**
+	 * User initiated change of the cell-size to be show in the memory component.
+	 */
 	private updateMemSize() {
 		this.memSize = parseInt(this.memSizeControl.value);
 		this.setupContent();
 		this.update();
 	}
 
+	/**
+	 * User initiated change of the bit-casting to be show in the memory component.
+	 */
 	private updateAsInt() {
 		this.asInt = this.memAsIntControl.checked;
 		this.update();
 	}
 
+	/**
+	 * User initiated change of the content if a memory cell (to be written into application memory)
+	 */
 	private updateMemCell(cell: HTMLInputElement) {
 		let rowOffset = DOMMemoryRows * parseInt(cell.id[4]);
 		let colOffset = this.memSize * parseInt(cell.id[6]);
@@ -111,6 +123,9 @@ export class DOMMemory {
 		}
 	}
 
+	/**
+	 * Initial setup of the memory component, without loading its content
+	 */
 	private setupContent() {
 		this.memContent.innerHTML = '<!-- JS Generated Content -->';
 
@@ -141,8 +156,11 @@ export class DOMMemory {
 		}
 	}
 
+	/**
+	 * Update of the memory component, either due to memory change intiated by the application,
+	 * or due to a change in the components options (addr, memSize or bit-casting)
+	 */
 	private update() {
-		// Lines
 		let addr = this.startAdresse;
 
 		for (let i = 0; i < DOMMemoryRows; i++) {
