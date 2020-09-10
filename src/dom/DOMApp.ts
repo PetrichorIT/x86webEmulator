@@ -5,8 +5,8 @@ import DOMRegister from './DOMRegister';
 import DOMMemory from './DOMMemory';
 import DOMFlag from './DOMFlag';
 import { initSyntax } from '../parsers/syntax';
-import Parser from '../parsers/parser';
 import PersistentStorage from './common';
+import { CompilerError } from '../parsers/const';
 
 let _firstBuild: boolean = true;
 
@@ -105,7 +105,6 @@ export class DOMApp {
 		let nextInstrIdx = this.app.memory.readUInt32LE(this.app.registers.eip._32);
 		this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
 		if (nextInstrIdx >= this.app.instructions.length || nextInstrIdx === 0) return;
-		console.log(this.app.instructions, nextInstrIdx);
 		let line = this.app.instructions[nextInstrIdx].lineNumber;
 		this.editor.markText({ line, ch: 0 }, { line, ch: 255 }, { css: 'background-color: rgba(17, 165, 175, 0.5);' });
 	}
@@ -114,12 +113,16 @@ export class DOMApp {
 	 * Handles actions if the compile button is pressed
 	 */
 	private onCompile() {
+		this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
+
 		const tsmp = new Date().getTime();
 		this.debug(`Parsing new Snapshot $${tsmp}`);
 
 		try {
-			let p = new Parser().parse(this.editor.getDoc().getValue(), this.app);
+			let p = this.app.parse(this.editor.getDoc().getValue());
 			this.debug(`Parsed Snapshot $${tsmp} - Got ${p.length} instructions`);
+
+			console.log(p);
 
 			this.debug(`Writing new Snapshot $${tsmp}`);
 			this.app.runProgram(p);
@@ -127,8 +130,15 @@ export class DOMApp {
 			PersistentStorage.setData('_editor_snapshot', this.editor.getDoc().getValue());
 			this.debug(`Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		} catch (e) {
+			console.error(e);
 			if (e.message.startsWith('C')) {
-				// Compil error
+				let err = e as CompilerError;
+				this.editor.markText(
+					{ line: err.line, ch: err.position.from },
+					{ line: err.line, ch: err.position.to || 255 },
+					{ css: 'background-color: rgba(200, 50, 30, 0.5);' }
+				);
+
 				this.debug(e, 'error');
 			} else {
 				throw e;
