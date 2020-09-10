@@ -1,19 +1,20 @@
 import Register32 from './models/Register32';
 import Operand, { OperandTypes } from './models/Operand';
-import Parser from './parsers/parser';
+import Parser from './parsers/Parser';
 
 export type Label = { label: string; lineNumber: number };
 export type Command = { name: string; params: Operand[]; lineNumber: number };
 export type CommandFunction = (app: App, params: Operand[]) => void;
 
 export class App {
+	parser: Parser;
+
 	registers: { [key: string]: Register32 };
 	flags: { [key: string]: boolean };
 	memory: Buffer;
 
 	instructions: Command[];
 	commandHandlers: { [key: string]: CommandFunction };
-	libs: { [key: string]: (Command | Label)[] };
 
 	subscriber: (() => void)[];
 
@@ -48,7 +49,11 @@ export class App {
 		this.commandHandlers = commandHandlers;
 		this.instructions = [ undefined ];
 		this.subscriber = [];
-		this.libs = {};
+		this.parser = new Parser(this);
+	}
+
+	parse(code: string): (Command | Label)[] {
+		return this.parser.parse(code);
 	}
 
 	/**
@@ -122,26 +127,7 @@ export class App {
 	 */
 	loadLib(name: string, code: string, entryPoints?: string[]) {
 		entryPoints = entryPoints || [ name ];
-		let parsed = new Parser().parse(code, this);
-
-		for (let i = 0; i < parsed.length; i++) {
-			if ((parsed[i] as Label).label) {
-				if (!entryPoints.includes((parsed[i] as Label).label)) {
-					(parsed[i] as Label).label = '__' + name + '_' + (parsed[i] as Label).label;
-				}
-			} else {
-				for (let j = 0; j < (parsed[i] as Command).params.length; j++) {
-					if ((parsed[i] as Command).params[j].type === OperandTypes.label) {
-						if (!entryPoints.includes((parsed[i] as Command).params[j].value)) {
-							(parsed[i] as Command).params[j].value =
-								'__' + name + '_' + (parsed[i] as Command).params[j].value;
-						}
-					}
-				}
-			}
-		}
-
-		this.libs[name] = parsed;
+		this.parser.parseLib(name, code, entryPoints);
 	}
 
 	/**

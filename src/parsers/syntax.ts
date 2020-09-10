@@ -17,7 +17,7 @@ export function initSyntax() {
 					if (syn_number.test(w)) return 'number';
 					if (syn_registers.test(w)) return 'var2';
 					if (syn_label.test(w)) return 'def';
-					if (syn_keywords.test(w)) return 'keyword';
+					if (syn_keywords.includes(w)) return 'keyword';
 				} else if (stream.match(syn_registers, true)) {
 					return 'var2';
 				} else if (stream.eat(';')) {
