@@ -11,6 +11,7 @@
 		"test:transport": "jest --verbose src/x86/transport.test.ts",
 		"test:logic": "jest --verbose src/x86/logic.test.ts",
 		"test:arithmetic": "jest --verbose src/x86/arithmetic.test.ts",
+		"test:flag": "jest --verbose src/x86/flag.test.ts",
 		"test:lib": "jest --verbose src/x86/lib/lib.test.ts",
 		"build": "rm -rf prebuild/* && tsc",
 		"pack": "npx webpack --config webpack.config.js",
