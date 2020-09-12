@@ -89,7 +89,7 @@ export class Parser {
 						to: this.currentLine.position
 					});
 
-				instructions.concat(
+				instructions = instructions.concat(
 					this.libs[libName].map((instr) => {
 						instr.lineNumber = lineIdx;
 						return instr;

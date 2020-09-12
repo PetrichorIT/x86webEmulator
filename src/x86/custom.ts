@@ -11,3 +11,8 @@ export function _alt(app: App, params: Operand[]) {
 
 	app.registers.eip._32 += 4;
 }
+
+export function _clearmemory(app: App, params: Operand[]) {
+	app.memory = Buffer.alloc(0xffff);
+	app.registers.eip._32 += 4;
+}

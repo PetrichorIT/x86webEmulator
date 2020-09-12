@@ -12,5 +12,10 @@ fib_loop:
     jnz fib_loop
     
     ret
+
+
+clrMem:
+    _clearmemory
+    ret
 `;
 export default fib;

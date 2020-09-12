@@ -8,7 +8,7 @@ export function mov(app: App, params: Operand[]) {
 
 	if (dest.isMemory && src.isMemory) throw new Error('Mem2Mem');
 
-	let memSize = operandMemSize([ dest, src ]);
+	let memSize = operandMemSize([ dest, src ]) || 4;
 	let val = src.getValue(app, memSize);
 
 	dest.setValue(app, memSize, val);

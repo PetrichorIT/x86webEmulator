@@ -6,12 +6,14 @@ export let DOMMemoryCols = 8;
 export class DOMMemory {
 	private startAdresse: number = 0x0;
 	private asInt: boolean = false;
+	private asHex: boolean = true;
 	private memSize: number = 1;
 	private app: App;
 
 	private memAddrControl: HTMLInputElement;
 	private memSizeControl: HTMLInputElement;
 	private memAsIntControl: HTMLInputElement;
+	private memAsHexControl: HTMLInputElement;
 
 	private memContent: HTMLDivElement;
 
@@ -55,7 +57,7 @@ export class DOMMemory {
 		this.memAsIntControl = document.createElement('input');
 		this.memAsIntControl.type = 'checkbox';
 		this.memAsIntControl.classList.add('memAsInt');
-		this.memAsIntControl.checked = false;
+		this.memAsIntControl.checked = this.asInt;
 		this.memAsIntControl.id = 'inpAsInt';
 		this.memAsIntControl.addEventListener('change', () => this.updateAsInt());
 
@@ -64,6 +66,20 @@ export class DOMMemory {
 
 		document.querySelector('.memory-control').appendChild(memAsIntLabel);
 		document.querySelector('.memory-control').appendChild(this.memAsIntControl);
+		document.querySelector('.memory-control').appendChild(document.createElement('br'));
+
+		this.memAsHexControl = document.createElement('input');
+		this.memAsHexControl.type = 'checkbox';
+		this.memAsHexControl.checked = this.asHex;
+		this.memAsHexControl.classList.add('memAsInt');
+		this.memAsHexControl.id = 'inpAsInt';
+		this.memAsHexControl.addEventListener('change', () => this.updateAsHex());
+
+		let memAsHexLabel = document.createElement('label');
+		memAsHexLabel.innerHTML = 'As Hex';
+
+		document.querySelector('.memory-control').appendChild(memAsHexLabel);
+		document.querySelector('.memory-control').appendChild(this.memAsHexControl);
 		document.querySelector('.memory-control').appendChild(document.createElement('br'));
 
 		this.setupContent();
@@ -98,6 +114,14 @@ export class DOMMemory {
 	}
 
 	/**
+	 * User initiated change of the bit-casting to be show in the memory component.
+	 */
+	private updateAsHex() {
+		this.asHex = this.memAsHexControl.checked;
+		this.update();
+	}
+
+	/**
 	 * User initiated change of the content if a memory cell (to be written into application memory)
 	 */
 	private updateMemCell(cell: HTMLInputElement) {
@@ -107,7 +131,7 @@ export class DOMMemory {
 		let offset = rowOffset + colOffset;
 		if (isNaN(offset)) throw new Error('OFFSET FAILED');
 
-		let val = parseInt(cell.value, 16);
+		let val = parseInt(cell.value, this.asHex ? 16 : 10);
 		if (isNaN(val)) throw new Error('VAL FAILED');
 
 		switch (this.memSize) {
@@ -182,7 +206,9 @@ export class DOMMemory {
 						break;
 				}
 
-				(document.getElementById('mem-' + i + '-' + j) as HTMLInputElement).value = '' + val;
+				(document.getElementById('mem-' + i + '-' + j) as HTMLInputElement).value = val.toString(
+					this.asHex ? 16 : 10
+				);
 			}
 		}
 	}

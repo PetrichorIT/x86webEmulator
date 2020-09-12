@@ -60,6 +60,7 @@ export class DOMApp {
 		});
 
 		this.editor.getDoc().setValue(PersistentStorage.getData('_editor_snapshot') || '');
+		this.editor.on('inputRead', () => this.onEditorChange());
 
 		this.compileButton = document.getElementById('compile') as HTMLButtonElement;
 		this.compileButton.addEventListener('click', () => this.onCompile());
@@ -107,6 +108,13 @@ export class DOMApp {
 		if (nextInstrIdx >= this.app.instructions.length || nextInstrIdx === 0) return;
 		let line = this.app.instructions[nextInstrIdx].lineNumber;
 		this.editor.markText({ line, ch: 0 }, { line, ch: 255 }, { css: 'background-color: rgba(17, 165, 175, 0.5);' });
+	}
+
+	/**
+	 * 
+	 */
+	private onEditorChange() {
+		this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
 	}
 
 	/**
