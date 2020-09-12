@@ -3,8 +3,8 @@
 .CodeMirror {
 	/* Set height, width, borders, and global font properties here */
 	font-family: monospace;
-	font-size: 12px; /* Custom CSS by MKDEV */
-	height: 300px;
+	font-size: 14px; /* Custom CSS by MKDEV */
+	height: 400px;
 	color: black;
 	direction: ltr;
 }

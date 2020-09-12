@@ -28,8 +28,8 @@ export class App {
 			esi: new Register32(0),
 			edi: new Register32(0),
 
-			esp: new Register32(0x7fff),
-			ebp: new Register32(0x7fff),
+			esp: new Register32(0x8000),
+			ebp: new Register32(0x8000),
 
 			eip: new Register32(0)
 		};
@@ -64,11 +64,11 @@ export class App {
 	}
 
 	/**
-	 * Write a given set of instructions into the application memory at the given position (default 0x7fff)
+	 * Write a given set of instructions into the application memory at the given position (default 0x8000)
 	 * and prepares the app for execution of said programm
 	 */
 	runProgram(commands: (Command | Label)[], position?: number) {
-		position = position || 0x7fff;
+		position = position || 0x8000;
 		this.writeProgram(commands, position);
 		this.registers.eip._32 = position;
 

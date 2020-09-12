@@ -12,7 +12,7 @@ export function initSyntax() {
 
 				let w;
 				if (stream.eatWhile(/\w/)) {
-					w = stream.current();
+					w = stream.current().toLowerCase();
 
 					if (syn_number.test(w)) return 'number';
 					if (syn_registers.test(w)) return 'var2';

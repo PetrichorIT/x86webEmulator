@@ -156,7 +156,7 @@ export function cmp(app: App, params: Operand[]) {
 	let rhs = lhsOp.getValueInt(app, memSize);
 
 	let res = lhs - rhs;
-	let resT = (lhs + rhs) & bitMask(memSize);
+	let resT = (lhs - rhs) & bitMask(memSize);
 
 	app.flags.ZF = resT === 0;
 	app.flags.CF = resT !== res;
