@@ -1,0 +1,44 @@
+{
+	"name": "x86webEmulator",
+	"version": "1.0.0",
+	"description": "An x86 Emulator. JS &amp; Webpack",
+	"main": "prebuild/index.js",
+	"scripts": {
+		"test": "jest",
+		"test:lib": "jest --verbose src/x86/lib/lib.test.ts",
+		"test:register": "jest --verbose src/models/Register32.test.ts",
+
+		"test:x86": "jest --verbose src/x86/*.test.ts",
+		"test:arithmetic": "jest --verbose src/x86/arithmetic.test.ts",
+		"test:flag": "jest --verbose src/x86/flag.test.ts",
+		"test:logic": "jest --verbose src/x86/logic.test.ts",
+		"test:transport": "jest --verbose src/x86/transport.test.ts",
+
+		"build": "rm -rf prebuild/* && tsc",
+		"pack": "npx webpack --mode development --config webpack.config.js",
+		"pack:production": "npx webpack --mode production --config webpack.config.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Unamed001/x86webEmulator.git"
+	},
+	"keywords": [ "x86", "assembler", "assembly", "emulator" ],
+	"author": "MKDev",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/Unamed001/x86webEmulator/issues"
+	},
+	"homepage": "https://github.com/Unamed001/x86webEmulator#readme",
+	"devDependencies": {
+		"jest": "^26.4.1",
+		"ts-jest": "^26.2.0",
+		"typescript": "^3.8.0",
+		"webpack": "^4.44.1",
+		"webpack-cli": "^3.3.12",
+		"@types/codemirror": "0.0.98",
+		"@types/jest": "^26.0.10"
+	},
+	"dependencies": {
+		"codemirror": "^5.57.0"
+	}
+}
