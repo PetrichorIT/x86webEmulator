@@ -1,5 +1,5 @@
-import { App } from '../../App';
-import * as x86 from '../index';
+import { App } from '../App';
+import * as x86 from '../x86/index';
 import fib from './fib';
 import { string, stringEntryPoints } from './string';
 
