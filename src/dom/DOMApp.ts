@@ -137,8 +137,6 @@ export class DOMApp {
 			let p = this.app.parse(this.editor.getDoc().getValue());
 			this.debug(`Parsed Snapshot $${tsmp} - Got ${p.length} instructions`);
 
-			console.log(p);
-
 			this.debug(`Writing new Snapshot $${tsmp}`);
 			this.app.runProgram(p);
 
@@ -171,7 +169,8 @@ export class DOMApp {
 		this.debug(`Starting run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 
 		try {
-			while (this.running && this.app.instructionCycle()) await new Promise((r) => setTimeout(r, 100));
+			while (this.running && this.app.instructionCycle())
+				await new Promise((r) => setTimeout(r, this.app.instructionDelay));
 			if (this.running) this.debug(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		} catch (e) {
 			if (e.message === 'NOP') {

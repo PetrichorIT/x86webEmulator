@@ -18,6 +18,8 @@ export class App {
 
 	subscriber: (() => void)[];
 
+	instructionDelay: number;
+
 	constructor(commandHandlers: { [key: string]: CommandFunction }) {
 		this.registers = {
 			eax: new Register32(0),
@@ -49,6 +51,7 @@ export class App {
 		this.commandHandlers = commandHandlers;
 		this.instructions = [ undefined ];
 		this.subscriber = [];
+		this.instructionDelay = 100; // 100ms
 		this.parser = new Parser(this);
 	}
 

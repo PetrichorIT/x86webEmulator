@@ -5,6 +5,7 @@ export const string = `
 ; push rhs
 ; push &result
 strcmp:
+    _setinstrdelay 5
 	mov eax, [esp + 12]	; lhsOperand 
     mov ebx, [esp + 16]	; rhsOperand
     
@@ -24,14 +25,17 @@ strcmp_true:
 	cmp dl, 0
     jz strcmp_true_conf
 strcmp_true_err:
-	mov [esp + 8], 0
+    mov [esp + 8], 0
+    _setinstrdelay 100
     ret
 strcmp_true_conf:
-	mov [esp + 8], 1
+    mov [esp + 8], 1
+    _setinstrdelay 100
     ret
     
 strcmp_false:
-	mov [esp + 8], 0
+    mov [esp + 8], 0
+    _setinstrdelay 100
     ret
 
 ; EXPORT
@@ -39,6 +43,7 @@ strcmp_false:
 ; push lhs (org)
 ; push rhs (suffix)
 strcat:
+    _setinstrdelay 5
 	mov ebx, [esp + 8] ; Suffix
     mov eax, [esp + 12] ; Prefix
     
@@ -57,6 +62,7 @@ strcat_copy:
     cmp cl, 0
     jne strcat_copy
     
+    _setinstrdelay 100
     ret
 	
 ; EXPORT
@@ -64,6 +70,7 @@ strcat_copy:
 ; push operand
 ; puhs &result
 strlen:
+    _setinstrdelay 5
 	mov eax, [esp + 12] ; operand
     mov ebx, 0
     
@@ -76,6 +83,7 @@ strlen_loop:
     
     dec ebx
     mov [esp + 8], ebx
+    _setinstrdelay 100
     ret
 
 `;

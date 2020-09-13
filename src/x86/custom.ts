@@ -1,5 +1,5 @@
 import { App } from '../App';
-import Operand from '../models/Operand';
+import Operand, { OperandTypes } from '../models/Operand';
 
 export function _alt(app: App, params: Operand[]) {
 	const str = params
@@ -14,5 +14,17 @@ export function _alt(app: App, params: Operand[]) {
 
 export function _clearmemory(app: App, params: Operand[]) {
 	app.memory = Buffer.alloc(0xffff);
+	app.registers.eip._32 += 4;
+}
+
+export function _setinstrdelay(app: App, params: Operand[]) {
+	let param = params[0];
+
+	if (param.type !== OperandTypes.const) throw new Error('ONlY CONST');
+
+	let val = param.getValue(app, 4);
+	if (val <= 0) throw new Error('NOT 0 OR BELOW');
+
+	app.instructionDelay = val;
 	app.registers.eip._32 += 4;
 }
