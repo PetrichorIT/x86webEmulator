@@ -2,6 +2,7 @@ import { App, Command, Label } from '../App';
 import { StringStream } from './StringStream';
 import { syn_label, CompilerError, syn_keywords, syn_registers, syn_number } from './const';
 import Operand, { OperandTypes } from '../models/Operand';
+import { operandMemSize } from '../x86/common';
 
 export class Parser {
 	app: App;
@@ -84,7 +85,7 @@ export class Parser {
 					});
 
 				if (this.libs[libName] === undefined)
-					throw new CompilerError(`C004 - Unknown libary identifier`, lineIdx, {
+					throw new CompilerError(`C004 - Unknown libary identifier "${libName}"`, lineIdx, {
 						from: preIdx,
 						to: this.currentLine.position
 					});
@@ -105,6 +106,11 @@ export class Parser {
 							from: 0,
 							to: this.currentLine.position
 						});
+					if (label.startsWith('__'))
+						throw new CompilerError('C005 - Forbidden Label "__*"', lineIdx, {
+							from: 0,
+							to: this.currentLine.position
+						});
 					instructions.push({
 						label: label,
 						lineNumber: lineIdx
@@ -120,7 +126,7 @@ export class Parser {
 				let params: Operand[] = [];
 
 				if (!syn_keywords.includes(commandName))
-					throw new CompilerError('C006 - Invalid instruction', lineIdx, {
+					throw new CompilerError(`C006 - Invalid token. Invalid instruction "${commandName}"`, lineIdx, {
 						from: preCN,
 						to: this.currentLine.position
 					});
@@ -153,7 +159,11 @@ export class Parser {
 
 							let number = parseInt(matches[0].substr(0, matches[0].length - 1));
 							if (isNaN(number))
-								throw new CompilerError('C008 - Invalid number string', lineIdx, { from: preOpParse });
+								throw new CompilerError(
+									`C008 - Invalid number string "${matches[0].substr(0, matches[0].length - 1)}"`,
+									lineIdx,
+									{ from: preOpParse }
+								);
 							params.push(new Operand(OperandTypes.mDirect, number));
 						} else {
 							// Some Indirect Mem
@@ -174,25 +184,37 @@ export class Parser {
 								let regString = contents.substr(0, idx).trim().toLowerCase();
 
 								if (!syn_registers.test(regString))
-									throw new CompilerError('C010 - Invalid register', lineIdx, {
-										from: preOpParse,
-										to: this.currentLine.position
-									});
+									throw new CompilerError(
+										`C010 - Invalid token. Invalid register "${regString}"`,
+										lineIdx,
+										{
+											from: preOpParse,
+											to: this.currentLine.position
+										}
+									);
 
 								let offsetStr = contents.substr(idx + 1).trim();
 								if (offsetStr.match(syn_number)[0] !== offsetStr)
-									throw new CompilerError('C011 - Invalid token. Expected number', lineIdx, {
-										from: preOpParse,
-										to: this.currentLine.position
-									});
+									throw new CompilerError(
+										`C011 - Invalid token. Expected number from string "${offsetStr}"`,
+										lineIdx,
+										{
+											from: preOpParse,
+											to: this.currentLine.position
+										}
+									);
 
 								let offset = parseInt(offsetStr);
 
 								if (isNaN(offset))
-									throw new CompilerError('C011 - Invalid token. Expected number', lineIdx, {
-										from: preOpParse,
-										to: this.currentLine.position
-									});
+									throw new CompilerError(
+										`C011 - Invalid token. Expected number from string ${offsetStr}`,
+										lineIdx,
+										{
+											from: preOpParse,
+											to: this.currentLine.position
+										}
+									);
 
 								params.push(
 									new Operand(OperandTypes.mIndexed, [
@@ -205,10 +227,14 @@ export class Parser {
 
 								const fReg = contents.toLowerCase();
 								if (!syn_registers.test(fReg))
-									throw new CompilerError('C012 - Invalid register', lineIdx, {
-										from: preOpParse,
-										to: this.currentLine.position
-									});
+									throw new CompilerError(
+										`C012 - Invalid token. Invalid register "${fReg}"`,
+										lineIdx,
+										{
+											from: preOpParse,
+											to: this.currentLine.position
+										}
+									);
 
 								this.currentLine.eatWhitespaces();
 								let preSecondParse = this.currentLine.position;
@@ -225,10 +251,14 @@ export class Parser {
 									sReg = sReg.toLowerCase();
 
 									if (!syn_registers.test(sReg))
-										throw new CompilerError('C014 - Invalid register', lineIdx, {
-											from: preSecondParse,
-											to: this.currentLine.position
-										});
+										throw new CompilerError(
+											`C014 - Invalid token. Invalid register "${sReg}"`,
+											lineIdx,
+											{
+												from: preSecondParse,
+												to: this.currentLine.position
+											}
+										);
 
 									params.push(new Operand(OperandTypes.mDIndexed, [ fReg, sReg ]));
 								} else {
@@ -243,15 +273,23 @@ export class Parser {
 							let numStr = this.currentLine.eatWhile((c) => c !== ',' && c !== ' ');
 
 							if (numStr.match(syn_number)[0] !== numStr)
-								throw new CompilerError('C014 - Invalid token. Expected number', lineIdx, {
-									from: preOpParse
-								});
+								throw new CompilerError(
+									`C014 - Invalid token. Expected number from string "${numStr}"`,
+									lineIdx,
+									{
+										from: preOpParse
+									}
+								);
 
 							let num = parseInt(numStr);
 							if (isNaN(num))
-								throw new CompilerError('C015 - Invalid token. Expected number', lineIdx, {
-									from: preOpParse
-								});
+								throw new CompilerError(
+									`C015 - Invalid token. Expected number from string "${numStr}"`,
+									lineIdx,
+									{
+										from: preOpParse
+									}
+								);
 
 							params.push(new Operand(OperandTypes.const, num));
 						} else {
@@ -271,6 +309,32 @@ export class Parser {
 				}
 
 				instructions.push({ name: commandName, params: params, lineNumber: lineIdx });
+			}
+		}
+
+		// Label Resolve Test
+
+		function pushUniq<T>(arr: T[], value: T) {
+			if (!arr.includes(value)) arr.push(value);
+		}
+
+		let definedLabels: string[] = [];
+		let requestedLabels: { label: string; line: number }[] = [];
+
+		for (const instrc of instructions) {
+			if ((instrc as Label).label !== undefined) {
+				pushUniq(definedLabels, (instrc as Label).label);
+			} else {
+				for (const operand of (instrc as Command).params) {
+					if (operand.type === OperandTypes.label)
+						pushUniq(requestedLabels, { label: operand.value, line: instrc.lineNumber });
+				}
+			}
+		}
+
+		for (const { label, line } of requestedLabels) {
+			if (!definedLabels.includes(label)) {
+				throw new CompilerError(`C016 - Unkown Label "${label}"`, line, { from: 0 });
 			}
 		}
 
