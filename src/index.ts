@@ -9,5 +9,3 @@ Lib.loadDefaultLibs(app);
 Lib.loadLocalLibs(app);
 
 let domApp = new DOMApp(app);
-
-Lib.setLib(app, 'test', 'a:\nmov eax, 1\nret', [ 'a' ]);

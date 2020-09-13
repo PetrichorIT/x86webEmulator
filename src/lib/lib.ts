@@ -5,21 +5,19 @@ import fib from './fib';
 import { string, stringEntryPoints } from './string';
 
 class LibController {
-	localLibs: string[] = [];
+	private localLibs: string[] = [];
+	get libs(): string[] {
+		return [ 'fib', 'string' ].concat(this.localLibs);
+	}
 
-	/**
-	 * Loads a code snippet as Lib.
-	 * This lib can than be used by using the #include statement.
-	 * @param app
-	 * @param name The name used to include the library (also prefix for internal labels)
-	 * @param code The code that should be implemented
-	 * @param entryPoints The internal labels that should NOT be prefixed
-	 */
 	private loadLib(app: App, libName: string, libCode: string, libEntryPoints?: string[]) {
 		libEntryPoints = libEntryPoints || [ libName ];
 		app.parser.parseLib(libName, libCode, libEntryPoints);
 	}
 
+	/**
+	 * Loads the defaults libaries to the given app component
+	 */
 	loadDefaultLibs(app: App) {
 		try {
 			this.loadLib(app, 'fib', fib, [ 'fib' ]);
@@ -29,6 +27,9 @@ class LibController {
 		}
 	}
 
+	/**
+	 * Loads the custom dynamic libaries from local storage (or cookies)
+	 */
 	loadLocalLibs(app: App) {
 		let libListStr = FullPersistentStorage.getData('_libs_list');
 		if (libListStr === '') libListStr = '[]';
@@ -68,6 +69,9 @@ class LibController {
 		FullPersistentStorage.setData('_libs_list', JSON.stringify(this.localLibs));
 	}
 
+	/**
+	 * Updates or creates a local libary and stores it
+	 */
 	setLib(app: App, libName: string, libCode: string, libEntryPoints?: string[]) {
 		this.loadLib(app, libName, libCode, libEntryPoints);
 

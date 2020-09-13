@@ -1,4 +1,5 @@
 import * as CodeMirror from 'codemirror';
+import { Lib } from '../lib/lib';
 import { syn_number, syn_registers, syn_label, syn_keywords, syn_include, syn_string } from './const';
 
 export function initSyntax() {
@@ -30,7 +31,15 @@ export function initSyntax() {
 				} else if (stream.match(syn_include, true)) {
 					return 'def';
 				} else if (stream.match(syn_string, true)) {
-					return 'string';
+					let token = stream.current();
+					token = token.substr(1, token.length - 2);
+
+					console.log(token);
+					if (Lib.libs.includes(token)) {
+						return 'string';
+					} else {
+						return 'underline-error';
+					}
 				} else {
 					stream.next();
 				}
