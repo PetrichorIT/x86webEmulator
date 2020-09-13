@@ -7,7 +7,8 @@ export enum OperandTypes {
 	mIndirect,
 	mIndexed,
 	mDIndexed,
-	label
+	label,
+	string
 }
 
 export class Operand {
@@ -26,7 +27,11 @@ export class Operand {
 	}
 
 	get isMemory() {
-		return !(this.type === OperandTypes.register || this.type === OperandTypes.const);
+		return !(
+			this.type === OperandTypes.register ||
+			this.type === OperandTypes.const ||
+			this.type === OperandTypes.string
+		);
 	}
 
 	get requiredMemSize() {
@@ -38,6 +43,26 @@ export class Operand {
 			throw new Error('Unidenified register');
 		}
 		return undefined;
+	}
+
+	getCompiledSelf(app: App): number {
+		if (!this.isMemory) throw new Error('ONLYMEM');
+
+		if (this.type === OperandTypes.mDirect) {
+			return this.value;
+		}
+
+		if (this.type === OperandTypes.mIndirect) {
+			return app.registers[this.value]._32;
+		}
+
+		if (this.type === OperandTypes.mIndexed) {
+			return app.registers[this.value[0]]._32 + this.value[1];
+		}
+
+		if (this.type === OperandTypes.mDIndexed) {
+			return app.registers[this.value[0]]._32 + app.registers[this.value[1]]._32;
+		}
 	}
 
 	/**
@@ -68,6 +93,10 @@ export class Operand {
 
 		if (this.type === OperandTypes.mDIndexed) {
 			return this.getMemUInt(app, app.registers[this.value[0]]._32 + app.registers[this.value[1]]._32, memSize);
+		}
+
+		if (this.type === OperandTypes.string) {
+			return this.value;
 		}
 
 		throw new Error('NEEDED' + this.type);
@@ -114,6 +143,10 @@ export class Operand {
 
 		if (this.type === OperandTypes.mDIndexed) {
 			return this.getMemInt(app, app.registers[this.value[0]]._32 + app.registers[this.value[1]]._32, memSize);
+		}
+
+		if (this.type === OperandTypes.string) {
+			return this.value;
 		}
 
 		throw new Error('NEEDED' + this.type);
@@ -180,6 +213,12 @@ export class Operand {
 				newValue
 			);
 		}
+
+		if (this.type === OperandTypes.string) {
+			throw new Error('NOSTRING');
+		}
+
+		throw new Error('NEEDED');
 	}
 	private setMemUInt(app: App, position: number, memSize: number, value: number): void {
 		switch (memSize) {

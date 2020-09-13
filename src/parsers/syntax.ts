@@ -6,10 +6,13 @@ export function initSyntax() {
 	CodeMirror.defineMode('x86', function(_config: CodeMirror.EditorConfiguration, parserOptions: any) {
 		return {
 			startState: () => {
-				return undefined;
+				return { context: 0 };
 			},
-			token: (stream) => {
+			token: (stream, state) => {
 				if (stream.eatSpace()) return null;
+
+				let isAfterInclude = state.context === 1;
+				state.context = 0;
 
 				let w;
 				if (stream.eatWhile(/\w/)) {
@@ -29,13 +32,12 @@ export function initSyntax() {
 				} else if (stream.match(syn_label, true)) {
 					return 'def';
 				} else if (stream.match(syn_include, true)) {
+					state.context = 1;
 					return 'def';
 				} else if (stream.match(syn_string, true)) {
 					let token = stream.current();
 					token = token.substr(1, token.length - 2);
-
-					console.log(token);
-					if (Lib.libs.includes(token)) {
+					if (Lib.libs.includes(token) || !isAfterInclude) {
 						return 'string';
 					} else {
 						return 'underline-error';

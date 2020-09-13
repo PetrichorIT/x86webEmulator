@@ -1,6 +1,6 @@
 import { App, Command, Label } from '../App';
 import { StringStream } from './StringStream';
-import { syn_label, CompilerError, syn_keywords, syn_registers, syn_number } from './const';
+import { syn_label, CompilerError, syn_keywords, syn_registers, syn_number, syn_string } from './const';
 import Operand, { OperandTypes } from '../models/Operand';
 import { operandMemSize } from '../x86/common';
 
@@ -292,6 +292,11 @@ export class Parser {
 								);
 
 							params.push(new Operand(OperandTypes.const, num));
+						} else if (this.currentLine.peek() === '"') {
+							let desc = this.currentLine.eatWhile((c) => c !== ',').trim();
+							if (syn_string.test(desc)) {
+								params.push(new Operand(OperandTypes.string, desc.substr(1, desc.length - 2)));
+							}
 						} else {
 							// Register
 							let desc = this.currentLine.eatWhile((c) => c !== ',').trim();
