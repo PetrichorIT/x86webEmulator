@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/codemirror.css">
     <link rel="stylesheet" href="css/material-darker.css">
 
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
 </head>
 <body>
     <div class="popover-box"></div>
@@ -26,15 +27,25 @@
                     <textarea id="editor" autocomplete="false"></textarea>
                 </div>
                 <div class="button-box">
-                    <button id="compile">©</button>
-                    <button id="step">➡︎</button>
-                    <button id="run">►</button>
+                    <button id="compile">
+                        <i class="fas fa-crosshairs"></i>
+                    </button>
+                    <button id="step">
+                        <i class="fas fa-step-forward"></i>
+                    </button>
+                    <button id="run">
+                        <i class="fas fa-play"></i>    
+                    </button>
                     <div class="upload-btn-box">
-                        <button class="btn">∆</button>
+                        <button class="btn">
+                            <i class="fas fa-file-upload"></i>
+                        </button>
                         <input type="file" id="fileInput" accept="text/*">
                     </div>
                     <div class="upload-btn-box">
-                        <button class="btn" id="downloadButton">∇</button>
+                        <button class="btn" id="downloadButton">
+                            <i class="fas fa-file-download"></i>
+                        </button>
                     </div>
                 </div>
                 <div class="debug-box" id="debug-box">

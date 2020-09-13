@@ -93,7 +93,10 @@ export class DOMApp {
 		type = type || 'info';
 		const art = document.createElement('article');
 		art.classList.add(type);
-		art.innerHTML = message;
+		art.innerHTML =
+			`<i class="fas ${type === 'error'
+				? 'fa-exclamation-circle'
+				: 'fa-info-circle'}" style="padding-right: 10px;"></i>` + message;
 		this.debugBox.appendChild(art);
 
 		setTimeout(() => art.remove(), type === 'error' ? 30000 : 10000);
