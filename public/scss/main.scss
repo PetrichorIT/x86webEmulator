@@ -75,7 +75,8 @@ body {
 					font-weight: bold;
 				}
 
-				#compile {
+				#compile,
+				#pause {
 					background-color: $button-blue;
 
 					&:hover {

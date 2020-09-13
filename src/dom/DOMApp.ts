@@ -19,8 +19,9 @@ export class DOMApp {
 	private debugBox: HTMLDivElement;
 
 	private compileButton: HTMLButtonElement;
-	private runButton: HTMLButtonElement;
+	private pauseButton: HTMLButtonElement;
 	private stepButton: HTMLButtonElement;
+	private runButton: HTMLButtonElement;
 
 	private fileInputButton: HTMLInputElement;
 	private fileDownloadButton: HTMLButtonElement;
@@ -65,11 +66,14 @@ export class DOMApp {
 		this.compileButton = document.getElementById('compile') as HTMLButtonElement;
 		this.compileButton.addEventListener('click', () => this.onCompile());
 
-		this.runButton = document.getElementById('run') as HTMLButtonElement;
-		this.runButton.addEventListener('click', async () => await this.onRun());
+		this.pauseButton = document.getElementById('pause') as HTMLButtonElement;
+		this.pauseButton.addEventListener('click', () => this.onPause());
 
 		this.stepButton = document.getElementById('step') as HTMLButtonElement;
 		this.stepButton.addEventListener('click', () => this.onStep());
+
+		this.runButton = document.getElementById('run') as HTMLButtonElement;
+		this.runButton.addEventListener('click', async () => await this.onRun());
 
 		this.fileInputButton = document.getElementById('fileInput') as HTMLInputElement;
 		this.fileInputButton.addEventListener('change', () => this.onFileInput());
@@ -167,17 +171,22 @@ export class DOMApp {
 		this.debug(`Starting run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 
 		try {
-			while (this.app.instructionCycle()) await new Promise((r) => setTimeout(r, 100));
+			while (this.running && this.app.instructionCycle()) await new Promise((r) => setTimeout(r, 100));
+			if (this.running) this.debug(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		} catch (e) {
 			if (e.message === 'NOP') {
-				// FINE
+				if (this.running) this.debug(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 			} else {
 				this.debug(`Runtime error: ${e}`, 'error');
 			}
 		} finally {
-			this.debug(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 			this.running = false;
 		}
+	}
+
+	private onPause() {
+		this.debug(`Paused run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
+		this.running = false;
 	}
 
 	/**
