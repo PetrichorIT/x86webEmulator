@@ -1,9 +1,13 @@
 import { App } from './App';
 import * as x86 from './x86';
 import { DOMApp } from './dom/DOMApp';
-import { includeLibs } from './lib/lib';
+import { Lib } from './lib/lib';
 
 let app = new App(x86);
-includeLibs(app);
+
+Lib.loadDefaultLibs(app);
+Lib.loadLocalLibs(app);
 
 let domApp = new DOMApp(app);
+
+Lib.setLib(app, 'test', 'a:\nmov eax, 1\nret', [ 'a' ]);

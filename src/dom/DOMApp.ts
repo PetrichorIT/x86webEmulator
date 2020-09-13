@@ -5,7 +5,7 @@ import DOMRegister from './DOMRegister';
 import DOMMemory from './DOMMemory';
 import DOMFlag from './DOMFlag';
 import { initSyntax } from '../parsers/syntax';
-import PersistentStorage from './common';
+import SemiPersistentStorage from './common';
 import { CompilerError } from '../parsers/const';
 
 let _firstBuild: boolean = true;
@@ -60,7 +60,7 @@ export class DOMApp {
 			lineNumberFormatter: (i) => '0x' + i.toString(16)
 		});
 
-		this.editor.getDoc().setValue(PersistentStorage.getData('_editor_snapshot') || '');
+		this.editor.getDoc().setValue(SemiPersistentStorage.getData('_editor_snapshot') || '');
 		this.editor.on('inputRead', () => this.onEditorChange());
 
 		this.compileButton = document.getElementById('compile') as HTMLButtonElement;
@@ -140,7 +140,7 @@ export class DOMApp {
 			this.debug(`Writing new Snapshot $${tsmp}`);
 			this.app.runProgram(p);
 
-			PersistentStorage.setData('_editor_snapshot', this.editor.getDoc().getValue());
+			SemiPersistentStorage.setData('_editor_snapshot', this.editor.getDoc().getValue());
 			this.debug(`Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		} catch (e) {
 			console.error(e);

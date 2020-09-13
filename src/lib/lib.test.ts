@@ -1,7 +1,6 @@
 import { App } from '../App';
 import * as x86 from '../x86/index';
-import fib from './fib';
-import { string, stringEntryPoints } from './string';
+import { Lib } from './lib';
 
 describe('@Test Lib load test', () => {
 	let app: App;
@@ -10,21 +9,15 @@ describe('@Test Lib load test', () => {
 		expect(() => (app = new App(x86))).not.toThrow();
 	});
 
-	// FIB
-	it('Load lib "fib"', () => {
-		expect(() => app.loadLib('fib', fib)).not.toThrow();
+	it('Load default libs', () => {
+		expect(() => Lib.loadDefaultLibs(app)).not.toThrow();
 	});
 
-	it('Test lib "fib"', () => {
+	it('Test default lib  "fib"', () => {
 		expect(() => app.parse('#include "fib"')).not.toThrow();
 	});
 
-	// STRING
-	it('Load lib "string"', () => {
-		expect(() => app.loadLib('string', string, stringEntryPoints)).not.toThrow();
-	});
-
-	it('Test lib "string"', () => {
+	it('Test default lib "string"', () => {
 		expect(() => app.parse('#include "string"')).not.toThrow();
 	});
 });
