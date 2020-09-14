@@ -1,5 +1,13 @@
 /* BASICS */
 
+.cm-underline-error {
+	color: #c3e88d;
+	text-decoration-line: underline;
+	text-decoration-style: wavy;
+	text-decoration-color: darkred;
+	/* text-decoration-color: red; */
+}
+
 .CodeMirror {
 	/* Set height, width, borders, and global font properties here */
 	font-family: monospace;

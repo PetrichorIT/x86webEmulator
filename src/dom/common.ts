@@ -1,13 +1,15 @@
+import { doc } from 'prettier';
+
 // Time interval that a edit is stored if not loaded in between
 const _storageTimeToLife = 60 * 60 * 1000;
 
 // Check if sessionStorage is avilable
-function storageAvaiable() {
-	if (typeof sessionStorage !== 'undefined') {
+function storageAvaiable(storage: Storage) {
+	if (typeof storage !== 'undefined') {
 		try {
-			sessionStorage.setItem('__storage_test', 'yes');
-			if (sessionStorage.getItem('__storage_test') === 'yes') {
-				sessionStorage.removeItem('__storage_test');
+			storage.setItem('__storage_test', 'yes');
+			if (storage.getItem('__storage_test') === 'yes') {
+				storage.removeItem('__storage_test');
 				return true;
 			}
 		} catch (e) {}
@@ -15,10 +17,17 @@ function storageAvaiable() {
 	return false;
 }
 
-function setData(key: string, value: string): void {
-	if (storageAvaiable()) {
-		sessionStorage.setItem(key + '_timestamp', Date.now().toString());
-		sessionStorage.setItem(key, value);
+function setDataSemi(key: string, value: string): void {
+	setData(key, value, sessionStorage);
+}
+function setDataFull(key: string, value: string): void {
+	setData(key, value, localStorage);
+}
+
+function setData(key: string, value: string, st: Storage): void {
+	if (storageAvaiable(st)) {
+		st.setItem(key + '_timestamp', Date.now().toString());
+		st.setItem(key, value);
 	} else {
 		var d = new Date();
 		d.setTime(d.getTime() + _storageTimeToLife);
@@ -27,20 +36,28 @@ function setData(key: string, value: string): void {
 	}
 }
 
-function getData(key: string): string {
-	if (storageAvaiable()) {
-		let d = parseInt(sessionStorage.getItem(key + '_timestamp'));
+function getDataSemi(key: string): string {
+	return getData(key, sessionStorage);
+}
+
+function getDataFull(key: string): string {
+	return getData(key, localStorage);
+}
+
+function getData(key: string, st: Storage): string {
+	if (storageAvaiable(st)) {
+		let d = parseInt(st.getItem(key + '_timestamp'));
 
 		if (Date.now() - d > _storageTimeToLife) {
-			sessionStorage.removeItem(key);
-			sessionStorage.removeItem(key + '_timestamp');
+			st.removeItem(key);
+			st.removeItem(key + '_timestamp');
 			return '';
 		} else {
 			// Update timestamp
-			sessionStorage.setItem(key + '_timestamp', Date.now().toString());
+			st.setItem(key + '_timestamp', Date.now().toString());
 		}
 
-		return sessionStorage.getItem(key) || '';
+		return st.getItem(key) || '';
 	} else {
 		var name = key + '=';
 		var decodedCookie = decodeURIComponent(document.cookie);
@@ -58,17 +75,55 @@ function getData(key: string): string {
 	}
 }
 
-export const PersistentStorage = {
+function removeDataSemi(key: string): void {
+	removeData(key, sessionStorage);
+}
+
+function removeDataFull(key: string): void {
+	removeData(key, localStorage);
+}
+
+function removeData(key: string, st: Storage) {
+	if (storageAvaiable(st)) {
+		st.removeItem(key);
+		st.removeItem(key + '_timestamp');
+	} else {
+		document.cookie = key + '=; Max-Age=-99999999;';
+	}
+}
+
+export const SemiPersistentStorage = {
+	/**
+	 * Stores a string in a local semi persistent storage container.
+	 * Expires after 1h
+	 */
+	setData: setDataSemi,
+	/**
+	 * Loads a string from a local semi persistent storage container
+	 * Returns "" if not existent
+	 */
+	getData: getDataSemi,
+	/**
+	 * Remove a string from local semi persistent storage container
+	 */
+	removeData: removeDataSemi
+};
+
+export const FullPersistentStorage = {
 	/**
 	 * Stores a string in a local persistent storage container.
 	 * Expires after 1h
 	 */
-	setData: setData,
+	setData: setDataFull,
 	/**
-	 * Loads a string from a local persisten storage container
+	 * Loads a string from a local persistent storage container
 	 * Returns "" if not existent
 	 */
-	getData: getData
+	getData: getDataFull,
+	/**
+	 * Remove a string from local persistent storage container
+	 */
+	removeData: removeDataFull
 };
 
-export default PersistentStorage;
+export default SemiPersistentStorage;
