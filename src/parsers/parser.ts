@@ -96,6 +96,8 @@ export class Parser {
 						return instr;
 					})
 				);
+
+				console.info(`Including libary "${libName}" (${this.libs[libName].length} instructions)`);
 			} else {
 				const labelMatch = this.currentLine.match(syn_label, true) as RegExpMatchArray;
 				if (labelMatch) {

@@ -21,7 +21,10 @@ class LibController {
 	loadDefaultLibs(app: App) {
 		try {
 			this.loadLib(app, 'fib', fib, [ 'fib' ]);
+			console.info('Loaded default lib "fib"');
+
 			this.loadLib(app, 'string', string, stringEntryPoints);
+			console.info('Loaded default lib "string"');
 		} catch (e) {
 			console.error(e);
 		}
@@ -61,8 +64,9 @@ class LibController {
 				}
 
 				this.loadLib(app, lib, str, entryPoints);
+				console.info(`Loaded local lib "${lib}"`);
 			} catch (e) {
-				console.log(e);
+				console.error(e);
 			}
 		}
 
