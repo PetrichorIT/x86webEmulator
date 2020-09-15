@@ -4,7 +4,7 @@ export const string = `
 ; push lhs
 ; push rhs
 ; push &result
-strcmp:
+@export strcmp:
     _setinstrdelay 5
 	mov eax, [esp + 12]	; lhsOperand 
     mov ebx, [esp + 16]	; rhsOperand
@@ -42,7 +42,7 @@ strcmp_false:
 ; Expects
 ; push lhs (org)
 ; push rhs (suffix)
-strcat:
+@export strcat:
     _setinstrdelay 5
 	mov ebx, [esp + 8] ; Suffix
     mov eax, [esp + 12] ; Prefix
@@ -69,7 +69,7 @@ strcat_copy:
 ; Expects
 ; push operand
 ; puhs &result
-strlen:
+@export strlen:
     _setinstrdelay 5
 	mov eax, [esp + 12] ; operand
     mov ebx, 0
@@ -86,92 +86,92 @@ strlen_loop:
     _setinstrdelay 100
     ret
 
-    ; Expects
-    ; push <dest>
-    ; push <src>
-    ; push <num>
-    strncat:
-        _setinstrdelay 5
-        mov eax, [esp + 16] ; <dest>
-        
-        push eax
-        push 0
-        call strlen
-        _setinstrdelay 5
-        pop eax
-        pop ecx 
-        
-        add eax, [esp + 16] ; <dest> end
-        mov ebx, [esp + 12] ; <src> start
-        mov ecx, [esp + 8]
-        
-        push eax
-        push eax
-        push ebx
-        push ecx
-        call memcpy
-        _setinstrdelay 5
-        pop ecx; EAX
-        pop ecx
-        pop ecx
-        pop eax
-        
-        add eax, [esp + 8]
-        mov cl, 0
-        mov [eax], cl
-        
-        _setinstrdelay 100
-        ret
+; Expects
+; push <dest>
+; push <src>
+; push <num>
+@export strncat:
+    _setinstrdelay 5
+    mov eax, [esp + 16] ; <dest>
     
+    push eax
+    push 0
+    call strlen
+    _setinstrdelay 5
+    pop eax
+    pop ecx 
     
-    ; Expects
-    ; push <dest>
-    ; push <src>
-    strcpy:
-        _setinstrdelay 5
-        mov eax, [esp + 8] ; SRC
-        mov ebx, [esp + 12] ; DEST
-        mov cl, [eax]
-        
-        cmp cl, 0
-        je strcpy_end
-        
-    strcpy_loop:
-        mov cl, [eax]
-        mov [ebx], cl
-        inc eax
-        inc ebx
-        cmp cl, 0
-        jne strcpy_loop
-        
-    strcpy_end:
-        _setinstrdelay 100
-        ret
+    add eax, [esp + 16] ; <dest> end
+    mov ebx, [esp + 12] ; <src> start
+    mov ecx, [esp + 8]
     
-    ; Expects
-    ; push <dest>
-    ; push <src>
-    ; push <length>
-    memcpy:
-        _setinstrdelay 5
-        mov eax, [esp + 8]
-        mov ebx, [esp + 12]
-        mov ecx, [esp + 16]
-        
-        cmp eax, 0
-        je memcpy_end
-        
-    memcpy_loop:
-        mov dl, [ebx]
-        mov [ecx], dl
-        inc ecx
-        inc ebx
-        dec eax
-        jnz memcpy_loop
+    push eax
+    push eax
+    push ebx
+    push ecx
+    call memcpy
+    _setinstrdelay 5
+    pop ecx; EAX
+    pop ecx
+    pop ecx
+    pop eax
     
-    memcpy_end:
-        _setinstrdelay 100
-        ret
+    add eax, [esp + 8]
+    mov cl, 0
+    mov [eax], cl
+    
+    _setinstrdelay 100
+    ret
+
+
+; Expects
+; push <dest>
+; push <src>
+@export strcpy:
+    _setinstrdelay 5
+    mov eax, [esp + 8] ; SRC
+    mov ebx, [esp + 12] ; DEST
+    mov cl, [eax]
+    
+    cmp cl, 0
+    je strcpy_end
+    
+strcpy_loop:
+    mov cl, [eax]
+    mov [ebx], cl
+    inc eax
+    inc ebx
+    cmp cl, 0
+    jne strcpy_loop
+    
+strcpy_end:
+    _setinstrdelay 100
+    ret
+
+; Expects
+; push <dest>
+; push <src>
+; push <length>
+@export memcpy:
+    _setinstrdelay 5
+    mov eax, [esp + 8]
+    mov ebx, [esp + 12]
+    mov ecx, [esp + 16]
+    
+    cmp eax, 0
+    je memcpy_end
+    
+memcpy_loop:
+    mov dl, [ebx]
+    mov [ecx], dl
+    inc ecx
+    inc ebx
+    dec eax
+    jnz memcpy_loop
+
+memcpy_end:
+    _setinstrdelay 100
+    ret
 `;
 
-export const stringEntryPoints = [ 'strcmp', 'strcat', 'strlen' ];
+export const stringEntryPoints = [ 'strcmp', 'strcat', 'strlen', 'strcpy', 'memcpy', 'strncat' ];

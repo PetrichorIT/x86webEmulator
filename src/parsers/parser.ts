@@ -14,10 +14,11 @@ export class Parser {
 		this.libs = {};
 	}
 
-	parseLib(libName: string, code: string, entryPoints: string[]) {
+	parseLib(libName: string, code: string) {
 		let prefix = `__lib_${libName}_`;
 
-		let compiled = this.parse(code);
+		let entryPoints: string[] = [];
+		let compiled = this.parse(code, entryPoints);
 
 		for (let i = 0; i < compiled.length; i++) {
 			if ((compiled[i] as Label).label) {
@@ -49,7 +50,9 @@ export class Parser {
 		return this.libs[libName];
 	}
 
-	parse(code: string): (Command | Label)[] {
+	parse(code: string, exportLabels?: string[]): (Command | Label)[] {
+		exportLabels = exportLabels || [];
+
 		let lines = code.split('\n');
 		let instructions: (Command | Label)[] = [];
 
@@ -59,6 +62,9 @@ export class Parser {
 
 			if (this.currentLine.eol()) continue;
 			if (this.currentLine.eat(';')) continue;
+
+			let isExportLabel = this.currentLine.rest().startsWith('@export ');
+			if (isExportLabel) this.currentLine.skip(8);
 
 			if (this.currentLine.rest().startsWith('#include')) {
 				// Include statement
@@ -117,6 +123,8 @@ export class Parser {
 						label: label,
 						lineNumber: lineIdx
 					});
+
+					if (isExportLabel) exportLabels.push(label);
 				}
 
 				this.currentLine.eatWhitespaces();
@@ -346,6 +354,8 @@ export class Parser {
 		}
 
 		console.log(instructions);
+		console.log(exportLabels);
+
 		return instructions;
 	}
 }

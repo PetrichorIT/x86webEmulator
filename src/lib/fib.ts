@@ -1,5 +1,5 @@
 export const fib = `
-fib:
+@export fib:
     _setinstrdelay 5
 	mov eax, [esp + 8]
     mov ebx, 0

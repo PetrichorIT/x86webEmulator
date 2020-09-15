@@ -2,7 +2,7 @@ import { App } from '../App';
 import { FullPersistentStorage } from '../dom/common';
 
 import fib from './fib';
-import { string, stringEntryPoints } from './string';
+import { string } from './string';
 
 class LibController {
 	private localLibs: string[] = [];
@@ -10,9 +10,8 @@ class LibController {
 		return [ 'fib', 'string' ].concat(this.localLibs);
 	}
 
-	private loadLib(app: App, libName: string, libCode: string, libEntryPoints?: string[]) {
-		libEntryPoints = libEntryPoints || [ libName ];
-		app.parser.parseLib(libName, libCode, libEntryPoints);
+	private loadLib(app: App, libName: string, libCode: string) {
+		app.parser.parseLib(libName, libCode);
 	}
 
 	/**
@@ -20,10 +19,10 @@ class LibController {
 	 */
 	loadDefaultLibs(app: App) {
 		try {
-			this.loadLib(app, 'fib', fib, [ 'fib' ]);
+			this.loadLib(app, 'fib', fib);
 			console.info('Loaded default lib "fib"');
 
-			this.loadLib(app, 'string', string, stringEntryPoints);
+			this.loadLib(app, 'string', string);
 			console.info('Loaded default lib "string"');
 		} catch (e) {
 			console.error(e);
@@ -51,19 +50,12 @@ class LibController {
 				if (str === '') {
 					// Remove Lib
 					FullPersistentStorage.removeData('_lib_' + lib);
-					FullPersistentStorage.removeData('_lib_' + lib + '_entry_points');
 					this.localLibs.filter((libName) => libName !== lib);
 
 					continue;
 				}
 
-				let entryPointsStr = FullPersistentStorage.getData('_lib_' + lib + '_entry_points');
-				let entryPoints;
-				if (entryPointsStr !== '') {
-					entryPoints = JSON.parse(entryPointsStr);
-				}
-
-				this.loadLib(app, lib, str, entryPoints);
+				this.loadLib(app, lib, str);
 				console.info(`Loaded local lib "${lib}"`);
 			} catch (e) {
 				console.error(e);
@@ -76,14 +68,13 @@ class LibController {
 	/**
 	 * Updates or creates a local libary and stores it
 	 */
-	setLib(app: App, libName: string, libCode: string, libEntryPoints?: string[]) {
-		this.loadLib(app, libName, libCode, libEntryPoints);
+	setLib(app: App, libName: string, libCode: string) {
+		this.loadLib(app, libName, libCode);
 
 		if (!this.localLibs.includes(libName)) this.localLibs.push(libName);
 
 		FullPersistentStorage.setData('_libs_list', JSON.stringify(this.localLibs));
 		FullPersistentStorage.setData('_lib_' + libName, libCode);
-		FullPersistentStorage.setData('_lib_' + libName + '_entry_points', JSON.stringify(libEntryPoints));
 	}
 }
 

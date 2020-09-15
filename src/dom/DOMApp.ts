@@ -158,10 +158,8 @@ export class DOMApp {
 
 	private moreActionSaveAsLib() {
 		const libName = prompt('Enter a libary name', 'myLib');
-		const entryPointsStr = prompt('Enter the entry points (seperated by ",")', libName);
 
-		const entryPoints = entryPointsStr.split(',').map((v) => v.trim());
-		Lib.setLib(this.app, libName, this.editor.getDoc().getValue(), entryPoints);
+		Lib.setLib(this.app, libName, this.editor.getDoc().getValue());
 	}
 
 	/**
