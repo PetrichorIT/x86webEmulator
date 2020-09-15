@@ -301,7 +301,7 @@ export class Parser {
 							}
 						} else {
 							// Register
-							let desc = this.currentLine.eatWhile((c) => c !== ',').trim();
+							let desc = this.currentLine.eatWhile((c) => c !== ',' && c !== ';').trim();
 							if (syn_registers.test(desc)) {
 								params.push(new Operand(OperandTypes.register, desc));
 							} else {
@@ -345,6 +345,7 @@ export class Parser {
 			}
 		}
 
+		console.log(instructions);
 		return instructions;
 	}
 }
