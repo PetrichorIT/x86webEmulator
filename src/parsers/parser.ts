@@ -1,8 +1,8 @@
-import { App, Command, Label } from '../App';
+import { App, Command, CommandOperandChecker, Label } from '../App';
 import { StringStream } from './StringStream';
 import { syn_label, CompilerError, syn_keywords, syn_registers, syn_number, syn_string } from './const';
 import Operand, { OperandTypes } from '../models/Operand';
-import { operandMemSize } from '../x86/common';
+import * as x86 from '../x86';
 
 export class Parser {
 	app: App;
@@ -321,6 +321,17 @@ export class Parser {
 
 					this.currentLine.eatWhitespaces();
 					i++;
+				}
+
+				// Check Operand Composition
+
+				const checker = (x86 as any)['__' + commandName] as CommandOperandChecker | undefined;
+				if (checker) {
+					try {
+						checker(params);
+					} catch (e) {
+						throw new CompilerError(e.message, lineIdx, { from: preCN });
+					}
 				}
 
 				instructions.push({ name: commandName, params: params, lineNumber: lineIdx });

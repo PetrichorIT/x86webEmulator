@@ -1,11 +1,17 @@
 import { App } from '../App';
 import Operand, { OperandTypes } from '../models/Operand';
 
+export function __and(params: Operand[]) {
+	if (params.length !== 2) throw new Error('C00X - Invalid operands. Invalid number of operands. Expected 2.');
+	let lhsOp = params[0];
+	let rhsOp = params[1];
+	if (lhsOp.type === OperandTypes.const) throw new Error('C00X - Invalid operands. Left operand must be mutable.');
+	if (lhsOp.isMemory && rhsOp.isMemory) throw new Error('C00X - Invalid operands. Only one operand can be memory.');
+}
+
 export function and(app: App, params: Operand[]) {
 	let lhsOp = params[0];
 	let rhsOp = params[1];
-
-	if (lhsOp.type === OperandTypes.const) throw new Error('noConst');
 
 	let memSize = lhsOp.requiredMemSize || rhsOp.requiredMemSize;
 
