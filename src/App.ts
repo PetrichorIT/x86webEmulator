@@ -122,18 +122,6 @@ export class App {
 	}
 
 	/**
-	 * Loads a code snippet as Lib.
-	 * This lib can than be used by using the #include statement.
-	 * @param name The name used to include the library (also prefix for internal labels)
-	 * @param code The code that should be implemented
-	 * @param entryPoints The internal labels that should NOT be prefixed
-	 */
-	loadLib(name: string, code: string, entryPoints?: string[]) {
-		entryPoints = entryPoints || [ name ];
-		this.parser.parseLib(name, code, entryPoints);
-	}
-
-	/**
 	 * Executes an instruction based on the current EIP.
 	 * Returns a flag that shows if an instruction was available (and thus executed)
 	 */

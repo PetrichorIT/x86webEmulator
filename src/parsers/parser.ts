@@ -1,6 +1,6 @@
 import { App, Command, Label } from '../App';
 import { StringStream } from './StringStream';
-import { syn_label, CompilerError, syn_keywords, syn_registers, syn_number } from './const';
+import { syn_label, CompilerError, syn_keywords, syn_registers, syn_number, syn_string } from './const';
 import Operand, { OperandTypes } from '../models/Operand';
 import { operandMemSize } from '../x86/common';
 
@@ -14,10 +14,11 @@ export class Parser {
 		this.libs = {};
 	}
 
-	parseLib(libName: string, code: string, entryPoints: string[]) {
+	parseLib(libName: string, code: string) {
 		let prefix = `__lib_${libName}_`;
 
-		let compiled = this.parse(code);
+		let entryPoints: string[] = [];
+		let compiled = this.parse(code, entryPoints);
 
 		for (let i = 0; i < compiled.length; i++) {
 			if ((compiled[i] as Label).label) {
@@ -49,7 +50,9 @@ export class Parser {
 		return this.libs[libName];
 	}
 
-	parse(code: string): (Command | Label)[] {
+	parse(code: string, exportLabels?: string[]): (Command | Label)[] {
+		exportLabels = exportLabels || [];
+
 		let lines = code.split('\n');
 		let instructions: (Command | Label)[] = [];
 
@@ -59,6 +62,9 @@ export class Parser {
 
 			if (this.currentLine.eol()) continue;
 			if (this.currentLine.eat(';')) continue;
+
+			let isExportLabel = this.currentLine.rest().startsWith('@export ');
+			if (isExportLabel) this.currentLine.skip(8);
 
 			if (this.currentLine.rest().startsWith('#include')) {
 				// Include statement
@@ -96,6 +102,8 @@ export class Parser {
 						return instr;
 					})
 				);
+
+				console.info(`Including libary "${libName}" (${this.libs[libName].length} instructions)`);
 			} else {
 				const labelMatch = this.currentLine.match(syn_label, true) as RegExpMatchArray;
 				if (labelMatch) {
@@ -115,6 +123,8 @@ export class Parser {
 						label: label,
 						lineNumber: lineIdx
 					});
+
+					if (isExportLabel) exportLabels.push(label);
 				}
 
 				this.currentLine.eatWhitespaces();
@@ -292,9 +302,14 @@ export class Parser {
 								);
 
 							params.push(new Operand(OperandTypes.const, num));
+						} else if (this.currentLine.peek() === '"') {
+							let desc = this.currentLine.eatWhile((c) => c !== ',').trim();
+							if (syn_string.test(desc)) {
+								params.push(new Operand(OperandTypes.string, desc.substr(1, desc.length - 2)));
+							}
 						} else {
 							// Register
-							let desc = this.currentLine.eatWhile((c) => c !== ',').trim();
+							let desc = this.currentLine.eatWhile((c) => c !== ',' && c !== ';').trim();
 							if (syn_registers.test(desc)) {
 								params.push(new Operand(OperandTypes.register, desc));
 							} else {
@@ -337,6 +352,9 @@ export class Parser {
 				throw new CompilerError(`C016 - Unkown Label "${label}"`, line, { from: 0 });
 			}
 		}
+
+		console.log(instructions);
+		console.log(exportLabels);
 
 		return instructions;
 	}

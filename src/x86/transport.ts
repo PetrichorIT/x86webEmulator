@@ -8,11 +8,28 @@ export function mov(app: App, params: Operand[]) {
 
 	if (dest.isMemory && src.isMemory) throw new Error('Mem2Mem');
 
-	let memSize = operandMemSize([ dest, src ]) || 4;
-	let val = src.getValue(app, memSize);
+	if (src.type === OperandTypes.string) {
+		// String
+		if (!dest.isMemory) throw new Error('NOMEMSTR');
 
-	dest.setValue(app, memSize, val);
-	app.registers.eip._32 += 4;
+		let memAddr = dest.getCompiledSelf(app);
+
+		const str = (src.getValue(app, 1) as any) as string;
+		for (let i = 0; i < str.length; i++) {
+			const code = Math.min(str.charCodeAt(i), 255);
+			app.memory.writeUInt8(code, memAddr);
+			memAddr++;
+		}
+		app.memory.writeUInt8(0, memAddr);
+
+		app.registers.eip._32 += 4;
+	} else {
+		let memSize = operandMemSize([ dest, src ]) || 4;
+		let val = src.getValue(app, memSize);
+
+		dest.setValue(app, memSize, val);
+		app.registers.eip._32 += 4;
+	}
 }
 
 export function push(app: App, params: Operand[]) {

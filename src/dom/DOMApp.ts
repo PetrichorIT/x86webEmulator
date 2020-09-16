@@ -5,8 +5,11 @@ import DOMRegister from './DOMRegister';
 import DOMMemory from './DOMMemory';
 import DOMFlag from './DOMFlag';
 import { initSyntax } from '../parsers/syntax';
-import PersistentStorage from './common';
+import SemiPersistentStorage from './common';
 import { CompilerError } from '../parsers/const';
+import { throwStatement } from '@babel/types';
+import { doc } from 'prettier';
+import { Lib } from '../lib/lib';
 
 let _firstBuild: boolean = true;
 
@@ -15,8 +18,12 @@ export class DOMApp {
 	private registers: { [key: string]: DOMRegister };
 	private flags: { [key: string]: DOMFlag };
 	private memory: DOMMemory;
+
 	private editor: CodeMirror.EditorFromTextArea;
 	private debugBox: HTMLDivElement;
+
+	private moreButton: HTMLButtonElement;
+	private moreBox: HTMLDivElement;
 
 	private compileButton: HTMLButtonElement;
 	private pauseButton: HTMLButtonElement;
@@ -35,7 +42,46 @@ export class DOMApp {
 		this.flags = {};
 		this.running = false;
 
+		this.buildDebug();
 		this.build();
+
+		Lib.loadDefaultLibs(this.app);
+		Lib.loadLocalLibs(this.app);
+	}
+
+	/**
+	 * Build Debug box
+	 */
+	private buildDebug() {
+		(console as any)._info = console.info;
+		console.info = (message?: string, ...optionalParams: any[]): void => {
+			this.debug(message, 'info');
+			(console as any)._info(message, ...optionalParams);
+		};
+
+		(console as any)._error = console.error;
+		console.error = (message?: string, ...optionalParams: any[]): void => {
+			this.debug(message || '', 'error');
+			(console as any)._error(message, ...optionalParams);
+		};
+	}
+
+	/**
+	 * Prints debug output to the debug component in the DOM
+	 * @param message Message to be send
+	 * @param type Message type 
+	 */
+	private debug(message: string, type?: 'error' | 'info') {
+		type = type || 'info';
+		const art = document.createElement('article');
+		art.classList.add(type);
+		art.innerHTML =
+			`<i class="fas ${type === 'error'
+				? 'fa-exclamation-circle'
+				: 'fa-info-circle'}" style="padding-right: 10px;"></i>` + message;
+		this.debugBox.appendChild(art);
+
+		setTimeout(() => art.remove(), type === 'error' ? 30000 : 10000);
 	}
 
 	/**
@@ -60,8 +106,15 @@ export class DOMApp {
 			lineNumberFormatter: (i) => '0x' + i.toString(16)
 		});
 
-		this.editor.getDoc().setValue(PersistentStorage.getData('_editor_snapshot') || '');
+		this.editor.getDoc().setValue(SemiPersistentStorage.getData('_editor_snapshot') || '');
 		this.editor.on('inputRead', () => this.onEditorChange());
+
+		this.moreButton = document.getElementById('more-button') as HTMLButtonElement;
+		this.moreButton.addEventListener('click', () => this.toggleMoreMenu());
+
+		this.moreBox = document.getElementById('more-box') as HTMLDivElement;
+
+		document.getElementById('saveAsLib').addEventListener('click', () => this.moreActionSaveAsLib());
 
 		this.compileButton = document.getElementById('compile') as HTMLButtonElement;
 		this.compileButton.addEventListener('click', () => this.onCompile());
@@ -89,24 +142,6 @@ export class DOMApp {
 	}
 
 	/**
-	 * Prints debug output to the debug component in the DOM
-	 * @param message Message to be send
-	 * @param type Message type 
-	 */
-	private debug(message: string, type?: 'error' | 'info') {
-		type = type || 'info';
-		const art = document.createElement('article');
-		art.classList.add(type);
-		art.innerHTML =
-			`<i class="fas ${type === 'error'
-				? 'fa-exclamation-circle'
-				: 'fa-info-circle'}" style="padding-right: 10px;"></i>` + message;
-		this.debugBox.appendChild(art);
-
-		setTimeout(() => art.remove(), type === 'error' ? 30000 : 10000);
-	}
-
-	/**
 	 * Handels debug / editor updates after the end of an instrcution cycle
 	 */
 	private onInstructionCycle() {
@@ -115,6 +150,16 @@ export class DOMApp {
 		if (nextInstrIdx >= this.app.instructions.length || nextInstrIdx === 0) return;
 		let line = this.app.instructions[nextInstrIdx].lineNumber;
 		this.editor.markText({ line, ch: 0 }, { line, ch: 255 }, { css: 'background-color: rgba(17, 165, 175, 0.5);' });
+	}
+
+	private toggleMoreMenu() {
+		this.moreBox.style.opacity = this.moreBox.style.opacity === '1' ? '0' : '1';
+	}
+
+	private moreActionSaveAsLib() {
+		const libName = prompt('Enter a libary name', 'myLib');
+
+		Lib.setLib(this.app, libName, this.editor.getDoc().getValue());
 	}
 
 	/**
@@ -130,20 +175,19 @@ export class DOMApp {
 	private onCompile() {
 		this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
 
-		const tsmp = new Date().getTime();
-		this.debug(`Parsing new Snapshot $${tsmp}`);
+		const tsmp = new Date().getMilliseconds() & 0xff;
+		console.info(`Parsing new snapshot $${tsmp}`);
 
 		try {
 			let p = this.app.parse(this.editor.getDoc().getValue());
-			this.debug(`Parsed Snapshot $${tsmp} - Got ${p.length} instructions`);
+			console.info(`Parsed snapshot $${tsmp} - Got ${p.length} instructions`);
 
-			this.debug(`Writing new Snapshot $${tsmp}`);
+			console.info(`Writing snapshot $${tsmp} to application memory`);
 			this.app.runProgram(p);
 
-			PersistentStorage.setData('_editor_snapshot', this.editor.getDoc().getValue());
-			this.debug(`Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
+			SemiPersistentStorage.setData('_editor_snapshot', this.editor.getDoc().getValue());
+			console.info(`Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		} catch (e) {
-			console.error(e);
 			if (e.message.startsWith('C')) {
 				let err = e as CompilerError;
 				this.editor.markText(
@@ -152,7 +196,7 @@ export class DOMApp {
 					{ css: 'background-color: rgba(200, 50, 30, 0.5);' }
 				);
 
-				this.debug(e, 'error');
+				console.error(e);
 			} else {
 				throw e;
 			}
@@ -166,17 +210,21 @@ export class DOMApp {
 		if (this.running) return;
 		this.running = true;
 
-		this.debug(`Starting run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
+		console.info(`Starting run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 
 		try {
 			while (this.running && this.app.instructionCycle())
 				await new Promise((r) => setTimeout(r, this.app.instructionDelay));
-			if (this.running) this.debug(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
+			if (this.running) {
+				console.info(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
+			}
 		} catch (e) {
 			if (e.message === 'NOP') {
-				if (this.running) this.debug(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
+				if (this.running) {
+					console.info(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
+				}
 			} else {
-				this.debug(`Runtime error: ${e}`, 'error');
+				console.error(`Runtime error: ${e}`);
 			}
 		} finally {
 			this.running = false;
@@ -184,7 +232,7 @@ export class DOMApp {
 	}
 
 	private onPause() {
-		this.debug(`Paused run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
+		console.info(`Paused run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		this.running = false;
 	}
 
@@ -192,7 +240,7 @@ export class DOMApp {
 	 * Handles actions if the step button is pressed
 	 */
 	private onStep() {
-		this.debug(`Stepping to instruction at EIP 0x${this.app.registers.eip._32.toString(16)}`);
+		console.info(`Stepping to instruction at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		this.app.instructionCycle();
 	}
 
@@ -204,13 +252,13 @@ export class DOMApp {
 
 		const fr = new FileReader();
 		fr.onloadend = (e) => {
-			this.debug(`Loaded Snapshot from file Client:${file.name}`);
+			console.info(`Loaded Snapshot from file Client:${file.name}`);
 			const content = fr.result;
 			this.editor.getDoc().setValue(content as string);
 		};
 
 		fr.onerror = (e) => {
-			this.debug(`Failed to load Snapshot from Client: ${fr.error}`);
+			console.error(`Failed to load Snapshot from Client: ${fr.error}`);
 		};
 		this.preferredFilename = file.name;
 		fr.readAsText(file);
