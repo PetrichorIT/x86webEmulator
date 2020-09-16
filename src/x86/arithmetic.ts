@@ -1,6 +1,6 @@
 import { App } from '../App';
 import Operand, { OperandTypes } from '../models/Operand';
-import { operandMemSize } from './common';
+import { CommonCheckers, operandMemSize } from './common';
 
 function bitMask(memSize: number): number {
 	switch (memSize) {
@@ -13,11 +13,10 @@ function bitMask(memSize: number): number {
 	}
 }
 
+export const __add = CommonCheckers.dualMutFirst;
 export function add(app: App, params: Operand[]) {
 	let dest = params[0];
 	let src = params[1];
-
-	if (dest.isMemory && src.isMemory) throw new Error('Mem2Mem');
 
 	let memSize = dest.requiredMemSize || src.requiredMemSize;
 
@@ -38,6 +37,7 @@ export function add(app: App, params: Operand[]) {
 	app.registers.eip._32 += 4;
 }
 
+export const __adc = CommonCheckers.dualMutFirst;
 export function adc(app: App, params: Operand[]) {
 	let lhsOp = params[0];
 	let rhsOp = params[1];
@@ -61,6 +61,7 @@ export function adc(app: App, params: Operand[]) {
 	app.registers.eip._32 += 4;
 }
 
+export const __sub = CommonCheckers.dualMutFirst;
 export function sub(app: App, params: Operand[]) {
 	let lhsOp = params[0];
 	let rhsOp = params[1];
@@ -86,6 +87,7 @@ export function sub(app: App, params: Operand[]) {
 	app.registers.eip._32 += 4;
 }
 
+export const __sbb = CommonCheckers.dualMutFirst;
 export function sbb(app: App, params: Operand[]) {
 	let lhsOp = params[0];
 	let rhsOp = params[1];
@@ -109,11 +111,13 @@ export function sbb(app: App, params: Operand[]) {
 	app.registers.eip._32 += 4;
 }
 
+export function __inc(params: Operand[]) {
+	CommonCheckers.expectCount(params, 1);
+	CommonCheckers.expectMutable(params[0]);
+	CommonCheckers.expectNoMem(params[0]);
+}
 export function inc(app: App, params: Operand[]) {
 	let para = params[0];
-
-	if (para.type === OperandTypes.const) throw new Error('NOCONST');
-	if (para.isMemory) throw new Error('NOMEM');
 
 	let memSize = para.requiredMemSize || 4;
 
@@ -129,6 +133,11 @@ export function inc(app: App, params: Operand[]) {
 	app.registers.eip._32 += 4;
 }
 
+export function __dec(params: Operand[]) {
+	CommonCheckers.expectCount(params, 1);
+	CommonCheckers.expectMutable(params[0]);
+	CommonCheckers.expectNoMem(params[0]);
+}
 export function dec(app: App, params: Operand[]) {
 	let para = params[0];
 	if (para.type === OperandTypes.const) throw new Error('NOCONST');
@@ -148,11 +157,13 @@ export function dec(app: App, params: Operand[]) {
 	app.registers.eip._32 += 4;
 }
 
+export function __cmp(params: Operand[]) {
+	CommonCheckers.expectCount(params, 2);
+	CommonCheckers.expectNoMem2Mem(params);
+}
 export function cmp(app: App, params: Operand[]) {
 	let lhsOp = params[0];
 	let rhsOp = params[1];
-
-	if (lhsOp.isMemory && rhsOp.isMemory) throw new Error('Mem2Mem');
 
 	let memSize = lhsOp.requiredMemSize || rhsOp.requiredMemSize;
 
@@ -171,6 +182,9 @@ export function cmp(app: App, params: Operand[]) {
 	app.registers.eip._32 += 4;
 }
 
+export function __mul(params: Operand[]) {
+	throw new Error('MISSING');
+}
 export function mul(app: App, params: Operand[]) {
 	let reg32 = params[0];
 	if (reg32.type !== OperandTypes.register || reg32.requiredMemSize !== 4) throw new Error('reg32!');
@@ -184,6 +198,9 @@ export function mul(app: App, params: Operand[]) {
 	app.registers.eip._32 += 4;
 }
 
+export function __div(params: Operand[]) {
+	throw new Error('MISSING');
+}
 export function div(app: App, params: Operand[]) {
 	let reg32 = params[0];
 	if (reg32.type !== OperandTypes.register || reg32.requiredMemSize !== 4) throw new Error('reg32!');

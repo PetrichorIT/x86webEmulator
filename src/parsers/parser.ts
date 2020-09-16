@@ -332,6 +332,8 @@ export class Parser {
 					} catch (e) {
 						throw new CompilerError(e.message, lineIdx, { from: preCN });
 					}
+				} else {
+					console.warn(`Missing checker for instruction "${commandName}" `);
 				}
 
 				instructions.push({ name: commandName, params: params, lineNumber: lineIdx });
@@ -363,9 +365,6 @@ export class Parser {
 				throw new CompilerError(`C016 - Unkown Label "${label}"`, line, { from: 0 });
 			}
 		}
-
-		console.log(instructions);
-		console.log(exportLabels);
 
 		return instructions;
 	}

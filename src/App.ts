@@ -20,6 +20,7 @@ export class App {
 	subscriber: (() => void)[];
 
 	instructionDelay: number;
+	defaultInstructionDelay: number;
 
 	constructor(commandHandlers: { [key: string]: CommandFunction | CommandOperandChecker }) {
 		this.registers = {
@@ -53,6 +54,7 @@ export class App {
 		this.instructions = [ undefined ];
 		this.subscriber = [];
 		this.instructionDelay = 100; // 100ms
+		this.defaultInstructionDelay = 100;
 		this.parser = new Parser(this);
 	}
 

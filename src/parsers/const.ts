@@ -19,3 +19,5 @@ export class CompilerError extends Error {
 		this.position = position;
 	}
 }
+
+console.log(syn_keywords);
