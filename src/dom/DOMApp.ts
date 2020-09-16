@@ -100,7 +100,8 @@ export class DOMApp {
 		const textArea = document.getElementById('editor') as HTMLTextAreaElement;
 		this.editor = CodeMirror.fromTextArea(textArea, {
 			mode: 'x86',
-			theme: 'material-darker',
+			theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'material-darker' : 'default',
+			// theme: 'material-darker',
 			lineNumbers: true,
 			indentUnit: 4,
 			lineNumberFormatter: (i) => '0x' + i.toString(16)
