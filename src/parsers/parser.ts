@@ -309,7 +309,7 @@ export class Parser {
 							}
 						} else {
 							// Register
-							let desc = this.currentLine.eatWhile((c) => c !== ',' && c !== ';').trim();
+							let desc = this.currentLine.eatWhile((c) => c !== ',' && c !== ';').trim().toLowerCase();
 							if (syn_registers.test(desc)) {
 								params.push(new Operand(OperandTypes.register, desc));
 							} else {
