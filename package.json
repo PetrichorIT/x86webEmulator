@@ -12,20 +12,20 @@
 		"test:flag": "jest --verbose src/x86/flag.test.ts",
 		"test:logic": "jest --verbose src/x86/logic.test.ts",
 		"test:transport": "jest --verbose src/x86/transport.test.ts",
-		"build": "rm -rf prebuild/* && tsc",
-		"pack": "npx webpack --mode development --config webpack.config.js",
-		"pack:production": "npx webpack --mode production --config webpack.config.js"
+
+		"build": "npm run build:ts && npm run build:sass && npm run build:pack:production",
+		"dev": "npm run build:ts && npm run build:pack",
+
+		"build:ts": "rm -rf prebuild/* && tsc",
+		"build:sass": "node-sass --input-path public/scss public/scss/main.scss public/css/main.css",
+		"build:pack": "npx webpack --mode development --config webpack.config.js",
+		"build:pack:production": "npx webpack --mode development --config webpack.config.js"
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/Unamed001/x86webEmulator.git"
 	},
-	"keywords": [
-		"x86",
-		"assembler",
-		"assembly",
-		"emulator"
-	],
+	"keywords": [ "x86", "assembler", "assembly", "emulator" ],
 	"author": "MKDev",
 	"license": "ISC",
 	"bugs": {
@@ -33,13 +33,14 @@
 	},
 	"homepage": "https://github.com/Unamed001/x86webEmulator#readme",
 	"devDependencies": {
+		"@types/codemirror": "0.0.98",
+		"@types/jest": "^26.0.10",
 		"jest": "^26.4.1",
+		"node-sass": "^4.14.1",
 		"ts-jest": "^26.2.0",
 		"typescript": "^3.8.0",
 		"webpack": "^4.44.1",
-		"webpack-cli": "^3.3.12",
-		"@types/codemirror": "0.0.98",
-		"@types/jest": "^26.0.10"
+		"webpack-cli": "^3.3.12"
 	},
 	"dependencies": {
 		"codemirror": "^5.57.0"
