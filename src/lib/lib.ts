@@ -21,7 +21,11 @@ class LibController {
 		try {
 			this.loadLib(app, 'fib', fib);
 			console.info('Loaded default lib "fib"');
+		} catch (e) {
+			console.error(e);
+		}
 
+		try {
 			this.loadLib(app, 'string', string);
 			console.info('Loaded default lib "string"');
 		} catch (e) {

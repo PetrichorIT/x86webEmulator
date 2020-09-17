@@ -1,6 +1,6 @@
 export const fib = `
 @export fib:
-    _setinstrdelay 5
+    setcorespeed 5
 	mov eax, [esp + 8]
     mov ebx, 0
     mov ecx, 1
@@ -12,12 +12,7 @@ fib_loop:
     dec eax
     jnz fib_loop
     
-    _setinstrdelay 100
-    ret
-
-
-clrMem:
-    _clearmemory
+    setcorespeed
     ret
 `;
 export default fib;

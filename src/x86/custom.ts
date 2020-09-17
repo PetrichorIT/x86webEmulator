@@ -1,30 +1,27 @@
 import { App } from '../App';
 import Operand, { OperandTypes } from '../models/Operand';
+import { CommonCheckers } from './common';
 
-export function _alt(app: App, params: Operand[]) {
+export const __alert = (params: Operand[]) => {};
+export function alert(app: App, params: Operand[]) {
 	const str = params
 		.map((v) => {
 			return `Operand:${v.type} ival: ${v.value} rval:${v.getValue(app, v.requiredMemSize || 4)}`;
 		})
 		.join('\n');
-	alert(str);
+	window.alert(str);
 
 	app.registers.eip._32 += 4;
 }
 
-export function _clearmemory(app: App, params: Operand[]) {
-	app.memory = Buffer.alloc(0xffff);
-	app.registers.eip._32 += 4;
+export function __setcorespeed(params: Operand[]) {
+	if (params.length === 0) return;
+	CommonCheckers.expectCount(params, 1);
+	CommonCheckers.expectConst(params[0]);
+	if ((params[0].value as number) <= 0) throw new Error('C00X - Invalid operands. Const must be greater than zero');
 }
-
-export function _setinstrdelay(app: App, params: Operand[]) {
-	let param = params[0];
-
-	if (param.type !== OperandTypes.const) throw new Error('ONlY CONST');
-
-	let val = param.getValue(app, 4);
-	if (val <= 0) throw new Error('NOT 0 OR BELOW');
-
+export function setcorespeed(app: App, params: Operand[]) {
+	let val = params.length === 1 ? params[0].getValue(app, 4) : app.defaultInstructionDelay;
 	app.instructionDelay = val;
 	app.registers.eip._32 += 4;
 }

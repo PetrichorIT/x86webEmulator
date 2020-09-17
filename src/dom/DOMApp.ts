@@ -182,13 +182,12 @@ export class DOMApp {
 			let p = this.app.parse(this.editor.getDoc().getValue());
 			console.info(`Parsed snapshot $${tsmp} - Got ${p.length} instructions`);
 
-			console.info(`Writing snapshot $${tsmp} to application memory`);
 			this.app.runProgram(p);
 
 			SemiPersistentStorage.setData('_editor_snapshot', this.editor.getDoc().getValue());
 			console.info(`Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		} catch (e) {
-			if (e.message.startsWith('C')) {
+			if (e.line && e.position) {
 				let err = e as CompilerError;
 				this.editor.markText(
 					{ line: err.line, ch: err.position.from },
@@ -196,7 +195,7 @@ export class DOMApp {
 					{ css: 'background-color: rgba(200, 50, 30, 0.5);' }
 				);
 
-				console.error(e);
+				console.error(e.message);
 			} else {
 				throw e;
 			}

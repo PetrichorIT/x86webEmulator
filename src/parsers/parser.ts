@@ -1,8 +1,8 @@
-import { App, Command, Label } from '../App';
+import { App, Command, CommandOperandChecker, Label } from '../App';
 import { StringStream } from './StringStream';
 import { syn_label, CompilerError, syn_keywords, syn_registers, syn_number, syn_string } from './const';
 import Operand, { OperandTypes } from '../models/Operand';
-import { operandMemSize } from '../x86/common';
+import * as x86 from '../x86';
 
 export class Parser {
 	app: App;
@@ -309,7 +309,7 @@ export class Parser {
 							}
 						} else {
 							// Register
-							let desc = this.currentLine.eatWhile((c) => c !== ',' && c !== ';').trim();
+							let desc = this.currentLine.eatWhile((c) => c !== ',' && c !== ';').trim().toLowerCase();
 							if (syn_registers.test(desc)) {
 								params.push(new Operand(OperandTypes.register, desc));
 							} else {
@@ -321,6 +321,19 @@ export class Parser {
 
 					this.currentLine.eatWhitespaces();
 					i++;
+				}
+
+				// Check Operand Composition
+
+				const checker = (x86 as any)['__' + commandName] as CommandOperandChecker | undefined;
+				if (checker) {
+					try {
+						checker(params);
+					} catch (e) {
+						throw new CompilerError(e.message, lineIdx, { from: preCN });
+					}
+				} else {
+					console.warn(`Missing checker for instruction "${commandName}" `);
 				}
 
 				instructions.push({ name: commandName, params: params, lineNumber: lineIdx });
@@ -352,9 +365,6 @@ export class Parser {
 				throw new CompilerError(`C016 - Unkown Label "${label}"`, line, { from: 0 });
 			}
 		}
-
-		console.log(instructions);
-		console.log(exportLabels);
 
 		return instructions;
 	}

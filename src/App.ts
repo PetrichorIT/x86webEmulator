@@ -5,6 +5,7 @@ import Parser from './parsers/parser';
 export type Label = { label: string; lineNumber: number };
 export type Command = { name: string; params: Operand[]; lineNumber: number };
 export type CommandFunction = (app: App, params: Operand[]) => void;
+export type CommandOperandChecker = (params: Operand[]) => void;
 
 export class App {
 	parser: Parser;
@@ -14,13 +15,14 @@ export class App {
 	memory: Buffer;
 
 	instructions: Command[];
-	commandHandlers: { [key: string]: CommandFunction };
+	commandHandlers: { [key: string]: CommandFunction | CommandOperandChecker };
 
 	subscriber: (() => void)[];
 
 	instructionDelay: number;
+	defaultInstructionDelay: number;
 
-	constructor(commandHandlers: { [key: string]: CommandFunction }) {
+	constructor(commandHandlers: { [key: string]: CommandFunction | CommandOperandChecker }) {
 		this.registers = {
 			eax: new Register32(0),
 			ebx: new Register32(0),
@@ -52,6 +54,7 @@ export class App {
 		this.instructions = [ undefined ];
 		this.subscriber = [];
 		this.instructionDelay = 100; // 100ms
+		this.defaultInstructionDelay = 100;
 		this.parser = new Parser(this);
 	}
 
@@ -132,7 +135,7 @@ export class App {
 		let instrc = this.instructions[iLoc];
 		if (!instrc) return false;
 
-		this.commandHandlers[instrc.name](this, instrc.params);
+		(this.commandHandlers[instrc.name] as CommandFunction)(this, instrc.params);
 
 		this.subscriber.forEach((s) => s());
 		return true;

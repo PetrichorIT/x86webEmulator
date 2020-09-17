@@ -5,7 +5,7 @@ export const string = `
 ; push rhs
 ; push &result
 @export strcmp:
-    _setinstrdelay 5
+    setcorespeed 5
 	mov eax, [esp + 12]	; lhsOperand 
     mov ebx, [esp + 16]	; rhsOperand
     
@@ -26,16 +26,16 @@ strcmp_true:
     jz strcmp_true_conf
 strcmp_true_err:
     mov [esp + 8], 0
-    _setinstrdelay 100
+    setcorespeed
     ret
 strcmp_true_conf:
     mov [esp + 8], 1
-    _setinstrdelay 100
+    setcorespeed
     ret
     
 strcmp_false:
     mov [esp + 8], 0
-    _setinstrdelay 100
+    setcorespeed
     ret
 
 ; EXPORT
@@ -43,7 +43,7 @@ strcmp_false:
 ; push lhs (org)
 ; push rhs (suffix)
 @export strcat:
-    _setinstrdelay 5
+    setcorespeed 5
 	mov ebx, [esp + 8] ; Suffix
     mov eax, [esp + 12] ; Prefix
     
@@ -62,7 +62,7 @@ strcat_copy:
     cmp cl, 0
     jne strcat_copy
     
-    _setinstrdelay 100
+    setcorespeed
     ret
 	
 ; EXPORT
@@ -70,7 +70,7 @@ strcat_copy:
 ; push operand
 ; puhs &result
 @export strlen:
-    _setinstrdelay 5
+    setcorespeed 5
 	mov eax, [esp + 12] ; operand
     mov ebx, 0
     
@@ -83,7 +83,7 @@ strlen_loop:
     
     dec ebx
     mov [esp + 8], ebx
-    _setinstrdelay 100
+    setcorespeed
     ret
 
 ; Expects
@@ -91,13 +91,13 @@ strlen_loop:
 ; push <src>
 ; push <num>
 @export strncat:
-    _setinstrdelay 5
+    setcorespeed 5
     mov eax, [esp + 16] ; <dest>
     
     push eax
     push 0
     call strlen
-    _setinstrdelay 5
+    setcorespeed 5
     pop eax
     pop ecx 
     
@@ -110,7 +110,7 @@ strlen_loop:
     push ebx
     push ecx
     call memcpy
-    _setinstrdelay 5
+    setcorespeed 5
     pop ecx; EAX
     pop ecx
     pop ecx
@@ -120,7 +120,7 @@ strlen_loop:
     mov cl, 0
     mov [eax], cl
     
-    _setinstrdelay 100
+    setcorespeed
     ret
 
 
@@ -128,7 +128,7 @@ strlen_loop:
 ; push <dest>
 ; push <src>
 @export strcpy:
-    _setinstrdelay 5
+    setcorespeed 5
     mov eax, [esp + 8] ; SRC
     mov ebx, [esp + 12] ; DEST
     mov cl, [eax]
@@ -145,7 +145,7 @@ strcpy_loop:
     jne strcpy_loop
     
 strcpy_end:
-    _setinstrdelay 100
+    setcorespeed
     ret
 
 ; Expects
@@ -153,7 +153,7 @@ strcpy_end:
 ; push <src>
 ; push <length>
 @export memcpy:
-    _setinstrdelay 5
+    setcorespeed 5
     mov eax, [esp + 8]
     mov ebx, [esp + 12]
     mov ecx, [esp + 16]
@@ -170,7 +170,7 @@ memcpy_loop:
     jnz memcpy_loop
 
 memcpy_end:
-    _setinstrdelay 100
+    setcorespeed
     ret
 `;
 
