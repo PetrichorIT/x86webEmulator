@@ -22,6 +22,9 @@ export class App {
 	instructionDelay: number;
 	defaultInstructionDelay: number;
 
+	/**
+	 * Creates an application process, capable of executing all commands given in the commandHandlers.
+	 */
 	constructor(commandHandlers: { [key: string]: CommandFunction | CommandOperandChecker }) {
 		this.registers = {
 			eax: new Register32(0),
@@ -56,10 +59,6 @@ export class App {
 		this.instructionDelay = 100; // 100ms
 		this.defaultInstructionDelay = 100;
 		this.parser = new Parser(this);
-	}
-
-	parse(code: string): (Command | Label)[] {
-		return this.parser.parse(code);
 	}
 
 	/**

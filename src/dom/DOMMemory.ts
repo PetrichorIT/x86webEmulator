@@ -17,11 +17,13 @@ export class DOMMemory {
 
 	private memContent: HTMLDivElement;
 
+	/**
+	 * Creates a memory control component from th given application object
+	 */
 	constructor(app: App) {
 		this.app = app;
 
 		this.memContent = document.querySelector('.memory-content');
-		// ADDR
 
 		this.memAddrControl = document.createElement('input');
 		this.memAddrControl.classList.add('memAddr');

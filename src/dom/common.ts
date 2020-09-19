@@ -1,5 +1,3 @@
-import { doc } from 'prettier';
-
 // Time interval that a edit is stored if not loaded in between
 const _storageTimeToLife = 60 * 60 * 1000;
 

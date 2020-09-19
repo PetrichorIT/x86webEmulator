@@ -14,6 +14,10 @@ export class Parser {
 		this.libs = {};
 	}
 
+	/**
+	 * Parses given code as libary code, 
+	 * converting internal labels using the __libName_ prefix.
+	 */
 	parseLib(libName: string, code: string) {
 		let prefix = `__lib_${libName}_`;
 
@@ -50,6 +54,9 @@ export class Parser {
 		return this.libs[libName];
 	}
 
+	/**
+	 * Parses given code and collectd exported labels.
+	 */
 	parse(code: string, exportLabels?: string[]): (Command | Label)[] {
 		exportLabels = exportLabels || [];
 
