@@ -1,6 +1,6 @@
 export const fib = `
 @export fib:
-    setcorespeed 5
+    setcorespeed 1
 	mov eax, [esp + 8]
     mov ebx, 0
     mov ecx, 1
