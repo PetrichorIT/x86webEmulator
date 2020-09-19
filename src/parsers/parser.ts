@@ -349,8 +349,12 @@ export class Parser {
 
 		// Label Resolve Test
 
-		function pushUniq<T>(arr: T[], value: T) {
-			if (!arr.includes(value)) arr.push(value);
+		function pushUniq<T>(arr: T[], value: T): boolean {
+			if (!arr.includes(value)) {
+				arr.push(value);
+				return true;
+			}
+			return false;
 		}
 
 		let definedLabels: string[] = [];
@@ -358,7 +362,13 @@ export class Parser {
 
 		for (const instrc of instructions) {
 			if ((instrc as Label).label !== undefined) {
-				pushUniq(definedLabels, (instrc as Label).label);
+				if (!pushUniq(definedLabels, (instrc as Label).label)) {
+					throw new CompilerError(
+						`C018 - Illegal label redefintion "${(instrc as Label).label}"`,
+						instrc.lineNumber,
+						{ from: 0 }
+					);
+				}
 			} else {
 				for (const operand of (instrc as Command).params) {
 					if (operand.type === OperandTypes.label)
