@@ -3,7 +3,7 @@ import Operand, { OperandTypes } from './models/Operand';
 import Parser from './parsers/parser';
 
 export type Label = { label: string; lineNumber: number };
-export type Command = { name: string; params: Operand[]; lineNumber: number };
+export type Command = { name: string; params: Operand[]; lineNumber: number; isLibCode?: boolean };
 export type CommandFunction = (app: App, params: Operand[]) => void;
 export type CommandOperandChecker = (params: Operand[]) => void;
 
@@ -123,6 +123,14 @@ export class App {
 		}
 	}
 
+	get isInLibMode(): boolean {
+		const iLoc = this.memory.readUInt32LE(this.registers.eip._32);
+		if (iLoc >= this.instructions.length) return false;
+		let instrc = this.instructions[iLoc];
+		if (!instrc) return false;
+		return instrc.isLibCode === true;
+	}
+
 	/**
 	 * Executes an instruction based on the current EIP.
 	 * Returns a flag that shows if an instruction was available (and thus executed)
@@ -136,7 +144,7 @@ export class App {
 
 		(this.commandHandlers[instrc.name] as CommandFunction)(this, instrc.params);
 
-		this.subscriber.forEach((s) => s());
+		if (!this.isInLibMode) this.subscriber.forEach((s) => s());
 		return true;
 	}
 }

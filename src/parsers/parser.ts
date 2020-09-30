@@ -30,6 +30,7 @@ export class Parser {
 					(compiled[i] as Label).label = prefix + (compiled[i] as Label).label;
 				}
 			} else {
+				(compiled[i] as Command).isLibCode = true;
 				for (let j = 0; j < (compiled[i] as Command).params.length; j++) {
 					const element = (compiled[i] as Command).params[j];
 					if (element.type === OperandTypes.label) {

@@ -5,7 +5,6 @@ export const string = `
 ; push rhs
 ; push &result
 @export strcmp:
-    setcorespeed 1
 	mov eax, [esp + 12]	; lhsOperand 
     mov ebx, [esp + 16]	; rhsOperand
     
@@ -26,16 +25,13 @@ strcmp_true:
     jz strcmp_true_conf
 strcmp_true_err:
     mov [esp + 8], 0
-    setcorespeed
     ret
 strcmp_true_conf:
     mov [esp + 8], 1
-    setcorespeed
     ret
     
 strcmp_false:
     mov [esp + 8], 0
-    setcorespeed
     ret
 
 ; EXPORT
@@ -43,7 +39,6 @@ strcmp_false:
 ; push lhs (org)
 ; push rhs (suffix)
 @export strcat:
-    setcorespeed 1
 	mov ebx, [esp + 8] ; Suffix
     mov eax, [esp + 12] ; Prefix
     
@@ -62,7 +57,6 @@ strcat_copy:
     cmp cl, 0
     jne strcat_copy
     
-    setcorespeed
     ret
 	
 ; EXPORT
@@ -70,7 +64,6 @@ strcat_copy:
 ; push operand
 ; puhs &result
 @export strlen:
-    setcorespeed 1
 	mov eax, [esp + 12] ; operand
     mov ebx, 0
     
@@ -83,7 +76,6 @@ strlen_loop:
     
     dec ebx
     mov [esp + 8], ebx
-    setcorespeed
     ret
 
 ; Expects
@@ -91,13 +83,11 @@ strlen_loop:
 ; push <src>
 ; push <num>
 @export strncat:
-    setcorespeed 1
     mov eax, [esp + 16] ; <dest>
     
     push eax
     push 0
     call strlen
-    setcorespeed 1
     pop eax
     pop ecx 
     
@@ -110,7 +100,7 @@ strlen_loop:
     push ebx
     push ecx
     call memcpy
-    setcorespeed 1
+
     pop ecx; EAX
     pop ecx
     pop ecx
@@ -120,7 +110,6 @@ strlen_loop:
     mov cl, 0
     mov [eax], cl
     
-    setcorespeed
     ret
 
 
@@ -128,7 +117,6 @@ strlen_loop:
 ; push <dest>
 ; push <src>
 @export strcpy:
-    setcorespeed 1
     mov eax, [esp + 8] ; SRC
     mov ebx, [esp + 12] ; DEST
     mov cl, [eax]
@@ -145,7 +133,6 @@ strcpy_loop:
     jne strcpy_loop
     
 strcpy_end:
-    setcorespeed
     ret
 
 ; Expects
@@ -153,7 +140,6 @@ strcpy_end:
 ; push <src>
 ; push <length>
 @export memcpy:
-    setcorespeed 1
     mov eax, [esp + 8]
     mov ebx, [esp + 12]
     mov ecx, [esp + 16]
@@ -170,7 +156,6 @@ memcpy_loop:
     jnz memcpy_loop
 
 memcpy_end:
-    setcorespeed
     ret
 
 ; Expect
@@ -178,7 +163,6 @@ memcpy_end:
 ; push <substring>
 ; push <&result = void * || null>
 @export strstr:
-	setcorespeed 1
 	mov eax, [esp + 16]
     mov ebx, [esp + 12]
     mov edx, 0
@@ -230,7 +214,6 @@ strstr_subloop_succ:
 
 strstr_end:
 	mov [esp + 8], edx
-	setcorespeed
     ret
 
 ; Expect
@@ -238,7 +221,6 @@ strstr_end:
 ; push <char>
 ; push <&result = void * || null>
 @export strrchr:
-	setcorespeed 1
 	mov eax, [esp + 16]
     mov ebx, [esp + 12]
     mov edx, 0
@@ -257,7 +239,6 @@ strrchr_loop_ne:
    
 strrchr_end:
 	mov [esp + 8], edx
-    setcorespeed
     ret
 
 ; Expect
@@ -265,7 +246,6 @@ strrchr_end:
 ; push <char>
 ; push <&result = void * || null>
 @export strchr:
-	setcorespeed 1
 	mov eax, [esp + 16]
     mov ebx, [esp + 12]
     
@@ -280,12 +260,10 @@ strchr_loop:
  
 strchr_succ:
 	mov [esp + 8], eax
-    setcorespeed
     ret
     
 strchr_fail:
 	mov [esp + 8], 0x0
-    setcorespeed
     ret
 `;
 

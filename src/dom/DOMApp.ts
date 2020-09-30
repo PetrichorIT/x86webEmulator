@@ -43,11 +43,11 @@ export class DOMApp {
 		this.flags = {};
 		this.running = false;
 
-		this.buildDebug();
-		this.build();
-
 		Lib.loadDefaultLibs(this.app);
 		Lib.loadLocalLibs(this.app);
+
+		this.buildDebug();
+		this.build();
 	}
 
 	/**
@@ -216,8 +216,10 @@ export class DOMApp {
 		console.info(`Starting run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 
 		try {
-			while (this.running && this.app.instructionCycle())
-				await new Promise((r) => setTimeout(r, this.app.instructionDelay));
+			while (this.running && this.app.instructionCycle()) {
+				console.log(this.app.isInLibMode);
+				if (!this.app.isInLibMode) await new Promise((r) => setTimeout(r, this.app.instructionDelay));
+			}
 			if (this.running) {
 				console.info(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 			}
