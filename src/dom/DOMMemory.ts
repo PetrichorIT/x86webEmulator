@@ -30,7 +30,7 @@ export class DOMMemory {
 		this.memAddrControl.type = 'text';
 		this.memAddrControl.value = '00000000';
 		this.memAddrControl.id = 'inpMemAddr';
-		this.memAddrControl.addEventListener('change', () => this.updateAddresse());
+		this.memAddrControl.addEventListener('keyup', () => this.updateAddresse());
 
 		let memAddrLabel = document.createElement('label');
 		memAddrLabel.innerHTML = 'Addresse';
@@ -45,7 +45,7 @@ export class DOMMemory {
 		this.memSizeControl.classList.add('memSize');
 		this.memSizeControl.value = '1';
 		this.memSizeControl.id = 'inpMemSize';
-		this.memSizeControl.addEventListener('change', () => this.updateMemSize());
+		this.memSizeControl.addEventListener('keyup', () => this.updateMemSize());
 
 		let memSizeLabel = document.createElement('label');
 		memSizeLabel.innerHTML = 'Bytes per field';
