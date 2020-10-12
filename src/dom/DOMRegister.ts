@@ -9,9 +9,10 @@ export class DOMRegister {
 
 	private register: Register32;
 
+	/**
+	 * Creates a control component for a register of the application process
+	 */
 	constructor(app: App, registerName: string) {
-		// CREATE DOM
-
 		this.register = app.registers[registerName];
 
 		const registerDOM = document.createElement('div');

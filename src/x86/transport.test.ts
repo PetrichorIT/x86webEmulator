@@ -18,10 +18,6 @@ describe('@Test MOV', () => {
 		t.mov(app, [ new Operand(OperandTypes.register, 'cx'), new Operand(OperandTypes.register, 'bx') ]);
 		expect(app.registers.ecx._16).toEqual(0xf0f0);
 		expect(app.registers.ecx._32).toEqual(0x0000f0f0);
-
-		expect(() =>
-			t.mov(app, [ new Operand(OperandTypes.register, 'edi'), new Operand(OperandTypes.register, 'cx') ])
-		).toThrowError();
 	});
 
 	it('MOV reg32, mem', () => {
@@ -33,12 +29,6 @@ describe('@Test MOV', () => {
 	it('MOV mem, reg32', () => {
 		t.mov(app, [ new Operand(OperandTypes.mDirect, 0xee), new Operand(OperandTypes.register, 'eax') ]);
 		expect(app.memory.readUInt32LE(0xee)).toEqual(0xa0a0a0a0);
-	});
-
-	it('MOV mem, mem', () => {
-		expect(() =>
-			t.mov(app, [ new Operand(OperandTypes.mDirect, 0), new Operand(OperandTypes.mDirect, 0) ])
-		).toThrowError();
 	});
 
 	it('MOV reg8, const', () => {
@@ -102,7 +92,5 @@ describe('@Test POP', () => {
 		expect(app.registers.ebx._32).toEqual(0xa0a0a0a0);
 		t.pop(app, [ new Operand(OperandTypes.register, 'ecx') ]);
 		expect(app.registers.ecx._32).toEqual(0xf0f0f0f0);
-
-		expect(() => t.pop(app, [ new Operand(OperandTypes.register, 'edx') ])).toThrowError();
 	});
 });

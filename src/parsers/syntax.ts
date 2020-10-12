@@ -18,11 +18,11 @@ export function initSyntax() {
 				if (stream.eatWhile(/\w/)) {
 					w = stream.current().toLowerCase();
 
+					if (w === '@export') return 'def';
+					if (syn_keywords.includes(w)) return 'keyword';
 					if (syn_number.test(w)) return 'number';
 					if (syn_registers.test(w)) return 'var2';
 					if (syn_label.test(w)) return 'def';
-					if (syn_keywords.includes(w)) return 'keyword';
-					if (w === '@export') return 'def';
 				} else if (stream.match(syn_registers, true)) {
 					return 'var2';
 				} else if (stream.eat(';')) {

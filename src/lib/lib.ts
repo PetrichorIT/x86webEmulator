@@ -7,7 +7,7 @@ import { string } from './string';
 class LibController {
 	private localLibs: string[] = [];
 	get libs(): string[] {
-		return [ 'fib', 'string' ].concat(this.localLibs);
+		return [ 'fib.h', 'string.h' ].concat(this.localLibs);
 	}
 
 	private loadLib(app: App, libName: string, libCode: string) {
@@ -19,11 +19,15 @@ class LibController {
 	 */
 	loadDefaultLibs(app: App) {
 		try {
-			this.loadLib(app, 'fib', fib);
-			console.info('Loaded default lib "fib"');
+			this.loadLib(app, 'fib.h', fib);
+			console.info('Loaded default lib "fib.h"');
+		} catch (e) {
+			console.error(e);
+		}
 
-			this.loadLib(app, 'string', string);
-			console.info('Loaded default lib "string"');
+		try {
+			this.loadLib(app, 'string.h', string);
+			console.info('Loaded default lib "string.h"');
 		} catch (e) {
 			console.error(e);
 		}

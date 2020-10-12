@@ -121,11 +121,6 @@ describe('@Test INC', () => {
 		expect(app.flags.ZF).toEqual(true);
 		// expect(app.registers.eax._32).toEqual(0xdddd0000);error
 	});
-
-	it('INC const/mem -> fail', () => {
-		expect(() => arithmetic.inc(app, [ new Operand(OperandTypes.const, 12) ])).toThrow();
-		expect(() => arithmetic.inc(app, [ new Operand(OperandTypes.mDirect, 12) ])).toThrow();
-	});
 });
 
 describe('@Test INC', () => {
@@ -147,10 +142,5 @@ describe('@Test INC', () => {
 		expect(app.registers.eax._16).toEqual(0);
 		expect(app.flags.ZF).toEqual(true);
 		// expect(app.registers.eax._32).toEqual(0xdddd0000);error
-	});
-
-	it('DEC const/mem -> fail', () => {
-		expect(() => arithmetic.dec(app, [ new Operand(OperandTypes.const, 12) ])).toThrow();
-		expect(() => arithmetic.dec(app, [ new Operand(OperandTypes.mDirect, 12) ])).toThrow();
 	});
 });

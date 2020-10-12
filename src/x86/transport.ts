@@ -1,17 +1,21 @@
 import { App } from '../App';
 import Operand, { OperandTypes } from '../models/Operand';
-import { operandMemSize } from './common';
+import { CommonCheckers, operandMemSize } from './common';
 
+export function __mov(params: Operand[]) {
+	CommonCheckers.expectCount(params, 2);
+	CommonCheckers.expectNoMem2Mem(params);
+	CommonCheckers.expectMutable(params[0]);
+
+	if (params[1].type === OperandTypes.string) {
+		if (!params[0].isMemory) throw new Error('C00X - Invalid operands. Expected left operand to be memory.');
+	}
+}
 export function mov(app: App, params: Operand[]) {
 	let dest = params[0];
 	let src = params[1];
 
-	if (dest.isMemory && src.isMemory) throw new Error('Mem2Mem');
-
 	if (src.type === OperandTypes.string) {
-		// String
-		if (!dest.isMemory) throw new Error('NOMEMSTR');
-
 		let memAddr = dest.getCompiledSelf(app);
 
 		const str = (src.getValue(app, 1) as any) as string;
@@ -32,9 +36,13 @@ export function mov(app: App, params: Operand[]) {
 	}
 }
 
+export function __push(params: Operand[]) {
+	CommonCheckers.expectCount(params, 1);
+	CommonCheckers.expectNoMem(params[0]);
+	CommonCheckers.expectMemSize(params[0], 4);
+}
 export function push(app: App, params: Operand[]) {
 	let src = params[0];
-	if (src.isMemory) throw new Error('Mem2Mem');
 	if (src.requiredMemSize && src.requiredMemSize !== 4) throw new Error('No');
 
 	app.registers.esp._32 -= 4;
@@ -42,6 +50,12 @@ export function push(app: App, params: Operand[]) {
 	app.registers.eip._32 += 4;
 }
 
+export function __pop(params: Operand[]) {
+	CommonCheckers.expectCount(params, 1);
+	CommonCheckers.expectNoMem(params[0]);
+	CommonCheckers.expectMemSize(params[0], 4);
+	CommonCheckers.expectMutable(params[0]);
+}
 export function pop(app: App, params: Operand[]) {
 	let src = params[0];
 	if (src.isMemory) throw new Error('Mem2Mem');

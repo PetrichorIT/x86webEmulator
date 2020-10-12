@@ -1,6 +1,6 @@
 import * as x86 from '../x86';
 
-export const syn_keywords = Object.getOwnPropertyNames(x86);
+export const syn_keywords = Object.getOwnPropertyNames(x86).filter((s) => !s.startsWith('__'));
 export const syn_registers = /^(eax|ax|ah|al|ebx|bx|bh|bl|ecx|cx|ch|cl|edx|dx|dh|dl|esp|ebp|edi|esi|eip)/i;
 export const syn_label = /[A-z][A-z0-9_]*:/;
 export const syn_include = /#include/;

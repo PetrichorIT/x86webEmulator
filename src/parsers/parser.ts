@@ -1,8 +1,8 @@
-import { App, Command, Label } from '../App';
+import { App, Command, CommandOperandChecker, Label } from '../App';
 import { StringStream } from './StringStream';
 import { syn_label, CompilerError, syn_keywords, syn_registers, syn_number, syn_string } from './const';
 import Operand, { OperandTypes } from '../models/Operand';
-import { operandMemSize } from '../x86/common';
+import * as x86 from '../x86';
 
 export class Parser {
 	app: App;
@@ -14,6 +14,10 @@ export class Parser {
 		this.libs = {};
 	}
 
+	/**
+	 * Parses given code as libary code, 
+	 * converting internal labels using the __libName_ prefix.
+	 */
 	parseLib(libName: string, code: string) {
 		let prefix = `__lib_${libName}_`;
 
@@ -26,6 +30,7 @@ export class Parser {
 					(compiled[i] as Label).label = prefix + (compiled[i] as Label).label;
 				}
 			} else {
+				(compiled[i] as Command).isLibCode = true;
 				for (let j = 0; j < (compiled[i] as Command).params.length; j++) {
 					const element = (compiled[i] as Command).params[j];
 					if (element.type === OperandTypes.label) {
@@ -50,6 +55,9 @@ export class Parser {
 		return this.libs[libName];
 	}
 
+	/**
+	 * Parses given code and collectd exported labels.
+	 */
 	parse(code: string, exportLabels?: string[]): (Command | Label)[] {
 		exportLabels = exportLabels || [];
 
@@ -309,7 +317,7 @@ export class Parser {
 							}
 						} else {
 							// Register
-							let desc = this.currentLine.eatWhile((c) => c !== ',' && c !== ';').trim();
+							let desc = this.currentLine.eatWhile((c) => c !== ',' && c !== ';').trim().toLowerCase();
 							if (syn_registers.test(desc)) {
 								params.push(new Operand(OperandTypes.register, desc));
 							} else {
@@ -323,14 +331,31 @@ export class Parser {
 					i++;
 				}
 
+				// Check Operand Composition
+
+				const checker = (x86 as any)['__' + commandName] as CommandOperandChecker | undefined;
+				if (checker) {
+					try {
+						checker(params);
+					} catch (e) {
+						throw new CompilerError(e.message, lineIdx, { from: preCN });
+					}
+				} else {
+					console.warn(`Missing checker for instruction "${commandName}" `);
+				}
+
 				instructions.push({ name: commandName, params: params, lineNumber: lineIdx });
 			}
 		}
 
 		// Label Resolve Test
 
-		function pushUniq<T>(arr: T[], value: T) {
-			if (!arr.includes(value)) arr.push(value);
+		function pushUniq<T>(arr: T[], value: T): boolean {
+			if (!arr.includes(value)) {
+				arr.push(value);
+				return true;
+			}
+			return false;
 		}
 
 		let definedLabels: string[] = [];
@@ -338,7 +363,13 @@ export class Parser {
 
 		for (const instrc of instructions) {
 			if ((instrc as Label).label !== undefined) {
-				pushUniq(definedLabels, (instrc as Label).label);
+				if (!pushUniq(definedLabels, (instrc as Label).label)) {
+					throw new CompilerError(
+						`C018 - Illegal label redefintion "${(instrc as Label).label}"`,
+						instrc.lineNumber,
+						{ from: 0 }
+					);
+				}
 			} else {
 				for (const operand of (instrc as Command).params) {
 					if (operand.type === OperandTypes.label)
@@ -352,9 +383,6 @@ export class Parser {
 				throw new CompilerError(`C016 - Unkown Label "${label}"`, line, { from: 0 });
 			}
 		}
-
-		console.log(instructions);
-		console.log(exportLabels);
 
 		return instructions;
 	}

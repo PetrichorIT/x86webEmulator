@@ -7,8 +7,6 @@ import DOMFlag from './DOMFlag';
 import { initSyntax } from '../parsers/syntax';
 import SemiPersistentStorage from './common';
 import { CompilerError } from '../parsers/const';
-import { throwStatement } from '@babel/types';
-import { doc } from 'prettier';
 import { Lib } from '../lib/lib';
 
 let _firstBuild: boolean = true;
@@ -36,21 +34,24 @@ export class DOMApp {
 	private running: boolean;
 	private preferredFilename = 'code.txt';
 
+	/**
+	 * Creates a DOMApp object that links the given application to the DOM
+	 */
 	constructor(app: App) {
 		this.app = app;
 		this.registers = {};
 		this.flags = {};
 		this.running = false;
 
-		this.buildDebug();
-		this.build();
-
 		Lib.loadDefaultLibs(this.app);
 		Lib.loadLocalLibs(this.app);
+
+		this.buildDebug();
+		this.build();
 	}
 
 	/**
-	 * Build Debug box
+	 * Links the console functions to the debug component
 	 */
 	private buildDebug() {
 		(console as any)._info = console.info;
@@ -68,8 +69,6 @@ export class DOMApp {
 
 	/**
 	 * Prints debug output to the debug component in the DOM
-	 * @param message Message to be send
-	 * @param type Message type 
 	 */
 	private debug(message: string, type?: 'error' | 'info') {
 		type = type || 'info';
@@ -85,7 +84,7 @@ export class DOMApp {
 	}
 
 	/**
-	 * Intiatial setup of the DOMApp Controller
+	 * Links & Creates the DOM Components at first init(_:)
 	 */
 	private build() {
 		for (const regName in this.app.registers) {
@@ -152,18 +151,23 @@ export class DOMApp {
 		this.editor.markText({ line, ch: 0 }, { line, ch: 255 }, { css: 'background-color: rgba(17, 165, 175, 0.5);' });
 	}
 
+	/**
+	 * Handles show/hide actions from the more button
+	 */
 	private toggleMoreMenu() {
 		this.moreBox.style.opacity = this.moreBox.style.opacity === '1' ? '0' : '1';
 	}
 
+	/**
+	 * Handles the creation of a Lib from the current code of the editor
+	 */
 	private moreActionSaveAsLib() {
 		const libName = prompt('Enter a libary name', 'myLib');
-
 		Lib.setLib(this.app, libName, this.editor.getDoc().getValue());
 	}
 
 	/**
-	 * 
+	 * Remove markings if editor is changed
 	 */
 	private onEditorChange() {
 		this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
@@ -179,16 +183,15 @@ export class DOMApp {
 		console.info(`Parsing new snapshot $${tsmp}`);
 
 		try {
-			let p = this.app.parse(this.editor.getDoc().getValue());
+			let p = this.app.parser.parse(this.editor.getDoc().getValue());
 			console.info(`Parsed snapshot $${tsmp} - Got ${p.length} instructions`);
 
-			console.info(`Writing snapshot $${tsmp} to application memory`);
 			this.app.runProgram(p);
 
 			SemiPersistentStorage.setData('_editor_snapshot', this.editor.getDoc().getValue());
 			console.info(`Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		} catch (e) {
-			if (e.message.startsWith('C')) {
+			if (e.line && e.position) {
 				let err = e as CompilerError;
 				this.editor.markText(
 					{ line: err.line, ch: err.position.from },
@@ -196,7 +199,7 @@ export class DOMApp {
 					{ css: 'background-color: rgba(200, 50, 30, 0.5);' }
 				);
 
-				console.error(e);
+				console.error(e.message);
 			} else {
 				throw e;
 			}
@@ -213,8 +216,10 @@ export class DOMApp {
 		console.info(`Starting run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 
 		try {
-			while (this.running && this.app.instructionCycle())
-				await new Promise((r) => setTimeout(r, this.app.instructionDelay));
+			while (this.running && this.app.instructionCycle()) {
+				console.log(this.app.isInLibMode);
+				if (!this.app.isInLibMode) await new Promise((r) => setTimeout(r, this.app.instructionDelay));
+			}
 			if (this.running) {
 				console.info(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 			}

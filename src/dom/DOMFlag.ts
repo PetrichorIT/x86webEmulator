@@ -5,9 +5,10 @@ export class DOMFlag {
 	private flagName: string;
 	private app: App;
 
+	/**
+	 * Creates a control component for a flag from the application object
+	 */
 	constructor(app: App, flagName: string) {
-		// CREATE DOM
-
 		this.flagName = flagName;
 		this.app = app;
 

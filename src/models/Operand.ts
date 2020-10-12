@@ -26,6 +26,9 @@ export class Operand {
 		// }
 	}
 
+	/**
+	 * Returns if the operand points to memory
+	 */
 	get isMemory() {
 		return !(
 			this.type === OperandTypes.register ||
@@ -34,6 +37,9 @@ export class Operand {
 		);
 	}
 
+	/**
+	 * Returns the required memory size (if exisiting)
+	 */
 	get requiredMemSize() {
 		if (this.type === OperandTypes.register) {
 			if (this.value[0].toLowerCase() === 'e') return 4;
@@ -45,6 +51,9 @@ export class Operand {
 		return undefined;
 	}
 
+	/**
+	 * Returns the address of the memory block, referenced by the operand
+	 */
 	getCompiledSelf(app: App): number {
 		if (!this.isMemory) throw new Error('ONLYMEM');
 
