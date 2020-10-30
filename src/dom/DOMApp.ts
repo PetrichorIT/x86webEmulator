@@ -184,6 +184,7 @@ export class DOMApp {
 
 		try {
 			let p = this.app.parser.parse(this.editor.getDoc().getValue());
+			console.log(p)
 			console.info(`Parsed snapshot $${tsmp} - Got ${p.length} instructions`);
 
 			this.app.runProgram(p);
@@ -191,7 +192,7 @@ export class DOMApp {
 			SemiPersistentStorage.setData('_editor_snapshot', this.editor.getDoc().getValue());
 			console.info(`Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		} catch (e) {
-			if (e.line && e.position) {
+			if (e.line !== undefined && e.position !== undefined) {
 				let err = e as CompilerError;
 				this.editor.markText(
 					{ line: err.line, ch: err.position.from },
