@@ -300,6 +300,8 @@ export class Parser {
 								);
 
 							let num = parseInt(numStr);
+							if (numStr.toLowerCase().startsWith("0b")) num = parseInt(numStr.substr(2), 2)
+							
 							if (isNaN(num))
 								throw new CompilerError(
 									`C015 - Invalid token. Expected number from string "${numStr}"`,
