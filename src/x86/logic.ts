@@ -18,7 +18,7 @@ export function and(app: App, params: Operand[]) {
 	app.registers.eip._32 += 4;
 }
 
-export const _or = CommonCheckers.dualMutFirst;
+export const __or = CommonCheckers.dualMutFirst;
 export function or(app: App, params: Operand[]) {
 	let lhsOp = params[0];
 	let rhsOp = params[1];
@@ -110,5 +110,24 @@ export function shr(app: App, params: Operand[]) {
 	let res = lhs >>> rhsOp.getValue(app, 4);
 
 	lhsOp.setValue(app, memSize, res);
+	app.registers.eip._32 += 4;
+}
+
+
+export function __bt(params: Operand[]) {
+	CommonCheckers.expectCount(params, 2)
+}
+
+export function bt(app: App, params: Operand[]) {
+	let reg = params[0];
+	let bit = params[1].getValue(app, params[1].requiredMemSize);
+
+	if (bit < 0 || bit > ((reg.requiredMemSize || 1) * 8)) throw new Error("BT idx invalid");
+
+	let pattern = reg.getValue(app, reg.requiredMemSize) >>> bit;
+
+	console.info(pattern.toString(2), bit)
+
+	app.flags.CF = (pattern & 0x1) === 1 ? true : false
 	app.registers.eip._32 += 4;
 }

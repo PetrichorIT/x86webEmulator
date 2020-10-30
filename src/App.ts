@@ -1,6 +1,8 @@
 import Register32 from './models/Register32';
 import Operand, { OperandTypes } from './models/Operand';
 import Parser from './parsers/parser';
+import IODevice from './io/io'
+import { dec } from './x86';
 
 export type Label = { label: string; lineNumber: number };
 export type Command = { name: string; params: Operand[]; lineNumber: number; isLibCode?: boolean };
@@ -21,6 +23,8 @@ export class App {
 
 	instructionDelay: number;
 	defaultInstructionDelay: number;
+
+	ioDevices: IODevice[]
 
 	/**
 	 * Creates an application process, capable of executing all commands given in the commandHandlers.
@@ -59,6 +63,29 @@ export class App {
 		this.instructionDelay = 100; // 100ms
 		this.defaultInstructionDelay = 100;
 		this.parser = new Parser(this);
+		this.ioDevices = []
+	}
+
+	/** 
+	* Controll IO
+	*/
+
+	ioWrite(port: number, value: number) {
+		for (const device of this.ioDevices) {
+			if (device.ports.includes(port)) {
+				device.onOutput(port, value)
+				return
+			}
+		}
+	}
+
+	ioRead(port: number): number {
+		for (const device of this.ioDevices) {
+			if (device.ports.includes(port)) {
+				return device.onInput(port);
+			}
+		}
+		return 0;
 	}
 
 	/**
