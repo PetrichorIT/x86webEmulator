@@ -51,7 +51,27 @@ export class DOMLibaryController {
 	private saveLibary() {
         const libName = prompt('Enter a libary name', 'myLib');
         if (!libName) return;
-		Lib.setLib(this.domApp.app, libName, this.domApp.editor.getDoc().getValue());
+        
+        const isNew = !Lib.libs.includes(libName);
+
+        Lib.setLib(this.domApp.app, libName, this.domApp.editor.getDoc().getValue());
+        if (isNew) {
+
+            // BUG: Needs dropdown recalculatio of height
+
+            const li = document.createElement("li");
+
+            const span = document.createElement("span");
+            span.innerHTML = libName;
+
+            const showButton = document.createElement("button")
+            showButton.classList.add("showButton");
+            showButton.innerHTML = "Show";
+            showButton.addEventListener("click", () => this.showLibaryCode(libName));
+
+            li.append(showButton, span);
+            document.querySelector(".libary-list").append(li)
+        }
     }
     
     /**

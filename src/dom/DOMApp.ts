@@ -158,6 +158,7 @@ export class DOMApp {
 			let width = body.offsetHeight;
 
 			if (header && body) 
+
 				header.addEventListener("click", () => {
 					body.style.paddingTop = extened ? "0px" : "15px";
 					body.style.paddingBottom = extened ? "0px" : "5px";
