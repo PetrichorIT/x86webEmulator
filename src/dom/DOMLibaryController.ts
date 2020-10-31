@@ -21,7 +21,16 @@ export class DOMLibaryController {
 
             for (const lib of Lib.libs) {
                 const li = document.createElement("li");
-                li.innerHTML = lib;
+
+                const span = document.createElement("span");
+                span.innerHTML = lib;
+
+                const showButton = document.createElement("button")
+                showButton.classList.add("showButton");
+                showButton.innerHTML = "Show";
+                showButton.addEventListener("click", () => this.showLibaryCode(lib));
+
+                li.append(showButton, span);
                 ul.append(li)
             }
 
@@ -30,17 +39,9 @@ export class DOMLibaryController {
 
         {
             const button = document.createElement("button")
+            button.classList.add("saveLibary")
             button.innerHTML = "Save code as libary"
             button.addEventListener("click", () => this.saveLibary());
-
-            container.append(button);
-        }
-
-        {
-            const button = document.createElement("button")
-            button.innerHTML = "Show libary code"
-            button.addEventListener("click", () => this.showLibaryCode());
-
             container.append(button);
         }
     }
@@ -53,8 +54,10 @@ export class DOMLibaryController {
 		Lib.setLib(this.domApp.app, libName, this.domApp.editor.getDoc().getValue());
     }
     
-    private showLibaryCode() {
-        const libName = prompt('Enter a libary name', 'string.h');
+    /**
+     * Shows the libary code in the editor
+     */
+    private showLibaryCode(libName: string) {
         this.domApp.editor.setValue(Lib.getLibCode(libName));
     }
 }

@@ -257,6 +257,45 @@ body {
 				}
 			}
 
+			.libary-controller {
+				.libary-list {
+					list-style: square;
+					list-style-type: square;
+					padding-left: 10px;
+
+					.showButton {
+						margin-right: 10px;
+						padding: .5px 5px;
+						border-radius: 5px;
+						outline: none;
+						border: none;
+						color: $primary-text;
+						background-color: $textbox-bg;
+
+						@media (prefers-color-scheme: dark) {
+							color: $primary-text-d;
+							background-color: $textbox-bg-d;
+						}
+					}
+				}
+
+				.saveLibary {
+					margin-left: 10px;
+					margin-top: 10px;
+					padding: 5px 10px;
+					border-radius: 5px;
+					outline: none;
+					border: none;
+					color: $primary-text;
+					background-color: $textbox-bg;
+
+					@media (prefers-color-scheme: dark) {
+						color: $primary-text-d;
+						background-color: $textbox-bg-d;
+					}
+				}
+			}
+
 			.row {
 				display: flex;
 				position: relative;
