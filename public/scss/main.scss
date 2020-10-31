@@ -9,6 +9,12 @@ $primary-text-d: rgb(240, 240, 240);
 $textbox-bg: rgb(210, 210, 210);
 $textbox-bg-d: rgb(70, 70, 70);
 
+$dropdown-bg: red;
+$dropdown-accent: red;
+
+$dropdown-bg-d: rgb(40, 40, 40);
+$dropdown-accent-d: rgb(70, 70, 70);
+
 $button-green: rgb(57, 133, 14);
 $button-blue: rgb(5, 93, 151);
 $button-gray: rgb(60, 60, 60);
@@ -48,13 +54,16 @@ body {
 
 		.input-box {
 			display: block;
-			width: 60%;
+			width: 50%;
 			height: calc(100vh - 75px);
 
 			.editor-box {
 				position: relative;
-				width: 80%;
+				width: calc(100% - 35px);
 				margin-left: 25px;
+				margin-right: 10px;
+				border-radius: 5px;
+				overflow: hidden;
 
 				.more-button {
 					position: absolute;
@@ -221,7 +230,7 @@ body {
 		}
 
 		.info-box {
-			width: 40%;
+			width: 50%;
 			height: calc(100% - 75px);
 
 			.row {
@@ -376,6 +385,36 @@ body {
 					}
 				}
 			}
+		}
+	}
+}
+
+.dropdown {
+	margin: 10px;
+	border-radius: 5px;
+	overflow: hidden;
+
+	.dropdown-header {
+		padding: 2.5px;
+		padding-left: 10px;
+		background-color: $dropdown-accent;
+		border-radius: 5px;
+
+		@media (prefers-color-scheme: dark) {
+			background-color: $dropdown-accent-d;
+		}
+	}
+
+	.dropdown-body {
+		padding-top: 15px;
+		padding-bottom: 5px;
+
+		overflow: hidden;
+		transition: .3s;
+		background-color: $dropdown-bg;
+
+		@media (prefers-color-scheme: dark) {
+			background-color: $dropdown-bg-d;
 		}
 	}
 }

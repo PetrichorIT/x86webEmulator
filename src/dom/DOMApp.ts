@@ -96,6 +96,8 @@ export class DOMApp {
 		if (!this.memory) this.memory = new DOMMemory(this.app);
 
 		if (_firstBuild) initSyntax();
+		if (_firstBuild) this.buildDropdowns()
+
 		const textArea = document.getElementById('editor') as HTMLTextAreaElement;
 		this.editor = CodeMirror.fromTextArea(textArea, {
 			mode: 'x86',
@@ -138,6 +140,38 @@ export class DOMApp {
 		this.app.subscribe(() => this.onInstructionCycle());
 
 		_firstBuild = false;
+	}
+
+	/**
+	 * Handles Dropdowns
+	 */
+	private buildDropdowns() {		
+		document.querySelectorAll(".dropdown").forEach((node) => {
+			const id = node.id;
+			if (!id) return;
+
+			const storageID = "dropdown:" + id
+
+			let extened = SemiPersistentStorage.getData(storageID) === "false";
+			let header = document.getElementById(id + ":header");
+			let body = document.getElementById(id + ":body");
+
+			let title = header.innerHTML;
+			let width = body.offsetHeight;
+
+			if (header && body) 
+				header.addEventListener("click", () => {
+					body.style.paddingTop = extened ? "0px" : "15px";
+					body.style.paddingBottom = extened ? "0px" : "5px";
+					body.style.height = extened ? "0px" : (width + "px");
+					header.innerHTML = extened ? "►" + title : "▼" + title
+					extened = !extened;
+
+					SemiPersistentStorage.setData(storageID, extened ? "true" : "false");
+				})
+
+				header.click();
+		})
 	}
 
 	/**
