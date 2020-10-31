@@ -152,7 +152,7 @@ export class DOMApp {
 
 			const storageID = "dropdown:" + id
 
-			let extened = SemiPersistentStorage.getData(storageID) === "false";
+			let extened = SemiPersistentStorage.getData(storageID) !== "true";
 			let header = document.getElementById(id + ":header");
 			let body = document.getElementById(id + ":body");
 
