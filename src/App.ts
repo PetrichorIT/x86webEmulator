@@ -22,7 +22,6 @@ export class App {
 	subscriber: (() => void)[];
 
 	instructionDelay: number;
-	defaultInstructionDelay: number;
 
 	ioDevices: IODevice[]
 
@@ -61,7 +60,6 @@ export class App {
 		this.instructions = [ undefined ];
 		this.subscriber = [];
 		this.instructionDelay = 100; // 100ms
-		this.defaultInstructionDelay = 100;
 		this.parser = new Parser(this);
 		this.ioDevices = []
 	}

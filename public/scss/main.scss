@@ -236,6 +236,27 @@ body {
 			width: 50%;
 			height: calc(100% - 75px);
 
+			.settings {
+				margin: 0;
+
+				.form-group {
+					position: relative;
+
+					label {
+						width: 160px;
+						text-align: right;
+						display: inline-block;
+						padding: 5px 10px;
+					}
+
+					input {
+						display: inline-block;
+						height: 100%;
+						padding-left: 10px;
+					}
+				}
+			}
+
 			.row {
 				display: flex;
 				position: relative;

@@ -8,6 +8,7 @@ import { initSyntax } from '../parsers/syntax';
 import SemiPersistentStorage from './common';
 import { CompilerError } from '../parsers/const';
 import { Lib } from '../lib/lib';
+import { DOMSettings } from './DOMSettings';
 
 let _firstBuild: boolean = true;
 
@@ -33,6 +34,8 @@ export class DOMApp {
 
 	private running: boolean;
 	private preferredFilename = 'code.txt';
+	
+	speedUpLibaryCode: boolean = true;
 
 	/**
 	 * Creates a DOMApp object that links the given application to the DOM
@@ -96,7 +99,9 @@ export class DOMApp {
 		if (!this.memory) this.memory = new DOMMemory(this.app);
 
 		if (_firstBuild) initSyntax();
-		if (_firstBuild) this.buildDropdowns()
+		new DOMSettings(this.app, this);
+
+		this.buildDropdowns()
 
 		const textArea = document.getElementById('editor') as HTMLTextAreaElement;
 		this.editor = CodeMirror.fromTextArea(textArea, {
@@ -252,8 +257,7 @@ export class DOMApp {
 
 		try {
 			while (this.running && this.app.instructionCycle()) {
-				console.log(this.app.isInLibMode);
-				if (!this.app.isInLibMode) await new Promise((r) => setTimeout(r, this.app.instructionDelay));
+				if (!this.app.isInLibMode || !this.speedUpLibaryCode) await new Promise((r) => setTimeout(r, this.app.instructionDelay));
 			}
 			if (this.running) {
 				console.info(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
