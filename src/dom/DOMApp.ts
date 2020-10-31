@@ -9,20 +9,18 @@ import SemiPersistentStorage from './common';
 import { CompilerError } from '../parsers/const';
 import { Lib } from '../lib/lib';
 import { DOMSettings } from './DOMSettings';
+import { DOMLibaryController } from './DOMLibaryController';
 
 let _firstBuild: boolean = true;
 
 export class DOMApp {
-	private app: App;
+	public app: App;
 	private registers: { [key: string]: DOMRegister };
 	private flags: { [key: string]: DOMFlag };
 	private memory: DOMMemory;
 
-	private editor: CodeMirror.EditorFromTextArea;
+	public editor: CodeMirror.EditorFromTextArea;
 	private debugBox: HTMLDivElement;
-
-	private moreButton: HTMLButtonElement;
-	private moreBox: HTMLDivElement;
 
 	private compileButton: HTMLButtonElement;
 	private pauseButton: HTMLButtonElement;
@@ -99,7 +97,9 @@ export class DOMApp {
 		if (!this.memory) this.memory = new DOMMemory(this.app);
 
 		if (_firstBuild) initSyntax();
+
 		new DOMSettings(this.app, this);
+		new DOMLibaryController(this);
 
 		this.buildDropdowns()
 
@@ -114,13 +114,6 @@ export class DOMApp {
 
 		this.editor.getDoc().setValue(SemiPersistentStorage.getData('_editor_snapshot') || '');
 		this.editor.on('inputRead', () => this.onEditorChange());
-
-		this.moreButton = document.getElementById('more-button') as HTMLButtonElement;
-		this.moreButton.addEventListener('click', () => this.toggleMoreMenu());
-
-		this.moreBox = document.getElementById('more-box') as HTMLDivElement;
-
-		document.getElementById('saveAsLib').addEventListener('click', () => this.moreActionSaveAsLib());
 
 		this.compileButton = document.getElementById('compile') as HTMLButtonElement;
 		this.compileButton.addEventListener('click', () => this.onCompile());
@@ -188,21 +181,6 @@ export class DOMApp {
 		if (nextInstrIdx >= this.app.instructions.length || nextInstrIdx === 0) return;
 		let line = this.app.instructions[nextInstrIdx].lineNumber;
 		this.editor.markText({ line, ch: 0 }, { line, ch: 255 }, { css: 'background-color: rgba(17, 165, 175, 0.5);' });
-	}
-
-	/**
-	 * Handles show/hide actions from the more button
-	 */
-	private toggleMoreMenu() {
-		this.moreBox.style.opacity = this.moreBox.style.opacity === '1' ? '0' : '1';
-	}
-
-	/**
-	 * Handles the creation of a Lib from the current code of the editor
-	 */
-	private moreActionSaveAsLib() {
-		const libName = prompt('Enter a libary name', 'myLib');
-		Lib.setLib(this.app, libName, this.editor.getDoc().getValue());
 	}
 
 	/**

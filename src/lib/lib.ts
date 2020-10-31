@@ -1,7 +1,7 @@
 import { App } from '../App';
 import { FullPersistentStorage } from '../dom/common';
 
-import fib from './fib';
+import { fib } from './fib';
 import { string } from './string';
 
 class LibController {
@@ -79,6 +79,15 @@ class LibController {
 
 		FullPersistentStorage.setData('_libs_list', JSON.stringify(this.localLibs));
 		FullPersistentStorage.setData('_lib_' + libName, libCode);
+	}
+
+	getLibCode(libName: string): string {
+		if (this.localLibs.includes(libName))
+			return FullPersistentStorage.getData("_lib_" + libName);
+		if (libName === "string.h")
+			return string;
+		if (libName === "fib.h")
+			return fib;
 	}
 }
 
