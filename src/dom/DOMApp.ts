@@ -103,10 +103,12 @@ export class DOMApp {
 
 		this.buildDropdowns()
 
+		const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+
 		const textArea = document.getElementById('editor') as HTMLTextAreaElement;
 		this.editor = CodeMirror.fromTextArea(textArea, {
 			mode: 'x86',
-			theme: 'material-darker',
+			theme: darkMode ? 'material-darker' : "default",
 			lineNumbers: true,
 			indentUnit: 4,
 			lineNumberFormatter: (i) => '0x' + i.toString(16)
