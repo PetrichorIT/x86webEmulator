@@ -50,7 +50,8 @@ export class DOMLibaryController {
 	 * Handles the creation of a Lib from the current code of the editor
 	 */
 	private saveLibary() {
-		const libName = prompt('Enter a libary name', 'myLib');
+        const libName = prompt('Enter a libary name', 'myLib');
+        if (!libName) return;
 		Lib.setLib(this.domApp.app, libName, this.domApp.editor.getDoc().getValue());
     }
     

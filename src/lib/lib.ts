@@ -11,7 +11,14 @@ class LibController {
 	}
 
 	private loadLib(app: App, libName: string, libCode: string) {
-		app.parser.parseLib(libName, libCode);
+		const res = app.parser.parseLib(libName, libCode);
+
+		// If only LibLabel and JMP LibLabel are included
+		if (res.length === 2) {			
+			FullPersistentStorage.removeData('_lib_' + libName);
+			this.localLibs.filter((ln) => ln !== libName);
+			delete app.parser.libs[libName];
+		}
 	}
 
 	/**
