@@ -2,7 +2,6 @@ import Register32 from './models/Register32';
 import Operand, { OperandTypes } from './models/Operand';
 import Parser from './parsers/parser';
 import IODevice from './io/io'
-import { dec } from './x86';
 
 export type Label = { label: string; lineNumber: number };
 export type Command = { name: string; params: Operand[]; lineNumber: number; isLibCode?: boolean };

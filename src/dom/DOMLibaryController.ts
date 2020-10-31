@@ -1,5 +1,4 @@
 import { Lib } from "../lib/lib";
-import { FullPersistentStorage } from "./common";
 import { DOMApp } from "./DOMApp";
 
 export class DOMLibaryController {
@@ -8,17 +7,17 @@ export class DOMLibaryController {
 
     constructor(domApp: DOMApp) {
         this.domApp = domApp;
-
         this.build()
     }
 
     private build() {
+        // Extract core container from DOM
         const container = document.querySelector(".libary-controller")
 
+        // Libaries list component
         {
             const ul = document.createElement("ul");
             ul.classList.add("libary-list")
-
             for (const lib of Lib.libs) {
                 const li = document.createElement("li");
 
@@ -33,10 +32,10 @@ export class DOMLibaryController {
                 li.append(showButton, span);
                 ul.append(li)
             }
-
             container.append(ul);
         }
 
+        // "Save as Libary" component
         {
             const button = document.createElement("button")
             button.classList.add("saveLibary")
