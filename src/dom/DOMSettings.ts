@@ -48,7 +48,6 @@ export class DOMSettings {
             speedUpCheckBox.checked = true;
 
             speedUpCheckBox.addEventListener("change", () => {
-                console.log(123)
                 this.domApp.speedUpLibaryCode = speedUpCheckBox.checked;
             })
 
