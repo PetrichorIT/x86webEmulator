@@ -71,6 +71,9 @@ export class DOMLibaryController {
 
             li.append(showButton, span);
             document.querySelector(".libary-list").append(li)
+
+            // Resize Dropdown Container
+            document.getElementById("libary-dropdown:body").style.height = document.getElementById("libary-dropdown:body").scrollHeight + "px";
         }
     }
     

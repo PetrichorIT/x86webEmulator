@@ -35,8 +35,8 @@ export class DOMApp {
 
 	private running: boolean;
 	private preferredFilename = 'code.txt';
-	
-	speedUpLibaryCode: boolean = true;
+
+	public speedUpLibaryCode: boolean = true;
 
 	/**
 	 * Creates a DOMApp object that links the given application to the DOM
@@ -179,15 +179,18 @@ export class DOMApp {
 			let body = document.getElementById(id + ":body");
 
 			let title = header.innerHTML;
-			let width = body.offsetHeight;
+			let height = body.offsetHeight;
 
 			if (header && body) 
 				header.addEventListener("click", () => {
+
 					body.style.paddingTop = extened ? "0px" : "15px";
 					body.style.paddingBottom = extened ? "0px" : "5px";
-					body.style.height = extened ? "0px" : (width + "px");
+					body.style.height = extened ? "0px" : (height + "px");
 					header.innerHTML = extened ? "►" + title : "▼" + title
 					extened = !extened;
+
+					height = body.scrollHeight;
 
 					SemiPersistentStorage.setData(storageID, extened ? "true" : "false");
 				})

@@ -490,6 +490,8 @@ body {
 	*/
 	.dropdown-header {
 		cursor: pointer;
+		user-select: none;
+
 		padding: 2.5px;
 		padding-left: 10px;
 		background-color: $dropdown-accent;
