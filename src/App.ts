@@ -17,11 +17,9 @@ export class App {
 
 	instructions: Command[];
 	commandHandlers: { [key: string]: CommandFunction | CommandOperandChecker };
-
 	subscriber: (() => void)[];
 
 	instructionDelay: number;
-
 	ioDevices: IODevice[]
 
 	/**
@@ -52,21 +50,20 @@ export class App {
 			OF: false
 		};
 
-		// 16 bit memory
+		// Only 16 Bit Address Space is valid
 		this.memory = Buffer.alloc(0xffff);
 
 		this.commandHandlers = commandHandlers;
 		this.instructions = [ undefined ];
 		this.subscriber = [];
-		this.instructionDelay = 100; // 100ms
+		this.instructionDelay = 100;
 		this.parser = new Parser(this);
 		this.ioDevices = []
 	}
 
 	/** 
-	* Controll IO
+	* Emulates a IO write operation to a registered IO Device.
 	*/
-
 	ioWrite(port: number, value: number) {
 		for (const device of this.ioDevices) {
 			if (device.ports.includes(port)) {
@@ -76,6 +73,9 @@ export class App {
 		}
 	}
 
+	/**
+	 * Emulates a IO read operation from a registered IO Device.
+	 */
 	ioRead(port: number): number {
 		for (const device of this.ioDevices) {
 			if (device.ports.includes(port)) {
@@ -105,13 +105,14 @@ export class App {
 	}
 
 	/**
-	 * Write a given set of instructions into the application memory at the given position
+	 * Write a given set of instructions into the application memory at the given position.
 	 */
 	writeProgram(commands: (Command | Label)[], position: number) {
 		let pos = position;
 		let labels: { [key: string]: number } = {};
 		let relPos = 0;
 
+		// Extract labels from source (matching relative positions)
 		for (let i = 0; i < commands.length; i++) {
 			if ((commands[i] as Label).label) {
 				labels[(commands[i] as Label).label] = pos + relPos;
@@ -120,6 +121,7 @@ export class App {
 			}
 		}
 
+		// Replace label operand with direct jumps
 		commands = commands.filter((v: any) => v.label === undefined).map((c: Command) => {
 			for (let i = 0; i < c.params.length; i++) {
 				if (c.params[i].type === OperandTypes.label) {
@@ -129,8 +131,8 @@ export class App {
 			return c;
 		});
 
+		// Write commands to memory
 		let idx = this.instructions.length;
-
 		for (const command of commands) {
 			this.instructions.push(command as Command);
 			this.memory.writeUInt32LE(idx++, pos);
@@ -139,7 +141,7 @@ export class App {
 	}
 
 	/**
-	 * Writes the given bytes starting at the address assending 
+	 * Writes the given bytes starting at the address assending.
 	 */
 	writeMemoryBytes(adresse: number, bytes: number[]) {
 		for (const byte of bytes) {
@@ -147,6 +149,9 @@ export class App {
 		}
 	}
 
+	/**
+	 * Indicates if the next command is libary code.
+	 */
 	get isInLibMode(): boolean {
 		const iLoc = this.memory.readUInt32LE(this.registers.eip._32);
 		if (iLoc >= this.instructions.length) return false;
@@ -157,7 +162,7 @@ export class App {
 
 	/**
 	 * Executes an instruction based on the current EIP.
-	 * Returns a flag that shows if an instruction was available (and thus executed)
+	 * Returns a flag that shows if an instruction was available (and thus executed).
 	 */
 	instructionCycle(): boolean {
 		const iLoc = this.memory.readUInt32LE(this.registers.eip._32);
