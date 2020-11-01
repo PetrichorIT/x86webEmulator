@@ -21,16 +21,21 @@ export class Parser {
 	parseLib(libName: string, code: string) {
 		let prefix = `__lib_${libName}_`;
 
+		// Compiles the code in normal mode and collects the entry points
 		let entryPoints: string[] = [];
 		let compiled = this.parse(code, entryPoints);
 
+		// Prefixes labels with a libary prefix
 		for (let i = 0; i < compiled.length; i++) {
 			if ((compiled[i] as Label).label) {
+				// Labels
 				if (!entryPoints.includes((compiled[i] as Label).label)) {
 					(compiled[i] as Label).label = prefix + (compiled[i] as Label).label;
 				}
 			} else {
+				// Defines code as libary code
 				(compiled[i] as Command).isLibCode = true;
+				// Label Operands
 				for (let j = 0; j < (compiled[i] as Command).params.length; j++) {
 					const element = (compiled[i] as Command).params[j];
 					if (element.type === OperandTypes.label) {
@@ -42,6 +47,7 @@ export class Parser {
 			}
 		}
 
+		// Adds lib_label and JMP lib_label for header intergration
 		this.libs[libName] = [
 			{
 				name: 'jmp',
@@ -61,19 +67,24 @@ export class Parser {
 	parse(code: string, exportLabels?: string[]): (Command | Label)[] {
 		exportLabels = exportLabels || [];
 
+		// One instruction per line (or none)
 		let lines = code.split('\n');
 		let instructions: (Command | Label)[] = [];
 
 		for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+			// Use line a string stream
 			this.currentLine = new StringStream(lines[lineIdx]);
 			this.currentLine.eatWhitespaces();
 
+			// Ingnore empty lines and pure comments
 			if (this.currentLine.eol()) continue;
 			if (this.currentLine.eat(';')) continue;
 
+			// Identifiy @export labels
 			let isExportLabel = this.currentLine.rest().startsWith('@export ');
 			if (isExportLabel) this.currentLine.skip(8);
 
+			// Manage include statements
 			if (this.currentLine.rest().startsWith('#include')) {
 				// Include statement
 				this.currentLine.skip(8);
@@ -113,6 +124,7 @@ export class Parser {
 
 				console.info(`Including libary "${libName}" (${this.libs[libName].length} instructions)`);
 			} else {
+				// Manage Lables
 				const labelMatch = this.currentLine.match(syn_label, true) as RegExpMatchArray;
 				if (labelMatch) {
 					// Found label
@@ -135,26 +147,28 @@ export class Parser {
 					if (isExportLabel) exportLabels.push(label);
 				}
 
+				// Eat Whitespaces whenever possible
 				this.currentLine.eatWhitespaces();
 				if (this.currentLine.eol()) continue;
 
-				// Normal Instruction
+				// Manage Instruction
 				const preCN = this.currentLine.position;
 				const commandName = this.currentLine.eatWhile(/[A-z_0-9]/).toLowerCase();
 				let params: Operand[] = [];
 
+				// Test for valid keyword
 				if (!syn_keywords.includes(commandName))
 					throw new CompilerError(`C006 - Invalid token. Invalid instruction "${commandName}"`, lineIdx, {
 						from: preCN,
 						to: this.currentLine.position
 					});
 
+				// Read Operands (max 4)
 				let i = 0;
-				while (!this.currentLine.eol() && i < 16) {
+				while (!this.currentLine.eol() && i < 4) {
 					if (this.currentLine.peek() === ';') break;
 
-					// Operand check
-
+					// Eat all whitspacing characters
 					this.currentLine.eat(',');
 					this.currentLine.eatWhitespaces();
 
@@ -350,8 +364,7 @@ export class Parser {
 			}
 		}
 
-		// Label Resolve Test
-
+		// Push Uniq
 		function pushUniq<T>(arr: T[], value: T): boolean {
 			if (!arr.includes(value)) {
 				arr.push(value);
@@ -365,6 +378,7 @@ export class Parser {
 
 		for (const instrc of instructions) {
 			if ((instrc as Label).label !== undefined) {
+				// Push all defined labels into array to find redefinition
 				if (!pushUniq(definedLabels, (instrc as Label).label)) {
 					throw new CompilerError(
 						`C018 - Illegal label redefintion "${(instrc as Label).label}"`,
@@ -373,6 +387,7 @@ export class Parser {
 					);
 				}
 			} else {
+				// Push all used labels into array to gurantee existence
 				for (const operand of (instrc as Command).params) {
 					if (operand.type === OperandTypes.label)
 						pushUniq(requestedLabels, { label: operand.value, line: instrc.lineNumber });
@@ -380,6 +395,7 @@ export class Parser {
 			}
 		}
 
+		// Test if requestedLabels <= definedLabels
 		for (const { label, line } of requestedLabels) {
 			if (!definedLabels.includes(label)) {
 				throw new CompilerError(`C016 - Unkown Label "${label}"`, line, { from: 0 });

@@ -8,6 +8,12 @@ export const syn_export = /@export/;
 export const syn_string = /"[^"]*"/;
 export const syn_number = /(0x[0-9a-fA-F]+|0b[01]+|[\d]+)/;
 
+/**
+ * Error type "Compiler Error"
+ * - requires line number of error
+ * - requires start char of error
+ * - assumes end char to be line end if non is given
+ */
 export class CompilerError extends Error {
 	line: number;
 	position: { from: number; to?: number };
