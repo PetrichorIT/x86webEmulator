@@ -11,6 +11,9 @@ import { Lib } from '../lib/lib';
 import { DOMSettings } from './DOMSettings';
 import { DOMLibaryController } from './DOMLibaryController';
 
+/**
+ * Indicates if a DOMApp is the initial build
+ */
 let _firstBuild: boolean = true;
 
 export class DOMApp {
@@ -44,6 +47,7 @@ export class DOMApp {
 		this.flags = {};
 		this.running = false;
 
+		// Load libaries first since they are needed on GUI build
 		Lib.loadDefaultLibs(this.app);
 		Lib.loadLocalLibs(this.app);
 
@@ -88,23 +92,32 @@ export class DOMApp {
 	 * Links & Creates the DOM Components at first init(_:)
 	 */
 	private build() {
+		// Builds Registers in a dedicated box
 		for (const regName in this.app.registers) {
 			this.registers[regName] = new DOMRegister(this.app, regName);
 		}
+
+		// Builds Flags in a decdicated box
 		for (const flgName in this.app.flags) {
 			this.flags[flgName] = new DOMFlag(this.app, flgName);
 		}
+
+		// Builds Memory if not allready done
 		if (!this.memory) this.memory = new DOMMemory(this.app);
 
+		// Initializes the syntax checker for codemirror
 		if (_firstBuild) initSyntax();
 
+		// Loads other components
 		new DOMSettings(this.app, this);
 		new DOMLibaryController(this);
 
+		// Last build step of the info panel.
+		// Requires allready build UI to determine the required dropdown height
 		this.buildDropdowns()
 
+		// Builds the codemirror editor (with color-scheme matching themes)
 		const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
-
 		const textArea = document.getElementById('editor') as HTMLTextAreaElement;
 		this.editor = CodeMirror.fromTextArea(textArea, {
 			mode: 'x86',
@@ -114,8 +127,12 @@ export class DOMApp {
 			lineNumberFormatter: (i) => '0x' + i.toString(16)
 		});
 
+		// Launches the editor with the last snapshot from SessionStorage
+		// Primes the editor to remove marks on editing
 		this.editor.getDoc().setValue(SemiPersistentStorage.getData('_editor_snapshot') || '');
 		this.editor.on('inputRead', () => this.onEditorChange());
+
+		// Initilizes and primes the action buttons
 
 		this.compileButton = document.getElementById('compile') as HTMLButtonElement;
 		this.compileButton.addEventListener('click', () => this.onCompile());
@@ -137,6 +154,7 @@ export class DOMApp {
 
 		this.debugBox = document.getElementById('debug-box') as HTMLDivElement;
 
+		// Subscribes to the application callback on change
 		this.app.subscribe(() => this.onInstructionCycle());
 
 		_firstBuild = false;
@@ -146,12 +164,16 @@ export class DOMApp {
 	 * Handles Dropdowns
 	 */
 	private buildDropdowns() {		
+		// Dropdowns require a ".dropdown" class and an id
+		// Header must have id : "id:Header ""
+		// Body mist have id : "id:Body"
 		document.querySelectorAll(".dropdown").forEach((node) => {
 			const id = node.id;
 			if (!id) return;
 
 			const storageID = "dropdown:" + id
 
+			// If not set extened is false (after initial configuration)
 			let extened = SemiPersistentStorage.getData(storageID) !== "true";
 			let header = document.getElementById(id + ":header");
 			let body = document.getElementById(id + ":body");
@@ -160,7 +182,6 @@ export class DOMApp {
 			let width = body.offsetHeight;
 
 			if (header && body) 
-
 				header.addEventListener("click", () => {
 					body.style.paddingTop = extened ? "0px" : "15px";
 					body.style.paddingBottom = extened ? "0px" : "5px";
@@ -171,6 +192,7 @@ export class DOMApp {
 					SemiPersistentStorage.setData(storageID, extened ? "true" : "false");
 				})
 
+				// Initial configuration
 				header.click();
 		})
 	}
@@ -199,20 +221,23 @@ export class DOMApp {
 	private onCompile() {
 		this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
 
+		// Get timestamp of compilation process
 		const tsmp = new Date().getMilliseconds() & 0xff;
 		console.info(`Parsing new snapshot $${tsmp}`);
 
 		try {
 			let p = this.app.parser.parse(this.editor.getDoc().getValue());
-			console.log(p)
 			console.info(`Parsed snapshot $${tsmp} - Got ${p.length} instructions`);
 
 			this.app.runProgram(p);
 
+			// Save a valid programm in SessionStorage
 			SemiPersistentStorage.setData('_editor_snapshot', this.editor.getDoc().getValue());
 			console.info(`Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		} catch (e) {
+			// Catch compiler errors
 			if (e.line !== undefined && e.position !== undefined) {
+				// Mark faulty code
 				let err = e as CompilerError;
 				this.editor.markText(
 					{ line: err.line, ch: err.position.from },
@@ -222,6 +247,7 @@ export class DOMApp {
 
 				console.error(e.message);
 			} else {
+				// Throw other errors (should not happen)
 				throw e;
 			}
 		}
@@ -235,15 +261,17 @@ export class DOMApp {
 		this.running = true;
 
 		console.info(`Starting run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
-
 		try {
+			// Run programm until stoped / finished
 			while (this.running && this.app.instructionCycle()) {
+				// If not in lib code or lib code does not required speed up => delay
 				if (!this.app.isInLibMode || !this.speedUpLibaryCode) await new Promise((r) => setTimeout(r, this.app.instructionDelay));
 			}
 			if (this.running) {
 				console.info(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 			}
 		} catch (e) {
+			// Catch NOP Error to determine end of run loop
 			if (e.message === 'NOP') {
 				if (this.running) {
 					console.info(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
@@ -256,6 +284,9 @@ export class DOMApp {
 		}
 	}
 
+	/**
+	 * Handles actions if the pause button is pressed
+	 */
 	private onPause() {
 		console.info(`Paused run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		this.running = false;
