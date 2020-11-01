@@ -13,10 +13,13 @@ export class DOMSettings {
         this.build();
     }
 
+    /**
+     * Builds the required UI for the settings component
+     */
     private build() {
-
         const container = document.querySelector(".settings");
 
+        // Instruction Delay component
         {
             const label = document.createElement("label");
             label.innerHTML = "Delay between instructions";
@@ -39,6 +42,7 @@ export class DOMSettings {
             container.append(group);
         }  
 
+        // Speed up component
         {
             const label = document.createElement("label");
             label.innerHTML = "Speed up libary code execution";
