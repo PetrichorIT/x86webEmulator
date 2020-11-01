@@ -38,6 +38,10 @@ export class DOMApp {
 
 	public speedUpLibaryCode: boolean = true;
 
+	public libaryViewActive: boolean = false;
+	public libaryViewSourceBackup: string;
+	private libaryViewCloseButton: HTMLButtonElement;
+
 	/**
 	 * Creates a DOMApp object that links the given application to the DOM
 	 */
@@ -154,6 +158,11 @@ export class DOMApp {
 
 		this.debugBox = document.getElementById('debug-box') as HTMLDivElement;
 
+		// Build Libary View Button
+		this.libaryViewCloseButton = document.getElementById("closeLibaryView") as HTMLButtonElement;
+		this.libaryViewCloseButton.hidden = true;
+		this.libaryViewCloseButton.addEventListener("click", () => this.libaryViewCloseButtonPressed());
+
 		// Subscribes to the application callback on change
 		this.app.subscribe(() => this.onInstructionCycle());
 
@@ -198,6 +207,45 @@ export class DOMApp {
 				// Initial configuration
 				header.click();
 		})
+	}
+
+	/**
+	 * 
+	 */
+	public libaryViewShowLibary(libaryName: string) {
+
+		if (!this.libaryViewActive) this.libaryViewSourceBackup = this.editor.getValue();
+
+		this.editor.setValue(Lib.getLibCode(libaryName));
+		this.editor.setOption("readOnly", true)
+		this.libaryViewCloseButton.hidden = false;
+		this.libaryViewActive = true;
+
+		{
+			this.compileButton.disabled = true;
+			this.runButton.disabled = true;
+			this.stepButton.disabled = true;
+			this.pauseButton.disabled = true;
+			this.fileInputButton.disabled = true;
+		}
+	}
+
+	/**
+	 * 
+	 */
+	private libaryViewCloseButtonPressed() {
+		this.editor.setValue(this.libaryViewSourceBackup)
+		this.editor.setOption("readOnly", false);
+		this.libaryViewActive = false;
+		this.libaryViewCloseButton.hidden = true;
+
+		{
+			this.compileButton.disabled = false;
+			this.runButton.disabled = false;
+			this.stepButton.disabled = false;
+			this.pauseButton.disabled = false;
+			this.fileInputButton.disabled = false;
+		}
 	}
 
 	/**

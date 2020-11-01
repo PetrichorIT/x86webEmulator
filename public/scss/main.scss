@@ -105,6 +105,29 @@ body {
 
 				border-radius: 5px;
 				overflow: hidden;
+
+				#closeLibaryView {
+					outline: none;
+					border: none;
+					cursor: pointer;
+
+					position: absolute;
+					top: 5px;
+					right: 5px;
+					z-index: 10;
+
+					background-color: rgba(1, 1, 1, 0);
+
+					i {
+						width: 20px;
+						height: 20px;
+						color: white;
+
+						&:hover {
+							color: #ddd;
+						}
+					}
+				}
 			}
 
 			/**
@@ -143,6 +166,10 @@ body {
 					&:hover {
 						background-color: rgba($button-blue, 0.5);
 					}
+
+					&:disabled {
+						background-color: rgba($button-blue, 0.5);
+					}
 				}
 
 				#run,
@@ -150,6 +177,10 @@ body {
 					background-color: $button-green;
 
 					&:hover {
+						background-color: rgba($button-green, 0.5);
+					}
+
+					&:disabled {
 						background-color: rgba($button-green, 0.5);
 					}
 				}

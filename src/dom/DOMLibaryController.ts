@@ -27,7 +27,7 @@ export class DOMLibaryController {
                 const showButton = document.createElement("button")
                 showButton.classList.add("showButton");
                 showButton.innerHTML = "Show";
-                showButton.addEventListener("click", () => this.showLibaryCode(lib));
+                showButton.addEventListener("click", () => this.domApp.libaryViewShowLibary(lib));
 
                 li.append(showButton, span);
                 ul.append(li)
@@ -56,9 +56,6 @@ export class DOMLibaryController {
 
         Lib.setLib(this.domApp.app, libName, this.domApp.editor.getDoc().getValue());
         if (isNew) {
-
-            // BUG: Needs dropdown recalculatio of height
-
             const li = document.createElement("li");
 
             const span = document.createElement("span");
@@ -67,7 +64,7 @@ export class DOMLibaryController {
             const showButton = document.createElement("button")
             showButton.classList.add("showButton");
             showButton.innerHTML = "Show";
-            showButton.addEventListener("click", () => this.showLibaryCode(libName));
+            showButton.addEventListener("click", () => this.domApp.libaryViewShowLibary(libName));
 
             li.append(showButton, span);
             document.querySelector(".libary-list").append(li)
@@ -75,12 +72,5 @@ export class DOMLibaryController {
             // Resize Dropdown Container
             document.getElementById("libary-dropdown:body").style.height = document.getElementById("libary-dropdown:body").scrollHeight + "px";
         }
-    }
-    
-    /**
-     * Shows the libary code in the editor
-     */
-    private showLibaryCode(libName: string) {
-        this.domApp.editor.setValue(Lib.getLibCode(libName));
     }
 }
