@@ -1,5 +1,8 @@
 @import url('https://fonts.googleapis.com/css?family=Space+Mono&display=swap');
 
+/**
+* Primary Configuration colors
+*/
 $primary-bg: rgb(245, 245, 245);
 $primary-bg-d: rgb(40, 40, 40);
 
@@ -9,24 +12,37 @@ $primary-text-d: rgb(240, 240, 240);
 $textbox-bg: rgb(235, 235, 235);
 $textbox-bg-d: rgb(70, 70, 70);
 
+/**
+* Dropdown colors:
+* - accent must be different from primary bg
+* - bg can (not must) be primary bg
+*/
 $dropdown-bg: $primary-bg;
 $dropdown-accent: rgb(225, 225, 225);
 
 $dropdown-bg-d: $primary-bg-d;
 $dropdown-accent-d: rgb(70, 70, 70);
 
+/**
+* Control button colors:
+* - do not require changes on color scheme
+*/
 $button-green: rgb(57, 133, 14);
 $button-blue: rgb(5, 93, 151);
-
 $button-gray: rgb(120, 120, 120);
-$button-gray-d: rgb(60, 60, 60);
 
+/**
+* Remove and special settings on box model for any elements.
+*/
 * {
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
 }
 
+/**
+* Prepare fullscreen application (no scroll by default, only if nessecary)
+*/
 body {
 	width: 100%;
 	height: 100vh;
@@ -40,25 +56,45 @@ body {
 	}
 }
 
+/**
+* Main content wrapper
+*/
 .content-box {
 	width: 100%;
 	height: 100%;
 
+	/**
+	* Build mini header.
+	*/
 	.header-box {
 		padding: 15px;
 		font-size: 25px;
 		font-weight: 600;
 	}
 
+	/**
+	* Use flexbox to generated dynamic row placement.
+	*/
 	.body-box {
 		position: relative;
 		display: flex;
 
+		/**
+		* Input box requirements:
+		* - contains editor and controll buttons
+		* - uses 50% of the space
+		* - should use max space avilable
+		*/
 		.input-box {
 			display: block;
 			width: 50%;
 			height: calc(100vh - 75px);
 
+			/**
+			* CodeMirror Editor requirements:
+			* - uses margins to not touch border
+			* - no overflow
+			*/
 			.editor-box {
 				position: relative;
 				width: calc(100% - 35px);
@@ -71,10 +107,20 @@ body {
 				overflow: hidden;
 			}
 
+			/**
+			* Button Box requirements:
+			* - margin-left = editor.margin-left
+			* - contains buttons (row)
+			*/
 			.button-box {
 				margin-top: 25px;
 				margin-left: 25px;
 
+				/**
+				* Button requirement:
+				* - contains font-aweasome icon (on text / outline)
+				* - bg-change on hover
+				*/
 				button {
 					outline: none;
 					border: none;
@@ -108,6 +154,11 @@ body {
 					}
 				}
 
+				/**
+				* Upload and Download must encapuslate input objects:
+				* - same requirements as buttom
+				* - must use max space input detetction
+				*/
 				.upload-btn-box,
 				.download-btn-box {
 					font-size: 20px;
@@ -154,6 +205,11 @@ body {
 				}
 			}
 
+			/**
+			* Debug box requirements:
+			* - no visible outline (only container)
+			* - color highlighting of message types
+			*/
 			.debug-box {
 				width: 80%;
 				margin-left: 25px;
@@ -173,13 +229,21 @@ body {
 			}
 		}
 
+		/**
+		* Info box requirements:
+		* - contains all info elements (in dropdowns)
+		* - uses remainng space
+		* - controlls dropdowns
+		*/
 		.info-box {
 			width: 50%;
 			height: calc(100% - 75px);
 
+			/**
+			* Settings requirements:
+			* - controlls form-groups 
+			*/
 			.settings {
-				margin: 0;
-
 				.form-group {
 					position: relative;
 
@@ -198,6 +262,11 @@ body {
 				}
 			}
 
+			/**
+			* Libary controller requirements:
+			* - controlls ul of libaries (with buttons)
+			* - save button
+			*/
 			.libary-controller {
 				.libary-list {
 					list-style: square;
@@ -237,7 +306,12 @@ body {
 				}
 			}
 
-			.row {
+			/**
+			* Controlls registers and flags:
+			* - internal flexbox rows
+			* - JS Generated size alignment
+			*/
+			.registersAndFlags {
 				display: flex;
 				position: relative;
 
@@ -275,7 +349,6 @@ body {
 
 				.flags-box {
 					padding-left: 20px;
-					// width: 40%;
 					.flag {
 						display: flex;
 						padding-bottom: 10px;
@@ -305,6 +378,11 @@ body {
 				}
 			}
 
+			/**
+			* Memory requirements:
+			* - dynamic cell size / amount changes
+			* - static control elements
+			*/
 			.memory-box {
 				margin: 0;
 
@@ -396,11 +474,21 @@ body {
 	}
 }
 
+/**
+* Dropdown component requires:
+* - no overflow
+* - rounded borders + margin
+*/
 .dropdown {
 	margin: 10px;
 	border-radius: 5px;
 	overflow: hidden;
 
+	/**
+	* Header component requires:
+	* - cursor:pointer
+	* - visible color difference to bg
+	*/
 	.dropdown-header {
 		cursor: pointer;
 		padding: 2.5px;
@@ -413,6 +501,11 @@ body {
 		}
 	}
 
+	/**
+	* Body component requires:
+	* - variable bg
+	* - no overflow and transition
+	*/
 	.dropdown-body {
 		position: relative;
 		padding-top: 15px;

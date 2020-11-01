@@ -30,10 +30,15 @@
             x86 Emulator
         </div>
         <div class="body-box">
+
+            <!-- Editor / Input box -->
             <div class="input-box">
+                <!-- CodeMirror Editor Window -->
                 <div class="editor-box">
                     <textarea id="editor" autocomplete="false"></textarea>
                 </div>
+
+                <!-- Direct Control Buttons -->
                 <div class="button-box">
                     <button id="compile">
                         <i class="fas fa-crosshairs"></i>
@@ -59,39 +64,44 @@
                         </button>
                     </div>
                 </div>
-                <div class="debug-box" id="debug-box">
-                </div>
+
+                <!-- Debug output box  -->
+                <div class="debug-box" id="debug-box"></div>
             </div>
+
+            <!-- Info Box -->
             <div class="info-box">
-                
+                <!-- Settings Dropdown -->
                 <div class="dropdown" id="settings-dropdown">
                     <div class="dropdown-header" id="settings-dropdown:header">
                         Settings
                     </div>
                     <div class="dropdown-body" id="settings-dropdown:body">
                         <div class="settings">
-
+                            <!-- JS Generated Content -->
                         </div>
                     </div>
                 </div>
 
+                <!-- Libaries Dropdown -->
                 <div class="dropdown" id="libary-dropdown">
                     <div class="dropdown-header" id="libary-dropdown:header">
                         Libaries
                     </div>
                     <div class="dropdown-body" id="libary-dropdown:body">
                         <div class="libary-controller">
-
+                            <!-- JS Generated Content -->
                         </div>
                     </div>
                 </div>
 
+                <!-- Register & Flags Dropdown -->
                 <div class="dropdown" id="cpu-dropdown">
                     <div class="dropdown-header" id="cpu-dropdown:header">
                         Registers & Flags
                     </div>
                     <div class="dropdown-body" id="cpu-dropdown:body">
-                        <div class="row">
+                        <div class="registersAndFlags">
                             <div class="registers-box">
                                 <!-- JS Generated Content -->
                             </div>
@@ -102,6 +112,7 @@
                     </div>
                 </div>
 
+                <!-- Memory Dropdown -->
                 <div class="dropdown" id="memory-dropdown">
                     <div class="dropdown-header" id="memory-dropdown:header">
                         Memory
@@ -118,6 +129,7 @@
                     </div>
                 </div>
                 
+                <!-- IO Dropdown -->
                 <div class="dropdown" id="io-dropdown">
                     <div class="dropdown-header" id="io-dropdown:header">
                         IO
@@ -126,11 +138,11 @@
                         IO
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <script src="js/main.js"></script>
+    <!-- Main Script -->
+    <script async src="js/main.js"></script>
 </body>
 </html>
