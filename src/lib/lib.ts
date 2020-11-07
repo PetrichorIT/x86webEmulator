@@ -13,9 +13,16 @@ class LibController {
 	private localLibs: string[] = [];
 
 	/**
+	 * Indicates if a Lib is local or default static.
+	 */
+	public isLocalLib(libName: string): boolean {
+		return this.localLibs.includes(libName);
+	}
+
+	/**
 	 * All available libaries including the default libaries.
 	 */
-	get libs(): string[] {
+	public get libs(): string[] {
 		return [ 'fib.h', 'string.h' ].concat(this.localLibs);
 	}
 
@@ -36,7 +43,7 @@ class LibController {
 	/**
 	 * Loads the defaults libaries to the given app component.
 	 */
-	loadDefaultLibs(app: App) {
+	public loadDefaultLibs(app: App) {
 		try {
 			this.loadLib(app, 'fib.h', fib);
 			console.info('Loaded default lib "fib.h"');
@@ -55,7 +62,7 @@ class LibController {
 	/**
 	 * Loads the custom dynamic libaries from Local storage (or Cookies).
 	 */
-	loadLocalLibs(app: App) {
+	public loadLocalLibs(app: App) {
 		// Load custom libaries list from storage
 		let libListStr = FullPersistentStorage.getData('_libs_list');
 		if (libListStr === '') libListStr = '[]';
@@ -98,7 +105,7 @@ class LibController {
 	/**
 	 * Updates or creates a local libary and stores it.
 	 */
-	setLib(app: App, libName: string, libCode: string) {
+	public setLib(app: App, libName: string, libCode: string): void {
 		this.loadLib(app, libName, libCode);
 
 		if (!this.localLibs.includes(libName)) this.localLibs.push(libName);
@@ -108,9 +115,22 @@ class LibController {
 	}
 
 	/**
+	 * Removes a usergenerated libary from the application.
+	 */
+	public removeLib(app: App, libName: string): void {
+		if (!this.localLibs.includes(libName)) return;
+
+		delete app.parser.libs[libName];
+		this.localLibs.splice(this.localLibs.findIndex((l) => l === libName), 1);
+
+		FullPersistentStorage.setData("_libs_list", JSON.stringify(this.localLibs));
+		FullPersistentStorage.removeData("_lib_" + libName);
+	}
+
+	/**
 	 * Returns the raw source code of the given libary (either from local storage or from default consts).
 	 */
-	getLibCode(libName: string): string {
+	public getLibCode(libName: string): string {
 		if (this.localLibs.includes(libName))
 			return FullPersistentStorage.getData("_lib_" + libName);
 		if (libName === "string.h")

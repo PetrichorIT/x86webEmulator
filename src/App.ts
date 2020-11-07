@@ -9,18 +9,18 @@ export type CommandFunction = (app: App, params: Operand[]) => void;
 export type CommandOperandChecker = (params: Operand[]) => void;
 
 export class App {
-	parser: Parser;
+	public parser: Parser;
 
-	registers: { [key: string]: Register32 };
-	flags: { [key: string]: boolean };
-	memory: Buffer;
+	public registers: { [key: string]: Register32 };
+	public flags: { [key: string]: boolean };
+	public memory: Buffer;
 
-	instructions: Command[];
-	commandHandlers: { [key: string]: CommandFunction | CommandOperandChecker };
-	subscriber: (() => void)[];
+	public instructions: Command[];
+	private commandHandlers: { [key: string]: CommandFunction | CommandOperandChecker };
+	private subscriber: (() => void)[];
 
-	instructionDelay: number;
-	ioDevices: IODevice[]
+	public instructionDelay: number;
+	public ioDevices: IODevice[]
 
 	/**
 	 * Creates an application process, capable of executing all commands given in the commandHandlers.
@@ -64,7 +64,7 @@ export class App {
 	/** 
 	* Emulates a IO write operation to a registered IO Device.
 	*/
-	ioWrite(port: number, value: number) {
+	public ioWrite(port: number, value: number) {
 		for (const device of this.ioDevices) {
 			if (device.ports.includes(port)) {
 				device.onOutput(port, value)
@@ -76,7 +76,7 @@ export class App {
 	/**
 	 * Emulates a IO read operation from a registered IO Device.
 	 */
-	ioRead(port: number): number {
+	public ioRead(port: number): number {
 		for (const device of this.ioDevices) {
 			if (device.ports.includes(port)) {
 				return device.onInput(port);
@@ -88,7 +88,7 @@ export class App {
 	/**
 	 * Adds a new RX like subscriber to the update cycle initialted by change in the app state
 	 */
-	subscribe(newSubscriber: () => void) {
+	public subscribe(newSubscriber: () => void) {
 		this.subscriber.push(newSubscriber);
 	}
 
@@ -96,7 +96,7 @@ export class App {
 	 * Write a given set of instructions into the application memory at the given position (default 0x8000)
 	 * and prepares the app for execution of said programm
 	 */
-	runProgram(commands: (Command | Label)[], position?: number) {
+	public runProgram(commands: (Command | Label)[], position?: number) {
 		position = position || 0x8000;
 		this.writeProgram(commands, position);
 		this.registers.eip._32 = position;
@@ -107,7 +107,7 @@ export class App {
 	/**
 	 * Write a given set of instructions into the application memory at the given position.
 	 */
-	writeProgram(commands: (Command | Label)[], position: number) {
+	private writeProgram(commands: (Command | Label)[], position: number) {
 		let pos = position;
 		let labels: { [key: string]: number } = {};
 		let relPos = 0;
@@ -141,18 +141,9 @@ export class App {
 	}
 
 	/**
-	 * Writes the given bytes starting at the address assending.
-	 */
-	writeMemoryBytes(adresse: number, bytes: number[]) {
-		for (const byte of bytes) {
-			this.memory.writeUInt8(byte, adresse++);
-		}
-	}
-
-	/**
 	 * Indicates if the next command is libary code.
 	 */
-	get isInLibMode(): boolean {
+	public get isInLibMode(): boolean {
 		const iLoc = this.memory.readUInt32LE(this.registers.eip._32);
 		if (iLoc >= this.instructions.length) return false;
 		let instrc = this.instructions[iLoc];
@@ -164,7 +155,7 @@ export class App {
 	 * Executes an instruction based on the current EIP.
 	 * Returns a flag that shows if an instruction was available (and thus executed).
 	 */
-	instructionCycle(): boolean {
+	public instructionCycle(): boolean {
 		const iLoc = this.memory.readUInt32LE(this.registers.eip._32);
 
 		if (iLoc >= this.instructions.length) return false;
