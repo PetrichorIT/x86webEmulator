@@ -133,7 +133,7 @@ export class DOMApp {
 
 		// Launches the editor with the last snapshot from SessionStorage
 		// Primes the editor to remove marks on editing
-		this.editor.getDoc().setValue(SemiPersistentStorage.getData('_editor_snapshot') || '');
+		this.editor.getDoc().setValue(SemiPersistentStorage.getData('editor:snapshot') || '');
 		this.editor.on('inputRead', () => this.onEditorChange());
 
 		// Initilizes and primes the action buttons
@@ -281,7 +281,7 @@ export class DOMApp {
 			this.app.runProgram(p);
 
 			// Save a valid programm in SessionStorage
-			SemiPersistentStorage.setData('_editor_snapshot', this.editor.getDoc().getValue());
+			SemiPersistentStorage.setData('editor:snapshot', this.editor.getDoc().getValue());
 			console.info(`[Parser] Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		} catch (e) {
 			// Catch compiler errors

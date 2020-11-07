@@ -1,10 +1,15 @@
 import { App } from "../App";
+import SemiPersistentStorage from "./common";
 import { DOMApp } from "./DOMApp";
 
 export class DOMSettings {
  
-    app: App;
-    domApp: DOMApp;
+    private app: App;
+    private domApp: DOMApp;
+
+    private instuctionDelay: Setting<number> = new Setting("instructionDelay");
+    private speedUpLibCode: Setting<boolean> = new Setting("speedUpLibCode");
+    private debugParser: Setting<boolean> = new Setting("debugParser");
 
     constructor(app: App, domApp: DOMApp) {
         this.app = app;
@@ -28,12 +33,18 @@ export class DOMSettings {
             instructionDelaySilde.type = "range";
             instructionDelaySilde.min = "0";
             instructionDelaySilde.max = "1000";
-            instructionDelaySilde.value = "100";
             instructionDelaySilde.step = "1";
 
-            instructionDelaySilde.addEventListener("change", () => {
-                this.app.instructionDelay = parseInt(instructionDelaySilde.value);
+
+            this.instuctionDelay.subscribe((v) => {
+                this.app.instructionDelay = v;
             })
+
+            instructionDelaySilde.addEventListener("change", () => {
+                this.instuctionDelay.set(parseInt(instructionDelaySilde.value));
+            })
+
+            instructionDelaySilde.value = ""+this.instuctionDelay.init(100);
 
             const group = document.createElement("div");
             group.classList.add("form-group")
@@ -49,11 +60,16 @@ export class DOMSettings {
 
             const speedUpCheckBox = document.createElement("input");
             speedUpCheckBox.type = "checkbox";
-            speedUpCheckBox.checked = true;
+
+            this.speedUpLibCode.subscribe((v) => {
+                this.domApp.speedUpLibaryCode = v;
+            })
 
             speedUpCheckBox.addEventListener("change", () => {
-                this.domApp.speedUpLibaryCode = speedUpCheckBox.checked;
+                this.speedUpLibCode.set(speedUpCheckBox.checked);
             })
+
+            speedUpCheckBox.checked = this.speedUpLibCode.init(true);
 
             const group = document.createElement("div");
             group.classList.add("form-group")
@@ -67,19 +83,56 @@ export class DOMSettings {
             const label = document.createElement("label");
             label.innerHTML = "Enable debug output for parser";
 
-            const speedUpCheckBox = document.createElement("input");
-            speedUpCheckBox.type = "checkbox";
-            speedUpCheckBox.checked = false;
+            const debugParserCheckBox = document.createElement("input");
+            debugParserCheckBox.type = "checkbox";
 
-            speedUpCheckBox.addEventListener("change", () => {
-                this.app.parser.debugMode = speedUpCheckBox.checked;
+            this.debugParser.subscribe((v) => {
+                this.app.parser.debugMode = v;
             })
+
+            debugParserCheckBox.addEventListener("change", () => {
+                this.debugParser.set(debugParserCheckBox.checked);
+            })
+
+            debugParserCheckBox.checked = this.debugParser.init(false);
 
             const group = document.createElement("div");
             group.classList.add("form-group")
-            group.append(label, speedUpCheckBox);
+            group.append(label, debugParserCheckBox);
 
             container.append(group);
         }
+    }
+}
+
+class Setting<T> {
+
+    private name: string;
+    private handler: (value: T) => void;
+
+    constructor(name: string) {
+        this.name = name;
+    }
+
+    public subscribe(handler: (value: T) => void) {
+        this.handler = handler;
+    }
+
+    public set(newValue: T) {
+        SemiPersistentStorage.setData("settings:" + this.name, JSON.stringify(newValue));
+        this.handler(newValue);
+    }
+
+    public init(defaultValue: T): T {
+        let sV: any = SemiPersistentStorage.getData("settings:" + this.name);
+        console.log(sV);
+        if (sV !== "") { 
+            sV = JSON.parse(sV);
+        } else {
+            sV = defaultValue;
+        }
+        console.log(sV);
+        this.set(sV);
+        return sV;
     }
 }
