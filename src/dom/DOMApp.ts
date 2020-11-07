@@ -274,17 +274,15 @@ export class DOMApp {
 
 		// Get timestamp of compilation process
 		const tsmp = new Date().getMilliseconds() & 0xff;
-		console.info(`Parsing new snapshot $${tsmp}`);
 
 		try {
 			let p = this.app.parser.parse(this.editor.getDoc().getValue());
-			console.info(`Parsed snapshot $${tsmp} - Got ${p.length} instructions`);
 
 			this.app.runProgram(p);
 
 			// Save a valid programm in SessionStorage
 			SemiPersistentStorage.setData('_editor_snapshot', this.editor.getDoc().getValue());
-			console.info(`Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
+			console.info(`[Parser] Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		} catch (e) {
 			// Catch compiler errors
 			if (e.line !== undefined && e.position !== undefined) {

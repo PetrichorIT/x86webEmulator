@@ -61,5 +61,25 @@ export class DOMSettings {
 
             container.append(group);
         }
+
+        // Debug Parser
+        {
+            const label = document.createElement("label");
+            label.innerHTML = "Enable debug output for parser";
+
+            const speedUpCheckBox = document.createElement("input");
+            speedUpCheckBox.type = "checkbox";
+            speedUpCheckBox.checked = false;
+
+            speedUpCheckBox.addEventListener("change", () => {
+                this.app.parser.debugMode = speedUpCheckBox.checked;
+            })
+
+            const group = document.createElement("div");
+            group.classList.add("form-group")
+            group.append(label, speedUpCheckBox);
+
+            container.append(group);
+        }
     }
 }

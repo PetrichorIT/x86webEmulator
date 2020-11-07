@@ -5,6 +5,9 @@ import Operand, { OperandTypes } from '../models/Operand';
 import * as x86 from '../x86';
 
 export class Parser {
+
+	debugMode: boolean = false;
+
 	app: App;
 	currentLine: StringStream;
 	libs: { [key: string]: (Command | Label)[] };
@@ -20,6 +23,8 @@ export class Parser {
 	 */
 	parseLib(libName: string, code: string) {
 		let prefix = `__lib_${libName}_`;
+
+		if (this.debugMode) console.info(`[Parser] Preparing Lib "${libName}" for parsing`);
 
 		// Compiles the code in normal mode and collects the entry points
 		let entryPoints: string[] = [];
@@ -58,6 +63,8 @@ export class Parser {
 		this.libs[libName] = this.libs[libName].concat(compiled);
 		this.libs[libName].push({ label: prefix + 'libmain', lineNumber: 0 });
 
+		if (this.debugMode) console.info(`[Parser] Finished parsing Lib "${libName}"`);
+
 		return this.libs[libName];
 	}
 
@@ -66,6 +73,8 @@ export class Parser {
 	 */
 	parse(code: string, exportLabels?: string[]): (Command | Label)[] {
 		exportLabels = exportLabels || [];
+
+		const startTime = (new Date()).getTime();
 
 		// One instruction per line (or none)
 		let lines = code.split('\n');
@@ -122,7 +131,7 @@ export class Parser {
 					})
 				);
 
-				console.info(`Including libary "${libName}" (${this.libs[libName].length} instructions)`);
+				if (this.debugMode) console.info(`[Parser] Including libary "${libName}" (${this.libs[libName].length} instructions)`);
 			} else {
 				// Manage Lables
 				const labelMatch = this.currentLine.match(syn_label, true) as RegExpMatchArray;
@@ -357,7 +366,7 @@ export class Parser {
 						throw new CompilerError(e.message, lineIdx, { from: preCN });
 					}
 				} else {
-					console.warn(`Missing checker for instruction "${commandName}" `);
+					if (this.debugMode) console.warn(`[Parser ]Missing checker for instruction "${commandName}" `);
 				}
 
 				instructions.push({ name: commandName, params: params, lineNumber: lineIdx });
@@ -400,6 +409,13 @@ export class Parser {
 			if (!definedLabels.includes(label)) {
 				throw new CompilerError(`C016 - Unkown Label "${label}"`, line, { from: 0 });
 			}
+		}
+
+		if (this.debugMode) {
+			const dur = (new Date()).getTime() - startTime;
+			console.info(`[Parser] Parsed ${lines.length} lines in ${dur}ms`);
+			console.info(`[Parser] Captured ${instructions.length} symbols (${definedLabels.length} labels, ${instructions.length - definedLabels.length} commands)`);
+			console.info(`[Parser] Captured ${exportLabels.length} public symbols`);
 		}
 
 		return instructions;

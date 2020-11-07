@@ -1,6 +1,6 @@
 import Register32 from './models/Register32';
 import Operand, { OperandTypes } from './models/Operand';
-import Parser from './parsers/parser';
+import Parser from './parsers/Parser';
 import IODevice from './io/io'
 
 export type Label = { label: string; lineNumber: number };

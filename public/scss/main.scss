@@ -511,7 +511,6 @@ body {
 */
 .dropdown {
 	margin: 10px;
-	border-radius: 5px;
 	overflow: hidden;
 
 	/**
@@ -526,7 +525,7 @@ body {
 		padding: 2.5px;
 		padding-left: 10px;
 		background-color: $dropdown-accent;
-		border-radius: 5px;
+		border-radius: 2.5px;
 
 		@media (prefers-color-scheme: dark) {
 			background-color: $dropdown-accent-d;
