@@ -10,6 +10,8 @@ import { CompilerError } from '../parsers/const';
 import { Lib } from '../lib/lib';
 import { DOMSettings } from './DOMSettings';
 import { DOMLibaryController } from './DOMLibaryController';
+import { LEDRow } from '../io/LEDRow';
+import { LeverRow } from '../io/LeverRow';
 
 /**
  * Indicates if a DOMApp is the initial build
@@ -115,6 +117,13 @@ export class DOMApp {
 		// Loads other components
 		new DOMSettings(this.app, this);
 		new DOMLibaryController(this);
+
+		this.app.ioDevices.push(
+			new LEDRow(0x5C, "#leftLED"),
+			new LEDRow(0x5D, "#rightLED"),
+			new LeverRow(0x58, "#leftLevers"),
+			new LeverRow(0x59, "#rightLevers")
+		);
 
 		// Last build step of the info panel.
 		// Requires allready build UI to determine the required dropdown height

@@ -125,13 +125,11 @@ class Setting<T> {
 
     public init(defaultValue: T): T {
         let sV: any = SemiPersistentStorage.getData("settings:" + this.name);
-        console.log(sV);
         if (sV !== "") { 
             sV = JSON.parse(sV);
         } else {
             sV = defaultValue;
         }
-        console.log(sV);
         this.set(sV);
         return sV;
     }
