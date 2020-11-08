@@ -501,6 +501,55 @@ body {
 					}
 				}
 			}
+
+			.io {
+				.led-list {
+					display: flex;
+
+					.led {
+						margin: 2.5px;
+						width: 25px;
+						height: 25px;
+						border-radius: 5px;
+
+						background-color: gray;
+					}
+				}
+
+				.leverRow {
+					display: flex;
+				}
+
+				.sevenSegmentDisplay {
+					padding: 5px;
+
+					.sevenSegDigit {
+						height: 40px;
+						padding-right: 5px;
+
+						use {
+							fill: rgb(207, 178, 178);
+							@media (prefers-color-scheme: dark) {
+								fill: rgb(71, 0, 0);
+							}
+						}
+
+						.sevenSeg-segOn {
+							fill: red;
+						}
+					}
+				}
+
+				.matrixKeyboard {
+					.matrixKeyboardRow {
+						display: flex;
+					}
+				}
+
+				.pit {
+					padding: 5px;
+				}
+			}
 		}
 	}
 }
@@ -550,5 +599,80 @@ body {
 		@media (prefers-color-scheme: dark) {
 			background-color: $dropdown-bg-d;
 		}
+	}
+}
+
+/**
+* Custom Cheboxes
+* General Definition
+*/
+.checkboxContainer {
+	display: block;
+	position: relative;
+	margin-bottom: 12px;
+	cursor: pointer;
+	font-size: 22px;
+	user-select: none;
+
+	width: 25px;
+	height: 25px;
+	margin: 2.5px;
+
+	input {
+		position: absolute;
+		opacity: 0;
+		cursor: pointer;
+		height: 0;
+		width: 0;
+	}
+
+	&:hover input ~ .checkmark {
+		background-color: #ccc;
+	}
+
+	input:checked ~ .checkmark {
+		background-color: #2196f3;
+
+		&::after {
+			display: block;
+		}
+	}
+
+	.checkmark {
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 25px;
+		width: 25px;
+		background-color: #eee;
+
+		&::after {
+			content: "";
+			position: absolute;
+			display: none;
+		}
+
+		&::after {
+			left: 9px;
+			top: 5px;
+			width: 5px;
+			height: 10px;
+			border: solid white;
+			border-width: 0 3px 3px 0;
+			-webkit-transform: rotate(45deg);
+			-ms-transform: rotate(45deg);
+			transform: rotate(45deg);
+		}
+	}
+}
+
+/**
+* Flex Row
+*/
+.flex-row {
+	display: flex;
+
+	> * {
+		margin: 6px 6px 0 6px;
 	}
 }

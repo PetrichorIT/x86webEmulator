@@ -84,9 +84,13 @@ export function shl(app: App, params: Operand[]) {
 	let rhsOp = params[1];
 
 	let memSize = lhsOp.requiredMemSize;
+	const offset = rhsOp.getValue(app, 4);
 
 	let lhs = lhsOp.getValue(app, memSize);
-	let res = lhs << rhsOp.getValue(app, 4);
+	let res = lhs << offset;
+
+	app.flags.CF = (lhs & (0b1 >>> (memSize*8 - offset))) !== 0
+	app.flags.ZF = res === 0;
 
 	lhsOp.setValue(app, memSize, res);
 	app.registers.eip._32 += 4;
@@ -106,8 +110,12 @@ export function shr(app: App, params: Operand[]) {
 
 	let memSize = lhsOp.requiredMemSize;
 
+	const offset = rhsOp.getValue(app, 4)
 	let lhs = lhsOp.getValue(app, memSize);
-	let res = lhs >>> rhsOp.getValue(app, 4);
+	let res = lhs >>> offset;
+
+	app.flags.CF = (lhs & (0b1 << (offset - 1))) !== 0
+	app.flags.ZF = res === 0;
 
 	lhsOp.setValue(app, memSize, res);
 	app.registers.eip._32 += 4;
