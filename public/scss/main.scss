@@ -589,6 +589,23 @@ body {
 						transform: rotate(45deg);
 					}
 				}
+
+				.sevenSegmentDisplay {
+					padding: 5px;
+
+					.sevenSegDigit {
+						height: 40px;
+						padding-right: 5px;
+
+						use {
+							fill: rgb(71, 0, 0);
+						}
+
+						.sevenSeg-segOn {
+							fill: red;
+						}
+					}
+				}
 			}
 		}
 	}

@@ -12,6 +12,7 @@ import { DOMSettings } from './DOMSettings';
 import { DOMLibaryController } from './DOMLibaryController';
 import { LEDRow } from '../io/LEDRow';
 import { LeverRow } from '../io/LeverRow';
+import { SevenSegmentDisplay } from '../io/SevenSegementDisplay';
 
 /**
  * Indicates if a DOMApp is the initial build
@@ -122,7 +123,8 @@ export class DOMApp {
 			new LEDRow(0x5C, "#leftLED"),
 			new LEDRow(0x5D, "#rightLED"),
 			new LeverRow(0x58, "#leftLevers"),
-			new LeverRow(0x59, "#rightLevers")
+			new LeverRow(0x59, "#rightLevers"),
+			new SevenSegmentDisplay(0xb0, 0xbb, ".sevenSegmentDisplay")
 		);
 
 		// Last build step of the info panel.

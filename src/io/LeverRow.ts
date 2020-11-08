@@ -43,6 +43,6 @@ export class LeverRow implements IODevice {
     }
 
     public onOutput(port: number, value: number): void {
-        // Do nothing
+        throw new Error("Runtime Execption(IO): LeverRow does not accept output");
     }
 }

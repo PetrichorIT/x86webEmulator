@@ -28,7 +28,7 @@ export class LEDRow implements IODevice {
 
 
     public onInput(port: number): number {
-        return this.output;
+        throw new Error("Runtime Execption(IO): LEDRow does not provide input");
     };
     public onOutput(port: number, value: number): void {
         this.output = value;
