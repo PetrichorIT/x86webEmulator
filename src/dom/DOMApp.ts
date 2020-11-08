@@ -14,6 +14,7 @@ import { LEDRow } from '../io/LEDRow';
 import { LeverRow } from '../io/LeverRow';
 import { SevenSegmentDisplay } from '../io/SevenSegementDisplay';
 import { MatrixKeyboard } from '../io/MatrixKeyboard';
+import { PIT } from '../io/PIT';
 
 /**
  * Indicates if a DOMApp is the initial build
@@ -126,7 +127,8 @@ export class DOMApp {
 			new LeverRow(0x58, "#leftLevers"),
 			new LeverRow(0x59, "#rightLevers"),
 			new SevenSegmentDisplay(0xb0, 0xbb, ".sevenSegmentDisplay"),
-			new MatrixKeyboard(0x5a, 0x5b, ".matrixKeyboard")
+			new MatrixKeyboard(0x5a, 0x5b, ".matrixKeyboard"),
+			new PIT(0x54, ".pit")
 		);
 
 		// Last build step of the info panel.
