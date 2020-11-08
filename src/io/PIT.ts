@@ -27,10 +27,11 @@ export class PIT implements IODevice {
 
     private build(domSelector: string) {
         const container = document.querySelector(domSelector);
+        container.innerHTML = "<div>PIT 8255A</div>"
 
         for (let i = 0; i < 3; i++) {
             const div = document.createElement("div")
-            div.innerHTML = "CH" + i;
+            div.innerHTML = "CH" + i + ": 0Hz";
             this.divOut.push(div);
             container.append(div);
         }
