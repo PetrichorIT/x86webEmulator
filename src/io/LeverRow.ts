@@ -17,8 +17,7 @@ export class LeverRow implements IODevice {
 
         for (let i = 7; i >= 0; i--) {
             const label = document.createElement("label")
-            label.classList.add("container")
-
+            label.classList.add("checkboxContainer")
 
             const box = document.createElement("input");
             box.type = "checkbox";
