@@ -225,7 +225,7 @@ export class DOMApp {
 	}
 
 	/**
-	 * 
+	 * Shows the libary in the editor (readonly).
 	 */
 	public libaryViewShowLibary(libaryName: string) {
 
@@ -246,7 +246,7 @@ export class DOMApp {
 	}
 
 	/**
-	 * 
+	 * Returns the editor to edit state.
 	 */
 	private libaryViewCloseButtonPressed() {
 		this.editor.setValue(this.libaryViewSourceBackup)
@@ -267,11 +267,15 @@ export class DOMApp {
 	 * Handels debug / editor updates after the end of an instrcution cycle
 	 */
 	private onInstructionCycle() {
-		let nextInstrIdx = this.app.memory.readUInt32LE(this.app.registers.eip._32);
 		this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
-		if (nextInstrIdx >= this.app.instructions.length || nextInstrIdx === 0) return;
-		let line = this.app.instructions[nextInstrIdx].lineNumber;
-		this.editor.markText({ line, ch: 0 }, { line, ch: 255 }, { css: 'background-color: rgba(17, 165, 175, 0.5);' });
+		
+		// Only apply markings in step mode or with instruction delay
+		if (this.app.instructionDelay > 0 || this.running === false) {
+			let nextInstrIdx = this.app.memory.readUInt32LE(this.app.registers.eip._32);
+			if (nextInstrIdx >= this.app.instructions.length || nextInstrIdx === 0) return;
+			let line = this.app.instructions[nextInstrIdx].lineNumber;
+			this.editor.markText({ line, ch: 0 }, { line, ch: 255 }, { css: 'background-color: rgba(17, 165, 175, 0.5);' });
+		}
 	}
 
 	/**
@@ -354,6 +358,12 @@ export class DOMApp {
 	private onPause() {
 		console.info(`Paused run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		this.running = false;
+
+		// Mark Current Position (if application was in 0ms running mode)
+		let nextInstrIdx = this.app.memory.readUInt32LE(this.app.registers.eip._32);
+		if (nextInstrIdx >= this.app.instructions.length || nextInstrIdx === 0) return;
+		let line = this.app.instructions[nextInstrIdx].lineNumber;
+		this.editor.markText({ line, ch: 0 }, { line, ch: 255 }, { css: 'background-color: rgba(17, 165, 175, 0.5);' });
 	}
 
 	/**
