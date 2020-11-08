@@ -598,7 +598,11 @@ body {
 						padding-right: 5px;
 
 						use {
-							fill: rgb(71, 0, 0);
+							fill: rgb(207, 178, 178);
+
+							@media (prefers-color-scheme: dark) {
+								fill: rgb(71, 0, 0);
+							}
 						}
 
 						.sevenSeg-segOn {
