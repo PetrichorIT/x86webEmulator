@@ -86,6 +86,7 @@ export class PIT implements IODevice {
                 this.gotInput = false;
                 this.input = 0;
 
+                this.divOut[this.channel].innerHTML = "CH" + this.channel + ": 0Hz";
                 break
         }
     }
