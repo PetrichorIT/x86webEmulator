@@ -196,6 +196,9 @@ body {
 					border-radius: 5px;
 					transition: .2s;
 
+					height: 40px;
+					width: 40px;
+
 					margin: 0;
 					padding: 0;
 					position: relative;
@@ -223,15 +226,18 @@ body {
 						}
 					}
 
-					input[type=file] {
+					input[type="file"] {
 						cursor: pointer;
 						font-size: 100px;
 						position: absolute;
 						height: 40px;
 						width: 40px;
 						left: 0;
-						top: 0;
 						opacity: 0;
+
+						&::-webkit-file-upload-button {
+							display: none;
+						}
 					}
 				}
 			}
@@ -502,6 +508,11 @@ body {
 				}
 			}
 
+			/**
+			* IO requirements:
+			* - modularized DOM
+			* - responsive on IN/OUT
+			*/
 			.io {
 				.led-list {
 					display: flex;
