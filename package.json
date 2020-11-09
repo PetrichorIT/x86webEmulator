@@ -12,10 +12,8 @@
 		"test:flag": "jest --verbose src/x86/flag.test.ts",
 		"test:logic": "jest --verbose src/x86/logic.test.ts",
 		"test:transport": "jest --verbose src/x86/transport.test.ts",
-
 		"build": "npm run build:ts && npm run build:sass && npm run build:pack:production",
 		"dev": "npm run build:ts && npm run build:pack",
-
 		"build:ts": "rm -rf prebuild/* && tsc",
 		"build:sass": "node-sass --input-path public/scss public/scss/main.scss public/css/main.css",
 		"build:pack": "npx webpack --mode development --config webpack.config.js",
@@ -25,7 +23,12 @@
 		"type": "git",
 		"url": "git+https://github.com/Unamed001/x86webEmulator.git"
 	},
-	"keywords": [ "x86", "assembler", "assembly", "emulator" ],
+	"keywords": [
+		"x86",
+		"assembler",
+		"assembly",
+		"emulator"
+	],
 	"author": "MKDev",
 	"license": "ISC",
 	"bugs": {

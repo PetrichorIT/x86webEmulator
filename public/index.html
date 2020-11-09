@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/codemirror.css">
     <link rel="stylesheet" href="css/material-darker.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
 
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
 </head>
@@ -179,5 +180,27 @@
 
     <!-- Main Script -->
     <script async src="js/main.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+    <script>
+        window.cookieconsent.initialise({
+            "palette": {
+                "popup": {
+                "background": "rgb(20, 20, 20)",
+                "text": "#d6d6d6"
+                },
+                "button": {
+                "background": "green"
+                }
+            },
+            "position": "bottom-left",
+            "content": {
+                "message": "This website uses cookies (or local storage) to ensure you get the best experience on our website",
+                "dismiss": "Got it!",
+                "link": "Learn more",
+                "href": "https://www.cookiesandyou.co"
+            }
+        });
+    </script>
 </body>
 </html>
