@@ -17,9 +17,8 @@ export class App {
 
 	public instructions: Command[];
 	private commandHandlers: { [key: string]: CommandFunction | CommandOperandChecker };
-	private subscriber: (() => void)[];
-
-	public instructionDelay: number;
+	
+	public onInstructionCycle: (() => void);
 	public ioDevices: IODevice[]
 
 	/**
@@ -55,8 +54,6 @@ export class App {
 
 		this.commandHandlers = commandHandlers;
 		this.instructions = [ undefined ];
-		this.subscriber = [];
-		this.instructionDelay = 100;
 		this.parser = new Parser(this);
 		this.ioDevices = []
 	}
@@ -85,12 +82,6 @@ export class App {
 		return 0;
 	}
 
-	/**
-	 * Adds a new RX like subscriber to the update cycle initialted by change in the app state
-	 */
-	public subscribe(newSubscriber: () => void) {
-		this.subscriber.push(newSubscriber);
-	}
 
 	/**
 	 * Write a given set of instructions into the application memory at the given position (default 0x8000)
@@ -100,8 +91,6 @@ export class App {
 		position = position || 0x8000;
 		this.writeProgram(commands, position);
 		this.registers.eip._32 = position;
-
-		this.subscriber.forEach((s) => s());
 	}
 
 	/**
@@ -156,6 +145,7 @@ export class App {
 	 * Returns a flag that shows if an instruction was available (and thus executed).
 	 */
 	public instructionCycle(): boolean {
+
 		const iLoc = this.memory.readUInt32LE(this.registers.eip._32);
 
 		if (iLoc >= this.instructions.length) return false;
@@ -164,7 +154,7 @@ export class App {
 
 		(this.commandHandlers[instrc.name] as CommandFunction)(this, instrc.params);
 
-		if (!this.isInLibMode) this.subscriber.forEach((s) => s());
+		if (this.onInstructionCycle) this.onInstructionCycle();
 		return true;
 	}
 }

@@ -37,7 +37,11 @@ export class DOMSettings {
 
 
             this.instuctionDelay.subscribe((v) => {
-                this.app.instructionDelay = v;
+                this.domApp.instructionDelay = v;
+
+                // Remove markings for speedup (check for existence cause editor is init afterwards)
+                if (v === 0 && this.domApp.editor)
+                    this.domApp.editor.getDoc().getAllMarks().forEach((m) => m.clear());
             })
 
             instructionDelaySilde.addEventListener("change", () => {

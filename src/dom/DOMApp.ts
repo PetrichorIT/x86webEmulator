@@ -41,12 +41,15 @@ export class DOMApp {
 	private running: boolean;
 	private preferredFilename = 'code.txt';
 
+	// Configguarzion Options
+	public instructionDelay: number = 100;
 	public speedUpLibaryCode: boolean = true;
 
 	public libaryViewActive: boolean = false;
 	public libaryViewSourceBackup: string;
 	private libaryViewCloseButton: HTMLButtonElement;
 
+	private subscribers: (() => void)[];
 	/**
 	 * Creates a DOMApp object that links the given application to the DOM
 	 */
@@ -55,6 +58,7 @@ export class DOMApp {
 		this.registers = {};
 		this.flags = {};
 		this.running = false;
+		this.subscribers = [];
 
 		// Load libaries first since they are needed on GUI build
 		Lib.loadDefaultLibs(this.app);
@@ -62,6 +66,13 @@ export class DOMApp {
 
 		this.buildDebug();
 		this.build();
+	}
+
+	/**
+	 * Adds a new RX like subscriber to the update cycle initialted by change in the app state
+	 */
+	public subscribe(newSubscriber: () => void) {
+		this.subscribers.push(newSubscriber);
 	}
 
 	/**
@@ -103,16 +114,16 @@ export class DOMApp {
 	private build() {
 		// Builds Registers in a dedicated box
 		for (const regName in this.app.registers) {
-			this.registers[regName] = new DOMRegister(this.app, regName);
+			this.registers[regName] = new DOMRegister(this, regName);
 		}
 
 		// Builds Flags in a decdicated box
 		for (const flgName in this.app.flags) {
-			this.flags[flgName] = new DOMFlag(this.app, flgName);
+			this.flags[flgName] = new DOMFlag(this, flgName);
 		}
 
 		// Builds Memory if not allready done
-		if (!this.memory) this.memory = new DOMMemory(this.app);
+		if (!this.memory) this.memory = new DOMMemory(this);
 
 		// Initializes the syntax checker for codemirror
 		if (_firstBuild) initSyntax();
@@ -179,7 +190,7 @@ export class DOMApp {
 		this.libaryViewCloseButton.addEventListener("click", () => this.libaryViewCloseButtonPressed());
 
 		// Subscribes to the application callback on change
-		this.app.subscribe(() => this.onInstructionCycle());
+		this.app.onInstructionCycle = () => this.onInstructionCycle();
 
 		_firstBuild = false;
 	}
@@ -267,15 +278,29 @@ export class DOMApp {
 	 * Handels debug / editor updates after the end of an instrcution cycle
 	 */
 	private onInstructionCycle() {
-		this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
+		
 		
 		// Only apply markings in step mode or with instruction delay
-		if (this.app.instructionDelay > 0 || this.running === false) {
-			let nextInstrIdx = this.app.memory.readUInt32LE(this.app.registers.eip._32);
-			if (nextInstrIdx >= this.app.instructions.length || nextInstrIdx === 0) return;
+		if (this.instructionDelay > 0 || this.running === false) {
+			this.updateUI();
+		}
+	}
+
+	/**
+	 * Causes UI Updates.
+	 */
+	private updateUI() {
+		this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
+
+		// Current Line Marking 
+		let nextInstrIdx = this.app.memory.readUInt32LE(this.app.registers.eip._32);
+		if (nextInstrIdx < this.app.instructions.length && nextInstrIdx !== 0) {
 			let line = this.app.instructions[nextInstrIdx].lineNumber;
 			this.editor.markText({ line, ch: 0 }, { line, ch: 255 }, { css: 'background-color: rgba(17, 165, 175, 0.5);' });
-		}
+		};
+
+		// Update Components
+		this.subscribers.forEach((s) => s());
 	}
 
 	/**
@@ -298,6 +323,7 @@ export class DOMApp {
 			let p = this.app.parser.parse(this.editor.getDoc().getValue());
 
 			this.app.runProgram(p);
+			this.updateUI();
 
 			// Save a valid programm in SessionStorage
 			SemiPersistentStorage.setData('editor:snapshot', this.editor.getDoc().getValue());
@@ -329,12 +355,18 @@ export class DOMApp {
 		this.running = true;
 
 		console.info(`Starting run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
+		
+		// Remove markings if in 0ms mode
+		if (this.instructionDelay === 0)
+			this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
+
 		try {
-			// Run programm until stoped / finished
+			// Run programm until stoped / finished (~5ms per cycle on no delay, no lib), (<1ms on lib)
 			while (this.running && this.app.instructionCycle()) {
 				// If not in lib code or lib code does not required speed up => delay
-				if (!this.app.isInLibMode || !this.speedUpLibaryCode) await new Promise((r) => setTimeout(r, this.app.instructionDelay));
+				if (!this.app.isInLibMode || !this.speedUpLibaryCode) await new Promise((r) => setTimeout(r, this.instructionDelay));
 			}
+			this.updateUI();
 			if (this.running) {
 				console.info(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 			}
@@ -359,17 +391,14 @@ export class DOMApp {
 		console.info(`Paused run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		this.running = false;
 
-		// Mark Current Position (if application was in 0ms running mode)
-		let nextInstrIdx = this.app.memory.readUInt32LE(this.app.registers.eip._32);
-		if (nextInstrIdx >= this.app.instructions.length || nextInstrIdx === 0) return;
-		let line = this.app.instructions[nextInstrIdx].lineNumber;
-		this.editor.markText({ line, ch: 0 }, { line, ch: 255 }, { css: 'background-color: rgba(17, 165, 175, 0.5);' });
+		this.updateUI();
 	}
 
 	/**
 	 * Handles actions if the step button is pressed
 	 */
 	private onStep() {
+		if (this.running) return;
 		console.info(`Stepping to instruction at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		this.app.instructionCycle();
 	}

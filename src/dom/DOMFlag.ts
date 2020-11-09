@@ -1,4 +1,5 @@
 import { App } from '../App';
+import { DOMApp } from './DOMApp';
 
 export class DOMFlag {
 	private flagDOM: HTMLInputElement;
@@ -8,9 +9,9 @@ export class DOMFlag {
 	/**
 	 * Creates a control component for a flag from the application object
 	 */
-	constructor(app: App, flagName: string) {
+	constructor(domApp: DOMApp, flagName: string) {
 		this.flagName = flagName;
-		this.app = app;
+		this.app = domApp.app;
 
 		const registerDOM = document.createElement('div');
 		registerDOM.classList.add('flag');
@@ -29,8 +30,8 @@ export class DOMFlag {
 
 		document.querySelector('.flags-box').appendChild(registerDOM);
 
-		this.update(app.flags[flagName]);
-		app.subscribe(() => this.update(app.flags[flagName]));
+		this.update(this.app.flags[flagName]);
+		domApp.subscribe(() => this.update(this.app.flags[flagName]));
 	}
 
 	/**
