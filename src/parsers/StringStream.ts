@@ -82,7 +82,7 @@ export class StringStream {
 		while (this.eat(match) !== undefined) {
 			str += this.string.charAt(this.position - 1);
 		}
-		return str === '' ? undefined : str;
+		return str;
 	}
 
 	/**

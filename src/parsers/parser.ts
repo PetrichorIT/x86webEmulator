@@ -235,7 +235,7 @@ export class Parser {
 									);
 
 								let offsetStr = contents.substr(idx + 1).trim();
-								if (offsetStr.match(syn_number)[0] !== offsetStr)
+								if (!offsetStr.match(syn_number) || offsetStr.match(syn_number)[0] !== offsetStr)
 									throw new CompilerError(
 										`C011 - Invalid token. Expected number from string "${offsetStr}"`,
 										lineIdx,
