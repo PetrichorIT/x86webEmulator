@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css?family=Space+Mono&display=swap');
-
 /**
 * Primary Configuration colors
 */
@@ -582,6 +580,10 @@ body {
 	.dropdown-header {
 		cursor: pointer;
 		user-select: none;
+
+		* {
+			user-select: none;
+		}
 
 		padding: 2.5px;
 		padding-left: 10px;
