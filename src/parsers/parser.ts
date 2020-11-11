@@ -311,7 +311,7 @@ export class Parser {
 					} else {
 						if (!isNaN(parseInt(this.currentLine.peek()))) {
 							// Const
-							let numStr = this.currentLine.eatWhile((c) => c !== ',' && c !== ' ');
+							let numStr = this.currentLine.eatWhile((c) => c !== ',' && c !== ' ' && c !== ";");
 
 							if (numStr.match(syn_number)[0] !== numStr)
 								throw new CompilerError(
