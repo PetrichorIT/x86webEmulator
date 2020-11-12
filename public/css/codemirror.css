@@ -14,6 +14,11 @@
 	text-decoration-color: darkred !important;
 }
 
+.cm-global-marker {
+	font-weight: bold;
+	color: #82aaff;
+}
+
 .CodeMirror {
 	/* Set height, width, borders, and global font properties here */
 	font-family: monospace;

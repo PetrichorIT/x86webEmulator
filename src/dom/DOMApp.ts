@@ -16,6 +16,7 @@ import { SevenSegmentDisplay } from '../io/SevenSegementDisplay';
 import { MatrixKeyboard } from '../io/MatrixKeyboard';
 import { PIT } from '../io/PIT';
 import { Programm } from '../models/Programm';
+import { initCodemirrorSyntax } from '../compiler/Syntax';
 
 /**
  * Indicates if a DOMApp is the initial build
@@ -127,7 +128,7 @@ export class DOMApp {
 		if (!this.memory) this.memory = new DOMMemory(this);
 
 		// Initializes the syntax checker for codemirror
-		if (_firstBuild) initSyntax();
+		if (_firstBuild) initCodemirrorSyntax();
 
 		// Loads other components
 		new DOMSettings(this.app, this);
@@ -160,7 +161,7 @@ export class DOMApp {
 
 		// Launches the editor with the last snapshot from SessionStorage
 		// Primes the editor to remove marks on editing
-		this.editor.getDoc().setValue(SemiPersistentStorage.getData('editor:snapshot') || '');
+		this.editor.getDoc().setValue(SemiPersistentStorage.getData('editor:snapshot') || '.text:\n\t\n\n.data:\n\t\n');
 		this.editor.on('inputRead', () => this.onEditorChange());
 
 		// Initilizes and primes the action buttons
