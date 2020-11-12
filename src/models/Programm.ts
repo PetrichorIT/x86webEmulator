@@ -14,6 +14,7 @@ export class Programm {
     /**
      * Writes the programm into the memory of the given application.
      * Uses memory from the given space downwards.
+     * Returns the address of the first not used memory cell;
      */
     public write(app: App, memoryPosition: number) {
 
@@ -77,6 +78,11 @@ export class Programm {
             app.memory.writeUInt32LE(idx++, pos);
             pos += 4;
         }
+
+        // Setup application for stack based context
+        app.registers.eip._32 = textPos;
+        app.registers.esp._32 = dataPos - 1;
+        app.registers.ebp._32 = dataPos - 1;
     }
 }
 

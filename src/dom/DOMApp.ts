@@ -15,6 +15,7 @@ import { LeverRow } from '../io/LeverRow';
 import { SevenSegmentDisplay } from '../io/SevenSegementDisplay';
 import { MatrixKeyboard } from '../io/MatrixKeyboard';
 import { PIT } from '../io/PIT';
+import { Programm } from '../models/Programm';
 
 /**
  * Indicates if a DOMApp is the initial build
@@ -322,7 +323,7 @@ export class DOMApp {
 		try {
 			let p = this.app.parser.parse(this.editor.getDoc().getValue());
 
-			this.app.runProgram(p);
+			this.app.runProgram(new Programm(p, []));
 			this.updateUI();
 
 			// Save a valid programm in SessionStorage

@@ -85,53 +85,12 @@ export class App {
 
 
 	/**
-	 * Write a given set of instructions into the application memory at the given position (default 0x8000)
-	 * and prepares the app for execution of said programm
+	 * Write a given programm into the application memory at the given position (default 0x8000)
+	 * and prepares the app for execution of said programm.
 	 */
-	public runProgram(commands: (Command | Label)[], position?: number) {
+	public runProgram(programm: Programm, position?: number) {
 		position = position || 0x8000;
-		// this.writeProgram(commands, position);
-		
-		let p = new Programm(commands, [ new DataConstant("a", 1, [ 0xff, 0xff, 0xff ])]);
-		p.write(this, position);
-		
-		this.registers.eip._32 = position;
-	}
-
-	/**
-	 * Write a given set of instructions into the application memory at the given position.
-	 */
-	private writeProgram(commands: (Command | Label)[], position: number) {
-		let pos = position;
-		let labels: { [key: string]: number } = {};
-		let relPos = 0;
-
-		// Extract labels from source (matching relative positions)
-		for (let i = 0; i < commands.length; i++) {
-			if ((commands[i] as Label).label) {
-				labels[(commands[i] as Label).label] = pos + relPos;
-			} else {
-				relPos += 4;
-			}
-		}
-
-		// Replace label operand with direct jumps
-		commands = commands.filter((v: any) => v.label === undefined).map((c: Command) => {
-			for (let i = 0; i < c.params.length; i++) {
-				if (c.params[i].type === OperandTypes.label) {
-					c.params[i] = new Operand(OperandTypes.const, labels[c.params[i].value]);
-				}
-			}
-			return c;
-		});
-
-		// Write commands to memory
-		let idx = this.instructions.length;
-		for (const command of commands) {
-			this.instructions.push(command as Command);
-			this.memory.writeUInt32LE(idx++, pos);
-			pos += 4;
-		}
+		programm.write(this, position);
 	}
 
 	/**
