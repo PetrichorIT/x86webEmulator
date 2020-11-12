@@ -1,14 +1,20 @@
-import { App, Command, Label } from "../App";
+import { App, Command, CompiledCode, Label } from "../App";
 import Operand, { OperandTypes } from "./Operand";
 
 export class Programm {
 
-    private text: (Command | Label)[];
-    private data: DataConstant[];
+    public text: CompiledCode;
+    public data: DataConstant[];
 
-    constructor(text: (Command | Label)[], data: DataConstant[]) {
+    public options: { [key:string]: string };
+    public exportLabels: string[];
+
+    constructor(text: CompiledCode, data: DataConstant[]) {
         this.text = text;
         this.data = data;
+
+        this.options = {};
+        this.exportLabels = [];
     }
 
     /**

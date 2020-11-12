@@ -4,6 +4,8 @@ import Parser from './parsers/parser';
 import IODevice from './io/io'
 import { DataConstant, Programm } from './models/Programm';
 
+export type CompiledCode = (Command | Label)[];
+
 export type Label = { label: string; lineNumber: number };
 export type Command = { name: string; params: Operand[]; lineNumber: number; isLibCode?: boolean };
 export type CommandFunction = (app: App, params: Operand[]) => void;

@@ -17,6 +17,7 @@ import { MatrixKeyboard } from '../io/MatrixKeyboard';
 import { PIT } from '../io/PIT';
 import { Programm } from '../models/Programm';
 import { initCodemirrorSyntax } from '../compiler/Syntax';
+import { Compiler } from '../compiler/Compiler';
 
 /**
  * Indicates if a DOMApp is the initial build
@@ -322,6 +323,11 @@ export class DOMApp {
 		const tsmp = new Date().getMilliseconds() & 0xff;
 
 		try {
+
+			console.log(
+				new Compiler(this.app).parse(this.editor.getDoc().getValue())
+			)
+
 			let p = this.app.parser.parse(this.editor.getDoc().getValue());
 
 			this.app.runProgram(new Programm(p, []));
