@@ -47,11 +47,13 @@ export function initSyntax() {
 						// Capture registers
 						if (syn_registers.test(w)) return 'var2';
 						// Assume label reference if in Operand (= keyword in line)
-						return state.gotKeyword === true ? "def" : null;
+						return state.gotKeyword === true ? "def" : "syntax-error";
 					}
 
 					// Capture noprefix numbers
 					if (syn_number.test(w)) return 'number';
+
+					return "syntax-error"
 				} else if (stream.match(syn_registers, true)) {
 					return 'var2';
 				} else if (stream.eat(';')) {
@@ -74,13 +76,15 @@ export function initSyntax() {
 					if (Lib.libs.includes(token) || !isAfterInclude) {
 						return 'string';
 					} else {
-						return 'underline-error';
+						return 'string-error';
 					}
 				} else {
 					// Allways eat something, to prevent endless loops
-					stream.next();
+					const char = stream.next();
+					if (char === ",") return null;
 				}
-				return null;
+
+				return "syntax-error";
 			}
 		};
 	});
