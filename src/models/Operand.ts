@@ -8,7 +8,8 @@ export enum OperandTypes {
 	mIndexed,
 	mDIndexed,
 	label,
-	string
+	string,
+	dataOffset
 }
 
 export class Operand {
@@ -35,6 +36,8 @@ export class Operand {
 	 * Returns the required memory size (if exisiting)
 	 */
 	get requiredMemSize() {
+		if (this.type === OperandTypes.dataOffset)
+			return 4;
 		if (this.type === OperandTypes.register) {
 			if (this.value[0].toLowerCase() === 'e') return 4;
 			if (this.value[1].toLowerCase() === 'x') return 2;
@@ -102,7 +105,7 @@ export class Operand {
 			return this.value;
 		}
 
-		throw new Error('NEEDED' + this.type);
+		throw new Error('Operand of type "' + this.type + '" is not supported in post-compiletime use (get).');
 	}
 
 	private getMemUInt(app: App, position: number, memSize: number): number {
@@ -152,7 +155,7 @@ export class Operand {
 			return this.value;
 		}
 
-		throw new Error('NEEDED' + this.type);
+		throw new Error('Operand of type "' + this.type + '" is not supported in post-compiletime use (get).');
 	}
 
 	private getMemInt(app: App, position: number, memSize: number): number {
@@ -217,12 +220,9 @@ export class Operand {
 			);
 		}
 
-		if (this.type === OperandTypes.string) {
-			throw new Error('NOSTRING');
-		}
-
-		throw new Error('NEEDED');
+		throw new Error('Operand of type "' + this.type + '" is not supported in post-compiletime use (set).');
 	}
+	
 	private setMemUInt(app: App, position: number, memSize: number, value: number): void {
 		switch (memSize) {
 			case 1:

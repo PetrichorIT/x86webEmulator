@@ -11,6 +11,10 @@ export class Programm {
         this.data = data;
     }
 
+    /**
+     * Writes the programm into the memory of the given application.
+     * Uses memory from the given space downwards.
+     */
     public write(app: App, memoryPosition: number) {
 
         let pos;
@@ -54,10 +58,15 @@ export class Programm {
         // Replace label Operands
         for (let i = 0; i < commands.length; i++) {
             for (let j = 0; j < commands[i].params.length; j++) {
+                // Replace label operands with direct jumps
                 if (commands[i].params[j].type === OperandTypes.label) {
                     commands[i].params[j] = new Operand(OperandTypes.const, labelPositions[commands[i].params[j].value] + textPos);
                 }
                 
+                // Replace offsets with direct memory addresses
+                if (commands[i].params[j].type === OperandTypes.dataOffset) {
+                    commands[i].params[j] = new Operand(OperandTypes.const, dataPositions[commands[i].params[j].value]);
+                }
             }
         }
 
