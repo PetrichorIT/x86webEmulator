@@ -2,6 +2,7 @@ import Register32 from './models/Register32';
 import Operand, { OperandTypes } from './models/Operand';
 import Parser from './parsers/parser';
 import IODevice from './io/io'
+import { DataConstant, Programm } from './models/Programm';
 
 export type Label = { label: string; lineNumber: number };
 export type Command = { name: string; params: Operand[]; lineNumber: number; isLibCode?: boolean };
@@ -89,7 +90,11 @@ export class App {
 	 */
 	public runProgram(commands: (Command | Label)[], position?: number) {
 		position = position || 0x8000;
-		this.writeProgram(commands, position);
+		// this.writeProgram(commands, position);
+		
+		let p = new Programm(commands, [ new DataConstant("a", 1, [ 0xff, 0xff, 0xff ])]);
+		p.write(this, position);
+		
 		this.registers.eip._32 = position;
 	}
 
