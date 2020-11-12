@@ -69,3 +69,38 @@ export function pop(app: App, params: Operand[]) {
 	app.registers.esp._32 += 4;
 	app.registers.eip._32 += 4;
 }
+
+
+module.exports.__in = function (params: Operand[]) {
+	CommonCheckers.expectCount(params, 2);
+	CommonCheckers.expectAL(params[0])
+	CommonCheckers.expectConst(params[1]);
+}
+
+module.exports.in = function (app: App, params: Operand[]) {
+	let al = params[0]
+	let port = params[1]
+
+	if (al.type !== OperandTypes.register && al.value !== "al") throw new Error("Only AL")
+	if (port.type !== OperandTypes.const) throw new Error("Invalid PORT")
+
+	app.registers.eax._8L = app.ioRead(port.getValue(app, 4));
+	app.registers.eip._32 += 4;
+}
+
+module.exports.__out = function(params: Operand[]) {
+	CommonCheckers.expectCount(params, 2);
+	CommonCheckers.expectAL(params[1])
+	CommonCheckers.expectConst(params[0]);
+}
+
+module.exports.out = function (app: App, params: Operand[]) {
+	let al = params[1]
+	let port = params[0]
+
+	if (al.type !== OperandTypes.register && al.value !== "al") throw new Error("Only AL")
+	if (port.type !== OperandTypes.const) throw new Error("Invalid PORT")
+
+	app.ioWrite(port.getValue(app, 4), al.getValue(app, 1))
+	app.registers.eip._32 += 4;
+}

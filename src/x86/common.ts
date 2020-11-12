@@ -48,6 +48,10 @@ export const CommonCheckers = {
 				throw new Error('C00X - Invalid operands. Invalid MemSize. Expected 4bytes or undefined.');
 		}
 	},
+	expectAL: (param: Operand) => {
+		if (param.type !== OperandTypes.register) throw new Error("C00X - Invalid Operands. Expected AL");
+		if (param.value !== "al") throw new Error("C00X - Invalid Operands. Expected AL");
+	},
 	// Other often use combis
 	jumpLike,
 	dualMutFirst,

@@ -18,12 +18,6 @@ export class Operand {
 	constructor(type: OperandTypes, value: any) {
 		this.type = type;
 		this.value = value;
-
-		// if (type === OperandTypes.const && typeof value === 'number' && value < 0) {
-		// 	const buf = Buffer.alloc(4);
-		// 	buf.writeInt32LE(value);
-		// 	this.value = buf.readUInt32LE();
-		// }
 	}
 
 	/**

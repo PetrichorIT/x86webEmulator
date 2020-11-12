@@ -1,4 +1,5 @@
 import { App } from '../App';
+import { DOMApp } from './DOMApp';
 
 export let DOMMemoryRows = 10;
 export let DOMMemoryCols = 8;
@@ -20,8 +21,8 @@ export class DOMMemory {
 	/**
 	 * Creates a memory control component from th given application object
 	 */
-	constructor(app: App) {
-		this.app = app;
+	constructor(domApp: DOMApp) {
+		this.app = domApp.app;
 
 		this.memContent = document.querySelector('.memory-content');
 
@@ -87,7 +88,7 @@ export class DOMMemory {
 		this.setupContent();
 		this.update();
 
-		this.app.subscribe(() => this.update());
+		domApp.subscribe(() => this.update());
 	}
 
 	/**

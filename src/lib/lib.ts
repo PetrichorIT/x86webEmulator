@@ -1,23 +1,49 @@
 import { App } from '../App';
 import { FullPersistentStorage } from '../dom/common';
 
-import fib from './fib';
+import { fib } from './fib';
 import { string } from './string';
 
 class LibController {
-	private localLibs: string[] = [];
-	get libs(): string[] {
-		return [ 'fib.h', 'string.h' ].concat(this.localLibs);
-	}
 
-	private loadLib(app: App, libName: string, libCode: string) {
-		app.parser.parseLib(libName, libCode);
+	/**
+	 * User generated libaries.
+	 * Loaded from Presistent Storage (LocalStorage or Cookies).
+	 */
+	private localLibs: string[] = [];
+
+	/**
+	 * Indicates if a Lib is local or default static.
+	 */
+	public isLocalLib(libName: string): boolean {
+		return this.localLibs.includes(libName);
 	}
 
 	/**
-	 * Loads the defaults libaries to the given app component
+	 * All available libaries including the default libaries.
 	 */
-	loadDefaultLibs(app: App) {
+	public get libs(): string[] {
+		return [ 'fib.h', 'string.h' ].concat(this.localLibs);
+	}
+
+	/**
+	 * Loads a libary into parser storage.
+	 */
+	private loadLib(app: App, libName: string, libCode: string) {
+		const res = app.parser.parseLib(libName, libCode);
+
+		// If only LibLabel and JMP LibLabel are included
+		if (res.length === 2) {			
+			FullPersistentStorage.removeData('_lib_' + libName);
+			this.localLibs.filter((ln) => ln !== libName);
+			delete app.parser.libs[libName];
+		}
+	}
+
+	/**
+	 * Loads the defaults libaries to the given app component.
+	 */
+	public loadDefaultLibs(app: App) {
 		try {
 			this.loadLib(app, 'fib.h', fib);
 			console.info('Loaded default lib "fib.h"');
@@ -34,15 +60,20 @@ class LibController {
 	}
 
 	/**
-	 * Loads the custom dynamic libaries from local storage (or cookies)
+	 * Loads the custom dynamic libaries from Local storage (or Cookies).
 	 */
-	loadLocalLibs(app: App) {
+	public loadLocalLibs(app: App) {
+		// Load custom libaries list from storage
 		let libListStr = FullPersistentStorage.getData('_libs_list');
 		if (libListStr === '') libListStr = '[]';
 
 		try {
-			this.localLibs = JSON.parse(libListStr);
+			// Parse loaded string to Array<String>
+			const parsed = JSON.parse(libListStr)
+			if (!Array.isArray(parsed)) throw new Error("Invalid stored raw value for key \"_libs_list\"")
+			this.localLibs = parsed;
 		} catch (e) {
+			// Correct stored local libary codes
 			console.error(e);
 			FullPersistentStorage.setData('_libs_list', '[]');
 			this.localLibs = [];
@@ -50,15 +81,16 @@ class LibController {
 
 		for (const lib of this.localLibs) {
 			try {
+				// Extract libary code from storage
 				const str = FullPersistentStorage.getData('_lib_' + lib);
 				if (str === '') {
-					// Remove Lib
+					// Remove empty libaries from storage
 					FullPersistentStorage.removeData('_lib_' + lib);
 					this.localLibs.filter((libName) => libName !== lib);
-
 					continue;
 				}
 
+				// Intergrate raw loaded libary into application
 				this.loadLib(app, lib, str);
 				console.info(`Loaded local lib "${lib}"`);
 			} catch (e) {
@@ -66,19 +98,45 @@ class LibController {
 			}
 		}
 
+		// Rewrite libaries list if empty libaries were deleted
 		FullPersistentStorage.setData('_libs_list', JSON.stringify(this.localLibs));
 	}
 
 	/**
-	 * Updates or creates a local libary and stores it
+	 * Updates or creates a local libary and stores it.
 	 */
-	setLib(app: App, libName: string, libCode: string) {
+	public setLib(app: App, libName: string, libCode: string): void {
 		this.loadLib(app, libName, libCode);
 
 		if (!this.localLibs.includes(libName)) this.localLibs.push(libName);
 
 		FullPersistentStorage.setData('_libs_list', JSON.stringify(this.localLibs));
 		FullPersistentStorage.setData('_lib_' + libName, libCode);
+	}
+
+	/**
+	 * Removes a usergenerated libary from the application.
+	 */
+	public removeLib(app: App, libName: string): void {
+		if (!this.localLibs.includes(libName)) return;
+
+		delete app.parser.libs[libName];
+		this.localLibs.splice(this.localLibs.findIndex((l) => l === libName), 1);
+
+		FullPersistentStorage.setData("_libs_list", JSON.stringify(this.localLibs));
+		FullPersistentStorage.removeData("_lib_" + libName);
+	}
+
+	/**
+	 * Returns the raw source code of the given libary (either from local storage or from default consts).
+	 */
+	public getLibCode(libName: string): string {
+		if (this.localLibs.includes(libName))
+			return FullPersistentStorage.getData("_lib_" + libName);
+		if (libName === "string.h")
+			return string;
+		if (libName === "fib.h")
+			return fib;
 	}
 }
 

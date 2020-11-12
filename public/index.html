@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/codemirror.css">
     <link rel="stylesheet" href="css/material-darker.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
 
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
 </head>
@@ -30,25 +31,20 @@
             x86 Emulator
         </div>
         <div class="body-box">
-            <div class="input-box">
-                <div class="editor-box">
-                    <button class="more-button" id="more-button">
-                        <i class="fas fa-ellipsis-h"></i>
-                    </button>
-                    <div class="more-box" id="more-box">
-                        <button class="more-box-action" id="saveAsLib">
-                            Save as Lib
-                        </button>
-                        <button class="more-box-action">
-                            Test 2
-                        </button>
-                        <button class="more-box-action">
-                            Test 3
-                        </button>
 
-                    </div>
+            <!-- Editor / Input box -->
+            <div class="input-box">
+                <!-- CodeMirror Editor Window -->
+                <div class="editor-box">
+                    <!-- More close button -->
+                    <button id="closeLibaryView">
+                        <i class="fas fa-times-circle"></i>
+                    </button>
+                    <!-- Source Textbox -->
                     <textarea id="editor" autocomplete="false"></textarea>
                 </div>
+
+                <!-- Direct Control Buttons -->
                 <div class="button-box">
                     <button id="compile">
                         <i class="fas fa-crosshairs"></i>
@@ -74,30 +70,138 @@
                         </button>
                     </div>
                 </div>
-                <div class="debug-box" id="debug-box">
-                </div>
+
+                <!-- Debug output box  -->
+                <div class="debug-box" id="debug-box"></div>
             </div>
+
+            <!-- Info Box -->
             <div class="info-box">
-                <div class="row">
-                    <div class="registers-box">
-                        <!-- JS Generated Content -->
+                <!-- Settings Dropdown -->
+                <div class="dropdown" id="settings-dropdown">
+                    <div class="dropdown-header" id="settings-dropdown:header">
+                        Settings
                     </div>
-                    <div class="flags-box">
-                         <!-- JS Generated Content -->
+                    <div class="dropdown-body" id="settings-dropdown:body">
+                        <div class="settings">
+                            <!-- JS Generated Content -->
+                        </div>
                     </div>
                 </div>
-                <div class="memory-box">
-                    <div class="memory-control">
-                        <!-- JS Generated Content -->
+
+                <!-- Libaries Dropdown -->
+                <div class="dropdown" id="libary-dropdown">
+                    <div class="dropdown-header" id="libary-dropdown:header">
+                        Libaries
                     </div>
-                    <div class="memory-content">
-                        <!-- JS Generated Content -->
+                    <div class="dropdown-body" id="libary-dropdown:body">
+                        <div class="libary-controller">
+                            <!-- JS Generated Content -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Register & Flags Dropdown -->
+                <div class="dropdown" id="cpu-dropdown">
+                    <div class="dropdown-header" id="cpu-dropdown:header">
+                        Registers & Flags
+                    </div>
+                    <div class="dropdown-body" id="cpu-dropdown:body">
+                        <div class="registersAndFlags">
+                            <div class="registers-box">
+                                <!-- JS Generated Content -->
+                            </div>
+                            <div class="flags-box">
+                                <!-- JS Generated Content -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Memory Dropdown -->
+                <div class="dropdown" id="memory-dropdown">
+                    <div class="dropdown-header" id="memory-dropdown:header">
+                        Memory
+                    </div>
+                    <div class="dropdown-body" id="memory-dropdown:body">
+                        <div class="memory-box">
+                            <div class="memory-control">
+                                <!-- JS Generated Content -->
+                            </div>
+                            <div class="memory-content">
+                                <!-- JS Generated Content -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- IO Dropdown -->
+                <div class="dropdown" id="io-dropdown">
+                    <div class="dropdown-header" id="io-dropdown:header">
+                        IO
+                    </div>
+                    <div class="dropdown-body" id="io-dropdown:body">
+                        <div class="io">
+                            <div class="flex-row">
+                                <div class="sevenSegmentDisplay">
+                                    <!-- JS Generated Content -->
+                                </div>
+                            </div>
+                            <div class="flex-row">
+                                <div class="led-list" id="leftLED">
+                                    <!-- JS Generated Content -->
+                                </div>
+                                <div class="led-list" id="rightLED">
+                                    <!-- JS Generated Content -->
+                                </div>
+                            </div>
+                            <div class="flex-row">
+                                <div id="leftLevers">
+                                    <!-- JS Generated Content -->
+                                </div>
+                                <div id="rightLevers">
+                                    <!-- JS Generated Content -->
+                                </div>
+                            </div>
+                            <div class="flex-row">
+                                <div class="matrixKeyboard">
+                                    <!-- JS Generated Content -->
+                                </div>
+                                <div class="pit">
+                                    <!-- JS Generated Content -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="js/main.js"></script>
+    <!-- Main Script -->
+    <script async src="js/main.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+    <script>
+        // Temporarily disabled
+        // window.cookieconsent.initialise({
+        //     "palette": {
+        //         "popup": {
+        //         "background": "rgb(20, 20, 20)",
+        //         "text": "#d6d6d6"
+        //         },
+        //         "button": {
+        //         "background": "green"
+        //         }
+        //     },
+        //     "position": "bottom-left",
+        //     "content": {
+        //         "message": "This website uses cookies (or local storage) to ensure you get the best experience on our website",
+        //         "dismiss": "Got it!",
+        //         "link": "Learn more",
+        //         "href": "https://www.cookiesandyou.co"
+        //     }
+        // });
+    </script>
 </body>
 </html>

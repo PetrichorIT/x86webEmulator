@@ -1,5 +1,6 @@
 import Register32 from '../models/Register32';
 import { App } from '../App';
+import { DOMApp } from './DOMApp';
 
 export class DOMRegister {
 	private byte3: HTMLInputElement;
@@ -12,8 +13,8 @@ export class DOMRegister {
 	/**
 	 * Creates a control component for a register of the application process
 	 */
-	constructor(app: App, registerName: string) {
-		this.register = app.registers[registerName];
+	constructor(domApp: DOMApp, registerName: string) {
+		this.register = domApp.app.registers[registerName];
 
 		const registerDOM = document.createElement('div');
 		registerDOM.classList.add('register');
@@ -55,7 +56,7 @@ export class DOMRegister {
 		// LINK DOM
 
 		this.update(this.register._32);
-		app.subscribe(() => this.update(app.registers[registerName]._32));
+		domApp.subscribe(() => this.update(domApp.app.registers[registerName]._32));
 	}
 
 	/**

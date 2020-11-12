@@ -8,20 +8,27 @@ import { initSyntax } from '../parsers/syntax';
 import SemiPersistentStorage from './common';
 import { CompilerError } from '../parsers/const';
 import { Lib } from '../lib/lib';
+import { DOMSettings } from './DOMSettings';
+import { DOMLibaryController } from './DOMLibaryController';
+import { LEDRow } from '../io/LEDRow';
+import { LeverRow } from '../io/LeverRow';
+import { SevenSegmentDisplay } from '../io/SevenSegementDisplay';
+import { MatrixKeyboard } from '../io/MatrixKeyboard';
+import { PIT } from '../io/PIT';
 
+/**
+ * Indicates if a DOMApp is the initial build
+ */
 let _firstBuild: boolean = true;
 
 export class DOMApp {
-	private app: App;
+	public app: App;
 	private registers: { [key: string]: DOMRegister };
 	private flags: { [key: string]: DOMFlag };
 	private memory: DOMMemory;
 
-	private editor: CodeMirror.EditorFromTextArea;
+	public editor: CodeMirror.EditorFromTextArea;
 	private debugBox: HTMLDivElement;
-
-	private moreButton: HTMLButtonElement;
-	private moreBox: HTMLDivElement;
 
 	private compileButton: HTMLButtonElement;
 	private pauseButton: HTMLButtonElement;
@@ -34,6 +41,15 @@ export class DOMApp {
 	private running: boolean;
 	private preferredFilename = 'code.txt';
 
+	// Configguarzion Options
+	public instructionDelay: number = 100;
+	public speedUpLibaryCode: boolean = true;
+
+	public libaryViewActive: boolean = false;
+	public libaryViewSourceBackup: string;
+	private libaryViewCloseButton: HTMLButtonElement;
+
+	private subscribers: (() => void)[];
 	/**
 	 * Creates a DOMApp object that links the given application to the DOM
 	 */
@@ -42,12 +58,21 @@ export class DOMApp {
 		this.registers = {};
 		this.flags = {};
 		this.running = false;
+		this.subscribers = [];
 
+		// Load libaries first since they are needed on GUI build
 		Lib.loadDefaultLibs(this.app);
 		Lib.loadLocalLibs(this.app);
 
 		this.buildDebug();
 		this.build();
+	}
+
+	/**
+	 * Adds a new RX like subscriber to the update cycle initialted by change in the app state
+	 */
+	public subscribe(newSubscriber: () => void) {
+		this.subscribers.push(newSubscriber);
 	}
 
 	/**
@@ -87,33 +112,57 @@ export class DOMApp {
 	 * Links & Creates the DOM Components at first init(_:)
 	 */
 	private build() {
+		// Builds Registers in a dedicated box
 		for (const regName in this.app.registers) {
-			this.registers[regName] = new DOMRegister(this.app, regName);
+			this.registers[regName] = new DOMRegister(this, regName);
 		}
-		for (const flgName in this.app.flags) {
-			this.flags[flgName] = new DOMFlag(this.app, flgName);
-		}
-		if (!this.memory) this.memory = new DOMMemory(this.app);
 
+		// Builds Flags in a decdicated box
+		for (const flgName in this.app.flags) {
+			this.flags[flgName] = new DOMFlag(this, flgName);
+		}
+
+		// Builds Memory if not allready done
+		if (!this.memory) this.memory = new DOMMemory(this);
+
+		// Initializes the syntax checker for codemirror
 		if (_firstBuild) initSyntax();
+
+		// Loads other components
+		new DOMSettings(this.app, this);
+		new DOMLibaryController(this);
+
+		this.app.ioDevices.push(
+			new LEDRow(0x5C, "#leftLED"),
+			new LEDRow(0x5D, "#rightLED"),
+			new LeverRow(0x58, "#leftLevers"),
+			new LeverRow(0x59, "#rightLevers"),
+			new SevenSegmentDisplay(0xb0, 0xbb, ".sevenSegmentDisplay"),
+			new MatrixKeyboard(0x5a, 0x5b, ".matrixKeyboard"),
+			new PIT(0x54, ".pit")
+		);
+
+		// Last build step of the info panel.
+		// Requires allready build UI to determine the required dropdown height
+		this.buildDropdowns()
+
+		// Builds the codemirror editor (with color-scheme matching themes)
+		const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
 		const textArea = document.getElementById('editor') as HTMLTextAreaElement;
 		this.editor = CodeMirror.fromTextArea(textArea, {
 			mode: 'x86',
-			theme: 'material-darker',
+			theme: darkMode ? 'material-darker' : "default",
 			lineNumbers: true,
 			indentUnit: 4,
 			lineNumberFormatter: (i) => '0x' + i.toString(16)
 		});
 
-		this.editor.getDoc().setValue(SemiPersistentStorage.getData('_editor_snapshot') || '');
+		// Launches the editor with the last snapshot from SessionStorage
+		// Primes the editor to remove marks on editing
+		this.editor.getDoc().setValue(SemiPersistentStorage.getData('editor:snapshot') || '');
 		this.editor.on('inputRead', () => this.onEditorChange());
 
-		this.moreButton = document.getElementById('more-button') as HTMLButtonElement;
-		this.moreButton.addEventListener('click', () => this.toggleMoreMenu());
-
-		this.moreBox = document.getElementById('more-box') as HTMLDivElement;
-
-		document.getElementById('saveAsLib').addEventListener('click', () => this.moreActionSaveAsLib());
+		// Initilizes and primes the action buttons
 
 		this.compileButton = document.getElementById('compile') as HTMLButtonElement;
 		this.compileButton.addEventListener('click', () => this.onCompile());
@@ -135,35 +184,123 @@ export class DOMApp {
 
 		this.debugBox = document.getElementById('debug-box') as HTMLDivElement;
 
-		this.app.subscribe(() => this.onInstructionCycle());
+		// Build Libary View Button
+		this.libaryViewCloseButton = document.getElementById("closeLibaryView") as HTMLButtonElement;
+		this.libaryViewCloseButton.hidden = true;
+		this.libaryViewCloseButton.addEventListener("click", () => this.libaryViewCloseButtonPressed());
+
+		// Subscribes to the application callback on change
+		this.app.onInstructionCycle = () => this.onInstructionCycle();
 
 		_firstBuild = false;
+	}
+
+	/**
+	 * Handles Dropdowns
+	 */
+	private buildDropdowns() {		
+		// Dropdowns require a ".dropdown" class and an id
+		// Header must have id : "id:Header ""
+		// Body mist have id : "id:Body"
+		document.querySelectorAll(".dropdown").forEach((node) => {
+			const id = node.id;
+			if (!id) return;
+
+			const storageID = "dropdown:" + id
+
+			// If not set extened is false (after initial configuration)
+			let extened = SemiPersistentStorage.getData(storageID) !== "true";
+			let header = document.getElementById(id + ":header");
+			let body = document.getElementById(id + ":body");
+
+			let title = header.innerHTML;
+			let height = body.offsetHeight;
+
+			if (header && body) 
+				header.addEventListener("click", () => {
+
+					body.style.paddingTop = extened ? "0px" : "15px";
+					body.style.paddingBottom = extened ? "0px" : "5px";
+					body.style.height = extened ? "0px" : (height + "px");
+					header.innerHTML = extened ? "►" + title : "▼" + title
+					extened = !extened;
+
+					height = body.scrollHeight;
+
+					SemiPersistentStorage.setData(storageID, extened ? "true" : "false");
+				})
+
+				// Initial configuration
+				header.click();
+		})
+	}
+
+	/**
+	 * Shows the libary in the editor (readonly).
+	 */
+	public libaryViewShowLibary(libaryName: string) {
+
+		if (!this.libaryViewActive) this.libaryViewSourceBackup = this.editor.getValue();
+
+		this.editor.setValue(Lib.getLibCode(libaryName));
+		this.editor.setOption("readOnly", true)
+		this.libaryViewCloseButton.hidden = false;
+		this.libaryViewActive = true;
+
+		{
+			this.compileButton.disabled = true;
+			this.runButton.disabled = true;
+			this.stepButton.disabled = true;
+			this.pauseButton.disabled = true;
+			this.fileInputButton.disabled = true;
+		}
+	}
+
+	/**
+	 * Returns the editor to edit state.
+	 */
+	private libaryViewCloseButtonPressed() {
+		this.editor.setValue(this.libaryViewSourceBackup)
+		this.editor.setOption("readOnly", false);
+		this.libaryViewActive = false;
+		this.libaryViewCloseButton.hidden = true;
+
+		{
+			this.compileButton.disabled = false;
+			this.runButton.disabled = false;
+			this.stepButton.disabled = false;
+			this.pauseButton.disabled = false;
+			this.fileInputButton.disabled = false;
+		}
 	}
 
 	/**
 	 * Handels debug / editor updates after the end of an instrcution cycle
 	 */
 	private onInstructionCycle() {
-		let nextInstrIdx = this.app.memory.readUInt32LE(this.app.registers.eip._32);
+		
+		
+		// Only apply markings in step mode or with instruction delay
+		if (this.instructionDelay > 0 || this.running === false) {
+			this.updateUI();
+		}
+	}
+
+	/**
+	 * Causes UI Updates.
+	 */
+	private updateUI() {
 		this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
-		if (nextInstrIdx >= this.app.instructions.length || nextInstrIdx === 0) return;
-		let line = this.app.instructions[nextInstrIdx].lineNumber;
-		this.editor.markText({ line, ch: 0 }, { line, ch: 255 }, { css: 'background-color: rgba(17, 165, 175, 0.5);' });
-	}
 
-	/**
-	 * Handles show/hide actions from the more button
-	 */
-	private toggleMoreMenu() {
-		this.moreBox.style.opacity = this.moreBox.style.opacity === '1' ? '0' : '1';
-	}
+		// Current Line Marking 
+		let nextInstrIdx = this.app.memory.readUInt32LE(this.app.registers.eip._32);
+		if (nextInstrIdx < this.app.instructions.length && nextInstrIdx !== 0) {
+			let line = this.app.instructions[nextInstrIdx].lineNumber;
+			this.editor.markText({ line, ch: 0 }, { line, ch: 255 }, { css: 'background-color: rgba(17, 165, 175, 0.5);' });
+		};
 
-	/**
-	 * Handles the creation of a Lib from the current code of the editor
-	 */
-	private moreActionSaveAsLib() {
-		const libName = prompt('Enter a libary name', 'myLib');
-		Lib.setLib(this.app, libName, this.editor.getDoc().getValue());
+		// Update Components
+		this.subscribers.forEach((s) => s());
 	}
 
 	/**
@@ -179,19 +316,22 @@ export class DOMApp {
 	private onCompile() {
 		this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
 
+		// Get timestamp of compilation process
 		const tsmp = new Date().getMilliseconds() & 0xff;
-		console.info(`Parsing new snapshot $${tsmp}`);
 
 		try {
 			let p = this.app.parser.parse(this.editor.getDoc().getValue());
-			console.info(`Parsed snapshot $${tsmp} - Got ${p.length} instructions`);
 
 			this.app.runProgram(p);
+			this.updateUI();
 
-			SemiPersistentStorage.setData('_editor_snapshot', this.editor.getDoc().getValue());
-			console.info(`Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
+			// Save a valid programm in SessionStorage
+			SemiPersistentStorage.setData('editor:snapshot', this.editor.getDoc().getValue());
+			console.info(`[Parser] Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		} catch (e) {
-			if (e.line && e.position) {
+			// Catch compiler errors
+			if (e.line !== undefined && e.position !== undefined) {
+				// Mark faulty code
 				let err = e as CompilerError;
 				this.editor.markText(
 					{ line: err.line, ch: err.position.from },
@@ -201,6 +341,7 @@ export class DOMApp {
 
 				console.error(e.message);
 			} else {
+				// Throw other errors (should not happen)
 				throw e;
 			}
 		}
@@ -214,16 +355,23 @@ export class DOMApp {
 		this.running = true;
 
 		console.info(`Starting run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
+		
+		// Remove markings if in 0ms mode
+		if (this.instructionDelay === 0)
+			this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
 
 		try {
+			// Run programm until stoped / finished (~5ms per cycle on no delay, no lib), (<1ms on lib)
 			while (this.running && this.app.instructionCycle()) {
-				console.log(this.app.isInLibMode);
-				if (!this.app.isInLibMode) await new Promise((r) => setTimeout(r, this.app.instructionDelay));
+				// If not in lib code or lib code does not required speed up => delay
+				if (!this.app.isInLibMode || !this.speedUpLibaryCode) await new Promise((r) => setTimeout(r, this.instructionDelay));
 			}
+			this.updateUI();
 			if (this.running) {
 				console.info(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 			}
 		} catch (e) {
+			// Catch NOP Error to determine end of run loop
 			if (e.message === 'NOP') {
 				if (this.running) {
 					console.info(`Ended run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
@@ -236,15 +384,21 @@ export class DOMApp {
 		}
 	}
 
+	/**
+	 * Handles actions if the pause button is pressed
+	 */
 	private onPause() {
 		console.info(`Paused run loop at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		this.running = false;
+
+		this.updateUI();
 	}
 
 	/**
 	 * Handles actions if the step button is pressed
 	 */
 	private onStep() {
+		if (this.running) return;
 		console.info(`Stepping to instruction at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		this.app.instructionCycle();
 	}
