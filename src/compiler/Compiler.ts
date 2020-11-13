@@ -1,4 +1,4 @@
-import { App, CommandOperandChecker, CompiledCode, Label } from "../App";
+import { App, Command, CommandOperandChecker, CompiledCode, Label } from "../App";
 import { DataConstant, Programm } from "../models/Programm";
 import { StringStream } from "./StringStream";
 import { CompilerError, SourceMode, syn_label_def, syn_label, syn_registers, syn_number, syn_keywords, syn_string } from "./Common";
@@ -21,7 +21,11 @@ export class Compiler {
         this.libs = {};
     }
 
-    public parse(text: string): Programm {
+    public parse(text: string, exportLabels?: string[]): Programm {
+
+         exportLabels = exportLabels || [];
+
+        const startTime = new Date().getTime();
 
         let lines = text.split("\n");
         let programm = new Programm([],[]);
@@ -32,7 +36,7 @@ export class Compiler {
                     this.parseGlobal(lines[lineIdx], lineIdx, programm);
                     break;
                 case SourceMode.text: 
-                    this.parseText(lines[lineIdx], lineIdx, programm);
+                    this.parseText(lines[lineIdx], lineIdx, programm, exportLabels);
                     break;
                 case SourceMode.data: 
                     this.parseData(lines[lineIdx], lineIdx, programm);
@@ -40,6 +44,71 @@ export class Compiler {
             }
             
         }
+
+        /// Check label / dConstant consistency 
+
+		function pushUniq<T>(arr: T[], value: T): boolean {
+			if (!arr.includes(value)) {
+				arr.push(value);
+				return true;
+			}
+			return false;
+		}
+
+        /// Collect defined and requesten labels / dConst
+		let definedLabels: string[] = [];
+        let requestedLabels: { label: string; line: number }[] = [];
+        
+        let definedDConst: string[] = [];
+        let requestedDConst: { name: string, line: number }[] = [];
+
+		for (const instrc of programm.text) {
+			if ((instrc as Label).label !== undefined) {
+				// Push all defined labels into array to find redefinition
+				if (!pushUniq(definedLabels, (instrc as Label).label)) {
+					throw new CompilerError(
+						`C018 - Illegal label redefintion "${(instrc as Label).label}"`,
+						instrc.lineNumber,
+						{ from: 0 }
+					);
+				}
+			} else {
+				// Push all used labels into array to gurantee existence
+				for (const operand of (instrc as Command).params) {
+					if (operand.type === OperandTypes.label)
+                        pushUniq(requestedLabels, { label: operand.value, line: instrc.lineNumber });
+                    if (operand.type === OperandTypes.dataOffset)
+                        pushUniq(requestedDConst, { name: operand.value, line: instrc.lineNumber });
+				}
+			}
+		}
+
+        for (const dConst of programm.data) {
+            if (!pushUniq(definedDConst, dConst.name)) 
+                throw new CompilerError('C033 -  Illegal Constant redefintion "' + dConst.name + '"', dConst.lineNumber, { from: 0 })
+        }
+
+		// Test if requestedLabels <= definedLabels
+		for (const { label, line } of requestedLabels) {
+			if (!definedLabels.includes(label)) {
+				throw new CompilerError(`C016 - Unkown Label "${label}"`, line, { from: 0 });
+			}
+        }
+        
+        // Test if requestedLabels <= definedLabels
+		for (const { name, line } of requestedDConst) {
+			if (!definedDConst.includes(name)) {
+				throw new CompilerError(`C016 - Unkown Constant "${name}"`, line, { from: 0 });
+			}
+		}
+
+        if (this.debugMode) {
+			const dur = (new Date()).getTime() - startTime;
+			console.info(`[Parser] Parsed ${lines.length} lines in ${dur}ms`);
+            console.info(`[Parser] Captured ${programm.text.length} symbols (${definedLabels.length} labels, ${programm.text.length - definedLabels.length} commands)`);
+            console.info(`[Parser] Captured ${programm.data.length} constants`);
+			console.info(`[Parser] Captured ${exportLabels.length} public symbols`);
+		}
 
         this.mode = SourceMode.global;
         return programm;
@@ -79,7 +148,7 @@ export class Compiler {
     /**
      * Parses a line defined as a text line.
      */
-    private parseText(line: string, lineIdx: number, programm: Programm) {
+    private parseText(line: string, lineIdx: number, programm: Programm, exportLabels: string[]) {
 
         // Use line a string stream
         this.currentLine = new StringStream(line);
@@ -138,7 +207,12 @@ export class Compiler {
                     return instr;
                 })
             );
-            programm.data.push(...this.libs[libName].data);
+            programm.data.push(...this.libs[libName].data
+                .map((dConst) => {
+                    dConst.lineNumber = lineIdx;
+                    return dConst;
+                })
+            );
 
             if (this.debugMode) console.info(`[Parser] Including libary "${libName}" (${this.libs[libName].text.length} instructions & ${this.libs[libName].data.length} constants)`);
         } else {
@@ -162,7 +236,7 @@ export class Compiler {
                     lineNumber: lineIdx
                 });
 
-                if (isExportLabel) programm.exportLabels.push(label);
+                if (isExportLabel) exportLabels.push(label);
             }
 
             // Eat Whitespaces whenever possible
@@ -346,10 +420,14 @@ export class Compiler {
 
                         params.push(new Operand(OperandTypes.const, num));
                     } else if (this.currentLine.peek() === '"') {
-                        let desc = this.currentLine.eatWhile((c) => c !== ',').trim();
+                        let desc = this.currentLine.eatWhile((c) => c !== ',' && c !== ";").trim();
                         if (syn_string.test(desc)) {
                             params.push(new Operand(OperandTypes.string, desc.substr(1, desc.length - 2)));
                         }
+                    } else if (this.currentLine.rest().toLowerCase().startsWith("offset ")) {
+                        this.currentLine.skip(7);
+                        let desc = this.currentLine.eatWhile((c) => c !== "," && c !== ";")
+                        params.push(new Operand(OperandTypes.dataOffset, desc));
                     } else {
                         // Register
                         let desc = this.currentLine.eatWhile((c) => c !== ',' && c !== ';').trim().toLowerCase();
@@ -426,7 +504,7 @@ export class Compiler {
         }
 
         programm.data.push(
-            new DataConstant(w, defSize, raw)
+            new DataConstant(w, defSize, raw, lineIdx)
         );
 
     }

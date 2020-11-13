@@ -98,13 +98,16 @@ export class DataConstant {
     public memSpace: number;
     public raw: number[];
 
+    public lineNumber: number
+
     public get totalRequiredMemSpace(): number {
         return this.memSpace * this.raw.length;
     }
 
-    constructor(name: string, memSpace: number, raw: number[]) {
+    constructor(name: string, memSpace: number, raw: number[], lineNumber: number) {
         this.name = name;
         this.memSpace = memSpace;
         this.raw = raw;
+        this.lineNumber = lineNumber;
     }
 }
