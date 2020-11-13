@@ -18,7 +18,7 @@ export const CommonCheckers = {
 	// Generic Checkers (multi opernad)
 	expectCount: (params: Operand[], count: number) => {
 		if (params.length !== count)
-			throw new Error('C00X - Invalid operands. Invalid number of operands. Expected ' + count + '.');
+			throw new Error('Invalid number of operands. Expected ' + count + '.');
 	},
 
 	expectNoMem2Mem: (params: Operand[]) => {
@@ -26,31 +26,31 @@ export const CommonCheckers = {
 		for (const op of params) {
 			if (op.isMemory) c++;
 		}
-		if (c > 1) throw new Error('C00X - Invalid operand. Only one operand can be memory.');
+		if (c > 1) throw new Error('Invalid operand. Only one operand can be memory.');
 	},
 	// Generic Checker (one operand)
 	expectLabelLike: (param: Operand) => {
 		if (param.type !== OperandTypes.label && param.type !== OperandTypes.const)
-			throw new Error('C00X - Invalid operands. Expected label or const.');
+			throw new Error('Expected label or const.');
 	},
 	expectConst: (param: Operand) => {
-		if (param.type !== OperandTypes.const) throw new Error('C00X - Invalid operands. Operand must be const.');
+		if (param.type !== OperandTypes.const) throw new Error('Operand must be const.');
 	},
 	expectMutable: (param: Operand) => {
-		if (param.type === OperandTypes.const) throw new Error('C00X - Invalid operands. Operand must be mutable.');
+		if (param.type === OperandTypes.const) throw new Error('Operand must be mutable.');
 	},
 	expectNoMem: (param: Operand) => {
-		if (param.isMemory) throw new Error('C00X - Invalid Operands. Operand cannot be memory');
+		if (param.isMemory) throw new Error('Operand cannot be memory');
 	},
 	expectMemSize: (param: Operand, memSize: number) => {
 		if (param.requiredMemSize) {
 			if (param.requiredMemSize !== memSize)
-				throw new Error('C00X - Invalid operands. Invalid MemSize. Expected 4bytes or undefined.');
+				throw new Error('Invalid memory size. Expected 4 bytes or undefined.');
 		}
 	},
 	expectAL: (param: Operand) => {
-		if (param.type !== OperandTypes.register) throw new Error("C00X - Invalid Operands. Expected AL");
-		if (param.value !== "al") throw new Error("C00X - Invalid Operands. Expected AL");
+		if (param.type !== OperandTypes.register) throw new Error("Expected register AL");
+		if (param.value !== "al") throw new Error("Expected register AL");
 	},
 	// Other often use combis
 	jumpLike,

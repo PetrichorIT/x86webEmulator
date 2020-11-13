@@ -9,7 +9,36 @@ export const syn_number = /(0x[0-9a-fA-F]+|0b[01]+|[\d]+)/;
 export const syn_datasize = /^(dd|db|dw)/i;
 
 export enum SourceMode {
-    global, text, data
+    global = 1, text = 2, data = 3
+}
+
+export enum CompilerErrorCode {
+
+	// Instrutions
+	invalidInstuction = "C001 - Invalid instruction name ",
+	invalidTokenDirectMemory = "C002 - Invalid token for direct memory access. Expected [<number>]",
+	invalidTokenNumber = "C003 - Invalid token. Expected <number>. Got ",
+	invalidTokenRegister = "C004 - Invalid token. Expected <register>. Got ",
+
+	missingToken = "C009 - Missing token ",
+
+	// Libary
+	missingLibaryIdentifier = "C010 - Missing valid libary identifier after #include statement",
+	unkownLibaryIdentifier = "C011 - Unkown libary identifier ",
+
+	// Labels
+	illegalLabelRedefintion = "C020 - Illegal redefintion label ",
+	undefinedLabel = "C021 - Missing defintion for label ",
+	illegalLabel = "C022 - Illegal label ",
+
+	// Constants
+	illegalConstantRedefintion = "C030 - Illegal redefintion for constant ",
+	undefinedConstant = "C031 - Missing defintion for constant ",
+	illegalNamingScheme = "C032 - Invalid naming scheme. Expected [A-z][A-z0-9_-]*. Got ",
+	illegalSizeScheme = "C033 - Invalid size scheme. Expected DD DB DW. Got ",
+
+	// Operand checkers,
+	illegalOperands = "C040 - Invalid operands. ",
 }
 
 /**
@@ -19,13 +48,17 @@ export enum SourceMode {
  * - assumes end char to be line end if non is given
  */
 export class CompilerError extends Error {
+	code: CompilerErrorCode;
 	line: number;
 	position: { from: number; to?: number };
 
-	constructor(message: string, line?: number, position?: { from: number; to?: number }) {
-		super(message);
+	constructor(code: CompilerErrorCode, description: string, line?: number, position?: { from: number; to?: number }) {
+		super(code + description);
 
+		this.code = code;
 		this.line = line;
 		this.position = position;
+
+		Object.setPrototypeOf(this, CompilerError.prototype);
     }
 }

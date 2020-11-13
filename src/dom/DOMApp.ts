@@ -331,12 +331,10 @@ export class DOMApp {
 			console.info(`[Compiler] Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		} catch (e) {
 			// Catch compiler errors
-			if (e.line !== undefined && e.position !== undefined) {
-				// Mark faulty code
-				let err = e as CompilerError;
+			if (e instanceof CompilerError) {
 				this.editor.markText(
-					{ line: err.line, ch: err.position.from },
-					{ line: err.line, ch: err.position.to || 255 },
+					{ line: e.line, ch: e.position.from },
+					{ line: e.line, ch: e.position.to || 255 },
 					{ css: 'background-color: rgba(200, 50, 30, 0.5);' }
 				);
 

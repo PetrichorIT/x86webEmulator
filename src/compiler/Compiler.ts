@@ -1,7 +1,7 @@
 import { App, Command, CommandOperandChecker, CompiledCode, Label } from "../App";
 import { DataConstant, Programm } from "../models/Programm";
 import { StringStream } from "./StringStream";
-import { CompilerError, SourceMode, syn_label_def, syn_label, syn_registers, syn_number, syn_keywords, syn_string } from "./Common";
+import { CompilerError, SourceMode, syn_label_def, syn_label, syn_registers, syn_number, syn_keywords, syn_string, CompilerErrorCode } from "./Common";
 import Operand, { OperandTypes } from "../models/Operand";
 
 import * as x86 from '../x86';
@@ -66,7 +66,8 @@ export class Compiler {
 
     public parse(text: string, exportLabels?: string[]): Programm {
 
-         exportLabels = exportLabels || [];
+        this.mode = SourceMode.global as any;
+        exportLabels = exportLabels || [];
 
         const startTime = new Date().getTime();
 
@@ -110,7 +111,8 @@ export class Compiler {
 				// Push all defined labels into array to find redefinition
 				if (!pushUniq(definedLabels, (instrc as Label).label)) {
 					throw new CompilerError(
-						`C018 - Illegal label redefintion "${(instrc as Label).label}"`,
+                        CompilerErrorCode.illegalLabelRedefintion,
+						(instrc as Label).label,
 						instrc.lineNumber,
 						{ from: 0 }
 					);
@@ -128,20 +130,20 @@ export class Compiler {
 
         for (const dConst of programm.data) {
             if (!pushUniq(definedDConst, dConst.name)) 
-                throw new CompilerError('C033 -  Illegal Constant redefintion "' + dConst.name + '"', dConst.lineNumber, { from: 0 })
+                throw new CompilerError(CompilerErrorCode.illegalConstantRedefintion, dConst.name, dConst.lineNumber, { from: 0 })
         }
 
 		// Test if requestedLabels <= definedLabels
 		for (const { label, line } of requestedLabels) {
 			if (!definedLabels.includes(label)) {
-				throw new CompilerError(`C016 - Unkown Label "${label}"`, line, { from: 0 });
+				throw new CompilerError(CompilerErrorCode.undefinedLabel, label, line, { from: 0 });
 			}
         }
         
         // Test if requestedLabels <= definedLabels
 		for (const { name, line } of requestedDConst) {
 			if (!definedDConst.includes(name)) {
-				throw new CompilerError(`C016 - Unkown Constant "${name}"`, line, { from: 0 });
+				throw new CompilerError(CompilerErrorCode.undefinedConstant, name, line, { from: 0 });
 			}
 		}
 
@@ -184,12 +186,14 @@ export class Compiler {
 
 
             if (this.currentLine.eol())
-                throw new CompilerError('C001 - Missing libName after #include statement', lineIdx, {
+                throw new CompilerError(
+                    CompilerErrorCode.missingLibaryIdentifier, null , lineIdx, {
                     from: 0
                 });
             // Also removes next symvol (if nothrow == ")
             if (this.currentLine.next() !== '"')
-                throw new CompilerError('C002 - Unkown token after #include statement. Expected "', lineIdx, {
+                throw new CompilerError(
+                    CompilerErrorCode.missingLibaryIdentifier, null, lineIdx, {
                     from: this.currentLine.position
                 });
 
@@ -197,13 +201,15 @@ export class Compiler {
             let libName = this.currentLine.eatWhile(/[A-z._/]/);
 
             if (this.currentLine.eol() || this.currentLine.peek() !== '"')
-                throw new CompilerError('C003 - Missing closing token " in #include statment', lineIdx, {
+                throw new CompilerError(
+                    CompilerErrorCode.missingLibaryIdentifier, null, lineIdx, {
                     from: preIdx,
                     to: this.currentLine.position
                 });
 
             if (this.libs[libName] === undefined)
-                throw new CompilerError(`C004 - Unknown libary identifier "${libName}"`, lineIdx, {
+                throw new CompilerError(
+                    CompilerErrorCode.unkownLibaryIdentifier, libName, lineIdx, {
                     from: preIdx,
                     to: this.currentLine.position
                 });
@@ -266,12 +272,16 @@ export class Compiler {
                 // Found label
                 const label = labelMatch[0].substr(0, labelMatch[0].length - 1);
                 if (label === 'libmain')
-                    throw new CompilerError('C005 - Forbidden Label "libmain"', lineIdx, {
+                    throw new CompilerError(
+                        CompilerErrorCode.illegalLabel,
+                        'libmain', lineIdx, {
                         from: 0,
                         to: this.currentLine.position
                     });
                 if (label.startsWith('__'))
-                    throw new CompilerError('C005 - Forbidden Label "__*"', lineIdx, {
+                    throw new CompilerError(
+                        CompilerErrorCode.illegalLabel,
+                        '__*', lineIdx, {
                         from: 0,
                         to: this.currentLine.position
                     });
@@ -295,7 +305,9 @@ export class Compiler {
 
             // Test for valid keyword
             if (!syn_keywords.includes(commandName))
-                throw new CompilerError(`C006 - Invalid token. Invalid instruction "${commandName}"`, lineIdx, {
+                throw new CompilerError(
+                    CompilerErrorCode.invalidInstuction
+                    ,commandName, lineIdx, {
                     from: preCN,
                     to: this.currentLine.position
                 });
@@ -321,7 +333,8 @@ export class Compiler {
                         ) as RegExpMatchArray;
                         if (!matches)
                             throw new CompilerError(
-                                'C007 - Invalid token for direct memory adressing. Expected [<number>]',
+                                CompilerErrorCode.invalidTokenDirectMemory,
+                                null,
                                 lineIdx,
                                 { from: preOpParse }
                             );
@@ -329,7 +342,8 @@ export class Compiler {
                         let number = parseInt(matches[0].substr(0, matches[0].length - 1));
                         if (isNaN(number))
                             throw new CompilerError(
-                                `C008 - Invalid number string "${matches[0].substr(0, matches[0].length - 1)}"`,
+                                CompilerErrorCode.invalidTokenNumber,
+                                matches[0].substr(0, matches[0].length - 1),
                                 lineIdx,
                                 { from: preOpParse }
                             );
@@ -339,13 +353,15 @@ export class Compiler {
 
                         let contents = this.currentLine.eatWhile((c) => c !== ']');
                         if (this.currentLine.peek() !== ']')
-                            throw new CompilerError('C009 - Missing closing token ]', lineIdx, {
+                            throw new CompilerError(
+                                CompilerErrorCode.missingToken, ']', lineIdx, {
                                 from: preOpParse,
                                 to: this.currentLine.position
                             });
                         this.currentLine.next();
                         contents = contents.trim();
 
+                            
                         if (contents.includes('+') || contents.includes('-')) {
                             // Indexed Memory Access
                             let idx = contents.indexOf('+');
@@ -354,7 +370,8 @@ export class Compiler {
 
                             if (!syn_registers.test(regString))
                                 throw new CompilerError(
-                                    `C010 - Invalid token. Invalid register "${regString}"`,
+                                    CompilerErrorCode.invalidTokenRegister,
+                                    regString,
                                     lineIdx,
                                     {
                                         from: preOpParse,
@@ -365,7 +382,8 @@ export class Compiler {
                             let offsetStr = contents.substr(idx + 1).trim();
                             if (!offsetStr.match(syn_number) || offsetStr.match(syn_number)[0] !== offsetStr)
                                 throw new CompilerError(
-                                    `C011 - Invalid token. Expected number from string "${offsetStr}"`,
+                                    CompilerErrorCode.invalidTokenNumber,
+                                    offsetStr,
                                     lineIdx,
                                     {
                                         from: preOpParse,
@@ -377,7 +395,8 @@ export class Compiler {
 
                             if (isNaN(offset))
                                 throw new CompilerError(
-                                    `C011 - Invalid token. Expected number from string ${offsetStr}`,
+                                    CompilerErrorCode.invalidTokenNumber,
+                                    offsetStr,
                                     lineIdx,
                                     {
                                         from: preOpParse,
@@ -397,7 +416,8 @@ export class Compiler {
                             const fReg = contents.toLowerCase();
                             if (!syn_registers.test(fReg))
                                 throw new CompilerError(
-                                    `C012 - Invalid token. Invalid register "${fReg}"`,
+                                    CompilerErrorCode.invalidTokenRegister,
+                                    fReg,
                                     lineIdx,
                                     {
                                         from: preOpParse,
@@ -412,7 +432,8 @@ export class Compiler {
                                 this.currentLine.next();
                                 let sReg = this.currentLine.eatWhile((c) => c !== ']');
                                 if (this.currentLine.peek() !== ']')
-                                    throw new CompilerError('C013 - Missing closing token ]', lineIdx, {
+                                    throw new CompilerError(
+                                        CompilerErrorCode.missingToken, "]", lineIdx, {
                                         from: preSecondParse,
                                         to: this.currentLine.position
                                     });
@@ -421,7 +442,8 @@ export class Compiler {
 
                                 if (!syn_registers.test(sReg))
                                     throw new CompilerError(
-                                        `C014 - Invalid token. Invalid register "${sReg}"`,
+                                        CompilerErrorCode.invalidTokenRegister,
+                                        sReg,
                                         lineIdx,
                                         {
                                             from: preSecondParse,
@@ -443,7 +465,8 @@ export class Compiler {
 
                         if (numStr.match(syn_number)[0] !== numStr)
                             throw new CompilerError(
-                                `C014 - Invalid token. Expected number from string "${numStr}"`,
+                                CompilerErrorCode.invalidTokenNumber,
+                                numStr,
                                 lineIdx,
                                 {
                                     from: preOpParse
@@ -455,7 +478,8 @@ export class Compiler {
                         
                         if (isNaN(num))
                             throw new CompilerError(
-                                `C015 - Invalid token. Expected number from string "${numStr}"`,
+                                CompilerErrorCode.invalidTokenNumber,
+                                numStr,
                                 lineIdx,
                                 {
                                     from: preOpParse
@@ -495,7 +519,10 @@ export class Compiler {
                 try {
                     checker(params);
                 } catch (e) {
-                    throw new CompilerError(e.message, lineIdx, { from: preCN });
+                    throw new CompilerError(
+                        CompilerErrorCode.illegalOperands, e.message, 
+                        lineIdx, { from: preCN }
+                    );
                 }
             } else {
                 if (this.debugMode) console.warn(`[Compiler ]Missing checker for instruction "${commandName}" `);
@@ -522,13 +549,18 @@ export class Compiler {
 
         const w = this.currentLine.eatWhile(/\w/)
         if (!syn_label.test(w))
-            throw new CompilerError('C031 - Invalid naming scheme "' + w + '". Expected [A-z][A-z0-9_-]*', lineIdx)
+            throw new CompilerError(
+                CompilerErrorCode.illegalNamingScheme,
+                w, lineIdx)
 
         this.currentLine.eatWhitespaces();
 
         const def = this.currentLine.eatWhile(/\w/).toLowerCase();
         if (![ "dd", "db", "dw"].includes(def))
-            throw new CompilerError('C032 - Invalid size scheme "' + def + '". Expected "DD", "DW" or "DB"')
+            throw new CompilerError(
+                CompilerErrorCode.illegalSizeScheme,
+                def, lineIdx
+            )
     
         const defSize: number = def === "dd" ? 4 : (def === "dw" ? 2 : 1)
 
