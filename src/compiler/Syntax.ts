@@ -30,6 +30,10 @@ export function initCodemirrorSyntax () {
 
 function synModeGlobal(stream: CodeMirror.StringStream, state: any): string {
     if (stream.eatSpace()) return null;
+
+    let isAfterInclude = state.context === 1;
+    state.context = 0;
+
     if (stream.eat(";")) {
         stream.skipToEnd();
         return "comment";
@@ -49,6 +53,23 @@ function synModeGlobal(stream: CodeMirror.StringStream, state: any): string {
         return "global-marker";
     }
 
+    if (stream.match("#include", true)) {
+        state.context = 1;
+        return 'def';
+    }
+
+    if (stream.match(syn_string, true)) {
+        let token = stream.current();
+        token = token.substr(1, token.length - 2);
+
+        // prepare for error if #include "noLib"
+        if (Lib.libs.includes(token) || !isAfterInclude) {
+            return 'string';
+        } else {
+            return 'string-error';
+        }
+    }
+
     stream.next();
     return null;
 }
@@ -59,10 +80,6 @@ function synModeText(stream: CodeMirror.StringStream, state: any): string {
 
     // Eat unnessary lines
     if (stream.eatSpace()) return null;
-
-    // Prepare string check if is libary include
-    let isAfterInclude = state.context === 1;
-    state.context = 0;
 
     // Extract word till whitespace
     let w;
@@ -108,21 +125,10 @@ function synModeText(stream: CodeMirror.StringStream, state: any): string {
         return 'number';
     } else if (stream.match(syn_label_def, true)) {
         return 'def';
-    } else if (stream.match("#include", true)) {
-        state.context = 1;
-        return 'def';
     } else if (stream.match("@export", true)) {
         return 'def';
     } else if (stream.match(syn_string, true)) {
-        // Extract string and cut delimitors
-        let token = stream.current();
-        token = token.substr(1, token.length - 2);
-        // prepare for error if #include "noLib"
-        if (Lib.libs.includes(token) || !isAfterInclude) {
-            return 'string';
-        } else {
-            return 'string-error';
-        }
+        return 'string';
     } else {
         // Allways eat something, to prevent endless loops
         const char = stream.next();

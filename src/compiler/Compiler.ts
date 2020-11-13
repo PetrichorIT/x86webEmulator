@@ -177,46 +177,11 @@ export class Compiler {
                 this.mode = SourceMode.text;
                 return;
             }
-        } else {
-            const res = this.currentLine.match(syn_label_def) as RegExpMatchArray;
-            if (res) {
-                const opt = res[0].substr(0, res.length - 1);
-                const value = this.currentLine.eatWhile((c) => c !== ";");
-
-                programm.options[opt] = value.trim();
-            }
-        }
-    }
-
-    /**
-     * Parses a line defined as a text line.
-     */
-    private parseText(line: string, lineIdx: number, programm: Programm, exportLabels: string[]) {
-
-        // Use line a string stream
-        this.currentLine = new StringStream(line);
-        this.currentLine.eatWhitespaces();
-
-        // Ingnore empty lines and pure comments
-        if (this.currentLine.eol()) return;
-        if (this.currentLine.eat(';')) return;
-
-        
-
-        if (this.currentLine.rest().startsWith(".data:")) {
-            this.mode = SourceMode.data;
-            return
-        }
-
-        // Identifiy @export labels
-        let isExportLabel = this.currentLine.rest().startsWith('@export ');
-        if (isExportLabel) this.currentLine.skip(8);
-
-        // Manage include statements
-        if (this.currentLine.rest().startsWith('#include')) {
+        } else if (this.currentLine.rest().startsWith("#include")) {
             // Include statement
             this.currentLine.skip(8);
             this.currentLine.eatWhitespaces();
+
 
             if (this.currentLine.eol())
                 throw new CompilerError('C001 - Missing libName after #include statement', lineIdx, {
@@ -258,7 +223,43 @@ export class Compiler {
             );
 
             if (this.debugMode) console.info(`[Compiler] Including libary "${libName}" (${this.libs[libName].text.length} instructions & ${this.libs[libName].data.length} constants)`);
+
         } else {
+            const res = this.currentLine.match(syn_label_def) as RegExpMatchArray;
+            if (res) {
+                const opt = res[0].substr(0, res.length - 1);
+                const value = this.currentLine.eatWhile((c) => c !== ";");
+
+                programm.options[opt] = value.trim();
+            }
+        }
+    }
+
+    /**
+     * Parses a line defined as a text line.
+     */
+    private parseText(line: string, lineIdx: number, programm: Programm, exportLabels: string[]) {
+
+        // Use line a string stream
+        this.currentLine = new StringStream(line);
+        this.currentLine.eatWhitespaces();
+
+        // Ingnore empty lines and pure comments
+        if (this.currentLine.eol()) return;
+        if (this.currentLine.eat(';')) return;
+
+        
+
+        if (this.currentLine.rest().startsWith(".data:")) {
+            this.mode = SourceMode.data;
+            return
+        }
+
+        // Identifiy @export labels
+        let isExportLabel = this.currentLine.rest().startsWith('@export ');
+        if (isExportLabel) this.currentLine.skip(8);
+
+        {
             // Manage Lables
             const labelMatch = this.currentLine.match(syn_label_def, true) as RegExpMatchArray;
             if (labelMatch) {
