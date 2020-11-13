@@ -14,11 +14,54 @@ export class Compiler {
     private mode: SourceMode = SourceMode.global;
     private currentLine: StringStream;
 
-    private libs: { [key:string]: Programm }
+    public libs: { [key:string]: Programm }
 
     constructor(app: App) {
         this.app = app;
         this.libs = {};
+    }
+
+    public parseLib(libName: string, text: string): Programm {
+        const prefix = `__lib_${libName}_`;
+        if (this.debugMode) console.info(`[Compiler] Preparing libary "${libName}" for compiling.`)
+
+        let entryPoints: string[] = [];
+        let compiled = this.parse(text, entryPoints);
+        
+        // Prefixes labels with a libary prefix
+		for (let i = 0; i < compiled.text.length; i++) {
+			if ((compiled.text[i] as Label).label) {
+				// Labels
+				if (!entryPoints.includes((compiled.text[i] as Label).label)) {
+					(compiled.text[i] as Label).label = prefix + (compiled.text[i] as Label).label;
+				}
+			} else {
+				// Defines code as libary code
+				(compiled.text[i] as Command).isLibCode = true;
+				// Label Operands
+				for (let j = 0; j < (compiled.text[i] as Command).params.length; j++) {
+					const element = (compiled.text[i] as Command).params[j];
+					if (element.type === OperandTypes.label) {
+						if (!entryPoints.includes(element.value)) {
+							element.value = prefix + element.value;
+						}
+					}
+				}
+			}
+        }
+        
+        // Adds lib_label and JMP lib_label for header intergration
+
+        compiled.text = [ 
+            { name: "jmp", params: [ new Operand(OperandTypes.label, prefix + "libmain")], lineNumber: 0 }, 
+            ...compiled.text, 
+            { label: prefix + "libmain", lineNumber: 0}
+        ];
+        this.libs[libName] = compiled;
+
+		if (this.debugMode) console.info(`[Compiler] Finished parsing Lib "${libName}"`);
+
+		return this.libs[libName];
     }
 
     public parse(text: string, exportLabels?: string[]): Programm {
@@ -104,10 +147,10 @@ export class Compiler {
 
         if (this.debugMode) {
 			const dur = (new Date()).getTime() - startTime;
-			console.info(`[Parser] Parsed ${lines.length} lines in ${dur}ms`);
-            console.info(`[Parser] Captured ${programm.text.length} symbols (${definedLabels.length} labels, ${programm.text.length - definedLabels.length} commands)`);
-            console.info(`[Parser] Captured ${programm.data.length} constants`);
-			console.info(`[Parser] Captured ${exportLabels.length} public symbols`);
+			console.info(`[Compiler] Parsed ${lines.length} lines in ${dur}ms`);
+            console.info(`[Compiler] Captured ${programm.text.length} symbols (${definedLabels.length} labels, ${programm.text.length - definedLabels.length} commands)`);
+            console.info(`[Compiler] Captured ${programm.data.length} constants`);
+			console.info(`[Compiler] Captured ${exportLabels.length} public symbols`);
 		}
 
         this.mode = SourceMode.global;
@@ -214,7 +257,7 @@ export class Compiler {
                 })
             );
 
-            if (this.debugMode) console.info(`[Parser] Including libary "${libName}" (${this.libs[libName].text.length} instructions & ${this.libs[libName].data.length} constants)`);
+            if (this.debugMode) console.info(`[Compiler] Including libary "${libName}" (${this.libs[libName].text.length} instructions & ${this.libs[libName].data.length} constants)`);
         } else {
             // Manage Lables
             const labelMatch = this.currentLine.match(syn_label_def, true) as RegExpMatchArray;
@@ -454,7 +497,7 @@ export class Compiler {
                     throw new CompilerError(e.message, lineIdx, { from: preCN });
                 }
             } else {
-                if (this.debugMode) console.warn(`[Parser ]Missing checker for instruction "${commandName}" `);
+                if (this.debugMode) console.warn(`[Compiler ]Missing checker for instruction "${commandName}" `);
             }
 
             programm.text.push({ name: commandName, params: params, lineNumber: lineIdx });

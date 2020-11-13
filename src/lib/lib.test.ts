@@ -14,10 +14,10 @@ describe('@Test Lib load test', () => {
 	});
 
 	it('Test default lib  "fib"', () => {
-		expect(() => app.parser.parse('#include "fib.h"')).not.toThrow();
+		expect(() => app.compiler.parse('#include "fib.h"')).not.toThrow();
 	});
 
 	it('Test default lib "string"', () => {
-		expect(() => app.parser.parse('#include "string.h"')).not.toThrow();
+		expect(() => app.compiler.parse('#include "string.h"')).not.toThrow();
 	});
 });

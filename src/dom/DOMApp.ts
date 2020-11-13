@@ -4,9 +4,8 @@ import { App } from '../App';
 import DOMRegister from './DOMRegister';
 import DOMMemory from './DOMMemory';
 import DOMFlag from './DOMFlag';
-import { initSyntax } from '../parsers/syntax';
 import SemiPersistentStorage from './common';
-import { CompilerError } from '../parsers/const';
+import { CompilerError } from '../compiler/Common';
 import { Lib } from '../lib/lib';
 import { DOMSettings } from './DOMSettings';
 import { DOMLibaryController } from './DOMLibaryController';
@@ -323,19 +322,13 @@ export class DOMApp {
 		const tsmp = new Date().getMilliseconds() & 0xff;
 
 		try {
-
-			console.log(
-				new Compiler(this.app).parse(this.editor.getDoc().getValue())
-			)
-
-			let p = this.app.parser.parse(this.editor.getDoc().getValue());
-
-			this.app.runProgram(new Programm(p, []));
+			const p = this.app.compiler.parse(this.editor.getDoc().getValue());
+			this.app.runProgram(p);
 			this.updateUI();
 
 			// Save a valid programm in SessionStorage
 			SemiPersistentStorage.setData('editor:snapshot', this.editor.getDoc().getValue());
-			console.info(`[Parser] Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
+			console.info(`[Compiler] Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		} catch (e) {
 			// Catch compiler errors
 			if (e.line !== undefined && e.position !== undefined) {

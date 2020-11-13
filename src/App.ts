@@ -1,8 +1,8 @@
 import Register32 from './models/Register32';
 import Operand, { OperandTypes } from './models/Operand';
-import Parser from './parsers/parser';
 import IODevice from './io/io'
 import { DataConstant, Programm } from './models/Programm';
+import { Compiler } from './compiler/Compiler';
 
 export type CompiledCode = (Command | Label)[];
 
@@ -12,7 +12,7 @@ export type CommandFunction = (app: App, params: Operand[]) => void;
 export type CommandOperandChecker = (params: Operand[]) => void;
 
 export class App {
-	public parser: Parser;
+	public compiler: Compiler;
 
 	public registers: { [key: string]: Register32 };
 	public flags: { [key: string]: boolean };
@@ -37,8 +37,8 @@ export class App {
 			esi: new Register32(0),
 			edi: new Register32(0),
 
-			esp: new Register32(0x8000),
-			ebp: new Register32(0x8000),
+			esp: new Register32(0),
+			ebp: new Register32(0),
 
 			eip: new Register32(0)
 		};
@@ -57,7 +57,7 @@ export class App {
 
 		this.commandHandlers = commandHandlers;
 		this.instructions = [ undefined ];
-		this.parser = new Parser(this);
+		this.compiler = new Compiler(this);
 		this.ioDevices = []
 	}
 

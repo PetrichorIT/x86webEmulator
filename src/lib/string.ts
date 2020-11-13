@@ -1,4 +1,6 @@
 export const string = `
+.text:
+
 ; EXPORT
 ; Expects:
 ; push lhs

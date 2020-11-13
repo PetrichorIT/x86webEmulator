@@ -9,7 +9,7 @@ export class DOMSettings {
 
     private instuctionDelay: Setting<number> = new Setting("instructionDelay");
     private speedUpLibCode: Setting<boolean> = new Setting("speedUpLibCode");
-    private debugParser: Setting<boolean> = new Setting("debugParser");
+    private debugCompiler: Setting<boolean> = new Setting("debugCompiler");
 
     constructor(app: App, domApp: DOMApp) {
         this.app = app;
@@ -82,27 +82,27 @@ export class DOMSettings {
             container.append(group);
         }
 
-        // Debug Parser
+        // Debug Compiler
         {
             const label = document.createElement("label");
-            label.innerHTML = "Enable debug output for parser";
+            label.innerHTML = "Enable debug output for compiler";
 
-            const debugParserCheckBox = document.createElement("input");
-            debugParserCheckBox.type = "checkbox";
+            const debugCompilerCheckBox = document.createElement("input");
+            debugCompilerCheckBox.type = "checkbox";
 
-            this.debugParser.subscribe((v) => {
-                this.app.parser.debugMode = v;
+            this.debugCompiler.subscribe((v) => {
+                this.app.compiler.debugMode = v;
             })
 
-            debugParserCheckBox.addEventListener("change", () => {
-                this.debugParser.set(debugParserCheckBox.checked);
+            debugCompilerCheckBox.addEventListener("change", () => {
+                this.debugCompiler.set(debugCompilerCheckBox.checked);
             })
 
-            debugParserCheckBox.checked = this.debugParser.init(false);
+            debugCompilerCheckBox.checked = this.debugCompiler.init(false);
 
             const group = document.createElement("div");
             group.classList.add("form-group")
-            group.append(label, debugParserCheckBox);
+            group.append(label, debugCompilerCheckBox);
 
             container.append(group);
         }
