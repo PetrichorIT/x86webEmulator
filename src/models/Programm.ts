@@ -77,16 +77,20 @@ export class Programm {
             }
         }
 
-        // Writes instructions into application memory
+        // Writes instructions into application memory & checks for first relevant command1
+        let startPosOfUserCode: number;
         let idx = app.instructions.length;
         for (const command of commands) {
+            if (startPosOfUserCode === undefined && !command.isLibCode) {
+                startPosOfUserCode = pos;
+            }
             app.instructions.push(command);
             app.memory.writeUInt32LE(idx++, pos);
             pos += 4;
         }
 
         // Setup application for stack based context
-        app.registers.eip._32 = textPos;
+        app.registers.eip._32 = startPosOfUserCode || textPos;
         app.registers.esp._32 = dataPos - 1;
         app.registers.ebp._32 = dataPos - 1;
     }

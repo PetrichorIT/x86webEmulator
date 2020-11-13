@@ -53,9 +53,9 @@ export class Compiler {
         // Adds lib_label and JMP lib_label for header intergration
 
         compiled.text = [ 
-            { name: "jmp", params: [ new Operand(OperandTypes.label, prefix + "libmain")], lineNumber: 0 }, 
+            { name: "jmp", params: [ new Operand(OperandTypes.label, prefix + "libmain")], lineNumber: 0, isLibCode: true }, 
             ...compiled.text, 
-            { label: prefix + "libmain", lineNumber: 0}
+            { label: prefix + "libmain", lineNumber: 0, isLibCode: true }
         ];
         this.libs[libName] = compiled;
 
