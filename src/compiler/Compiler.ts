@@ -502,7 +502,7 @@ export class Compiler {
                         
                         this.currentLine.next();
                         params.push(new Operand(OperandTypes.string, desc));
-                        
+
                     } else if (this.currentLine.rest().toLowerCase().startsWith("offset ")) {
                         this.currentLine.skip(7);
                         let desc = this.currentLine.eatWhile((c) => c !== "," && c !== ";")
@@ -615,9 +615,30 @@ export class Compiler {
                 if (r === "") break;
                 if (r === "?") {
                     raw.push(null);
+                } else if (r.includes("*")) {
+                    const sp = r.split("*");
+                    if (sp.length !== 2)
+                        throw new CompilerError(
+                            CompilerErrorCode.unexpectedToken,
+                            r,
+                            lineIdx, 
+                            { from: preEat, to: this.currentLine.position }
+                        );
+
+                    const n = parseInt(sp[0]);
+                    const v = sp[1] === '?' ? null : parseInt(sp[1]);
+
+                    if (isNaN(v) || isNaN(n)) 
+                        throw new CompilerError(
+                            CompilerErrorCode.invalidTokenNumber,
+                            r,
+                            lineIdx,
+                            { from: preEat, to: this.currentLine.position }
+                        );
+                    raw.push(...Array(n).fill(v));
                 } else {
                     const asInt = parseInt(r);
-                    if (isNaN(asInt))
+                    if (isNaN(asInt) || !syn_number.test(r))
                         throw new CompilerError(
                             CompilerErrorCode.invalidTokenNumber,
                             r,

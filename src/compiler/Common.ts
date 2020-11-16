@@ -20,6 +20,8 @@ export enum CompilerErrorCode {
 	invalidTokenNumber = "C003 - Invalid token. Expected <number>. Got ",
 	invalidTokenRegister = "C004 - Invalid token. Expected <register>. Got ",
 
+	unexpectedToken = "C005 - Unexpected token ",
+
 	missingToken = "C009 - Missing token ",
 
 	// Libary
@@ -54,7 +56,7 @@ export class CompilerError extends Error {
 	position: { from: number; to?: number };
 
 	constructor(code: CompilerErrorCode, description: string, line?: number, position?: { from: number; to?: number }) {
-		super(code + description);
+		super((code + description).replace("<", "&lt;").replace(">", "&gt;"));
 
 		this.code = code;
 		this.line = line;
