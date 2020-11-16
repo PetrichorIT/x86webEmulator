@@ -488,10 +488,21 @@ export class Compiler {
 
                         params.push(new Operand(OperandTypes.const, num));
                     } else if (this.currentLine.peek() === '"') {
-                        let desc = this.currentLine.eatWhile((c) => c !== ',' && c !== ";").trim();
-                        if (syn_string.test(desc)) {
-                            params.push(new Operand(OperandTypes.string, desc.substr(1, desc.length - 2)));
-                        }
+                        this.currentLine.next(); // Eat first "
+
+                        // Eat till terminator
+                        const desc = this.currentLine.eatWhile((c) => c !== '"');
+                        if (this.currentLine.eol()) 
+                            throw new CompilerError(
+                                CompilerErrorCode.missingToken,
+                                '"',
+                                lineIdx,
+                                { from: preOpParse, to: this.currentLine.position }
+                            );
+                        
+                        this.currentLine.next();
+                        params.push(new Operand(OperandTypes.string, desc));
+                        
                     } else if (this.currentLine.rest().toLowerCase().startsWith("offset ")) {
                         this.currentLine.skip(7);
                         let desc = this.currentLine.eatWhile((c) => c !== "," && c !== ";")
@@ -595,8 +606,7 @@ export class Compiler {
                         lineIdx, { from: preEat, to: this.currentLine.position }
                     );
 
-                const body = r.substr(1, r.length - 2);
-                raw.push(...Array.from(body).map((c) => Math.min(c.charCodeAt(0), 255)).concat(0));
+                raw.push(...Array.from(r).map((c) => Math.min(c.charCodeAt(0), 255)).concat(0));
            
                 this.currentLine.next(); // Eat last "
             } else {
