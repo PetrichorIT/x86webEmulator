@@ -328,7 +328,7 @@ export class DOMApp {
 
 			// Save a valid programm in SessionStorage
 			SemiPersistentStorage.setData('editor:snapshot', this.editor.getDoc().getValue());
-			console.info(`[Compiler] Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
+			console.info(`[Core] Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		} catch (e) {
 			// Catch compiler errors
 			if (e instanceof CompilerError) {
@@ -398,7 +398,6 @@ export class DOMApp {
 	 */
 	private onStep() {
 		if (this.running) return;
-		console.info(`Stepping to instruction at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		this.app.instructionCycle();
 	}
 

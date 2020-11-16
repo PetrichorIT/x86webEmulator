@@ -163,10 +163,11 @@ export class Compiler {
         // Output additional information in debug mode
         if (this.debugMode) {
 			const dur = (new Date()).getTime() - startTime;
-			console.info(`[Compiler] Parsed ${lines.length} lines in ${dur}ms`);
+			console.info(`[Compiler] Parsed ${lines.length} lines in ${dur === 0 ? "&lt;1" : dur}ms`);
             console.info(`[Compiler] Captured ${programm.text.length} symbols (${definedLabels.length} labels, ${programm.text.length - definedLabels.length} commands)`);
             console.info(`[Compiler] Captured ${programm.data.length} constants`);
-			console.info(`[Compiler] Captured ${exportLabels.length} public symbols`);
+            if (exportLabels.length !== 0)
+			    console.info(`[Compiler] Captured ${exportLabels.length} public symbols`);
 		}
 
         // Reset mode to default
@@ -264,13 +265,13 @@ export class Compiler {
             );
 
             // Debug information
-            if (this.debugMode) console.info(`[Compiler] Including libary "${libName}" (${this.libs[libName].text.length} instructions & ${this.libs[libName].data.length} constants)`);
+            if (this.debugMode) console.info(`[Compiler] Including libary "${libName}" (${this.libs[libName].text.length} symbols & ${this.libs[libName].data.length} constants)`);
         } else {
             // Capture options definition
             const res = this.currentLine.match(syn_label_def) as RegExpMatchArray;
             if (res) {
                 // Cature option
-                const opt = res[0].substr(0, res.length - 1);
+                const opt = res[0].substr(0, res[0].length - 1);
 
                 // Cature raw text value (terminated by eol or comment)
                 const value = this.currentLine.eatWhile((c) => c !== ";").trim();
