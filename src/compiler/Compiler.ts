@@ -167,7 +167,9 @@ export class Compiler {
             console.info(`[Compiler] Captured ${programm.text.length} symbols (${definedLabels.length} labels, ${programm.text.length - definedLabels.length} commands)`);
             console.info(`[Compiler] Captured ${programm.data.length} constants`);
             if (exportLabels.length !== 0)
-			    console.info(`[Compiler] Captured ${exportLabels.length} public symbols`);
+                console.info(`[Compiler] Captured ${exportLabels.length} public symbols`);
+            if (programm.depenencies.length !== 0)
+                console.log(`[Compiler] Included ${programm.depenencies.length} dependencies`)
 		}
 
         // Reset mode to default
@@ -263,6 +265,9 @@ export class Compiler {
                     return dConst;
                 })
             );
+
+            // Define dependency
+            programm.depenencies.push(libName)
 
             // Debug information
             if (this.debugMode) console.info(`[Compiler] Including libary "${libName}" (${this.libs[libName].text.length} symbols & ${this.libs[libName].data.length} constants)`);

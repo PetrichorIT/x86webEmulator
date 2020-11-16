@@ -9,12 +9,15 @@ export class Programm {
     public options: { [key:string]: string };
     public exportLabels: string[];
 
+    public depenencies: string[];
+
     constructor(text: CompiledCode, data: DataConstant[]) {
         this.text = text;
         this.data = data;
 
         this.options = {};
         this.exportLabels = [];
+        this.depenencies = [];
     }
 
     /**
@@ -93,7 +96,7 @@ export class Programm {
         app.registers.eip._32 = startPosOfUserCode || textPos;
         app.registers.esp._32 = dataPos - 1;
         app.registers.ebp._32 = dataPos - 1;
-        
+
         console.info(`[Core] Written executable ${this.options.name ? `"${this.options.name}" ` : ""}to memory 0x${dataPos.toString(16)} to 0x${memoryPosition.toString(16)} (${memoryPosition - dataPos} bytes)`)
     }
 }
