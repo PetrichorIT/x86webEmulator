@@ -14,6 +14,8 @@ export enum SourceMode {
 
 export enum CompilerErrorCode {
 
+	
+
 	// Instrutions
 	invalidInstuction = "C001 - Invalid instruction name ",
 	invalidTokenDirectMemory = "C002 - Invalid token for direct memory access. Expected [<number>]",
@@ -42,6 +44,9 @@ export enum CompilerErrorCode {
 
 	// Operand checkers,
 	illegalOperands = "C040 - Invalid operands. ",
+
+	invalidGlobalSymbol = "C090 - Invalid global symbol",
+	missingGlobalOptionsDefintion = "C091 - Missing value of options defintion "
 }
 
 /**
@@ -56,7 +61,7 @@ export class CompilerError extends Error {
 	position: { from: number; to?: number };
 
 	constructor(code: CompilerErrorCode, description: string, line?: number, position?: { from: number; to?: number }) {
-		super((code + description).replace("<", "&lt;").replace(">", "&gt;"));
+		super((code + (description || "")).replace("<", "&lt;").replace(">", "&gt;"));
 
 		this.code = code;
 		this.line = line;
