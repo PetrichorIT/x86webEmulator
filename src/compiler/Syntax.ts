@@ -154,6 +154,10 @@ function synModeData(stream: CodeMirror.StringStream, state: any): string {
         return "comment";
     }
 
+    if (stream.match(syn_string, true)) {
+        return "string";
+    }
+
     switch (state.dataContext) {
         case 0:
             if (stream.match(syn_label, true)) {

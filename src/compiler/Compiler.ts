@@ -564,24 +564,64 @@ export class Compiler {
     
         const defSize: number = def === "dd" ? 4 : (def === "dw" ? 2 : 1)
 
+        // Raw numbers
         const raw: number[] = []
         while (!this.currentLine.eol()) {
             if (this.currentLine.peek() === ";") break;
             if (this.currentLine.peek() === ",") this.currentLine.next();
 
-            const r = this.currentLine.eatWhile((c) => c !== ";" && c !== ",").trim();
-            if (r === "") break;
-            if (r === "?") {
-                raw.push(null);
-            } else {
-                raw.push(parseInt(r));
-            }
+            this.currentLine.eatWhitespaces();
 
+            // Eat till next seperator
+            const preEat = this.currentLine.position;
+
+            // Eat strings
+            if (this.currentLine.peek() === '"') {
+                this.currentLine.next(); // Eat first "
+
+                // Eat till terminator
+                const r = this.currentLine.eatWhile((c) => c !== '"');
+                if (this.currentLine.eol()) 
+                    throw new CompilerError(
+                        CompilerErrorCode.missingToken,
+                        '"',
+                        lineIdx,
+                        { from: preEat, to: this.currentLine.position }
+                    );
+                
+                if (defSize !== 1)
+                    throw new CompilerError(
+                        CompilerErrorCode.illegalStringSizeScheme, defSize.toString(10), 
+                        lineIdx, { from: preEat, to: this.currentLine.position }
+                    );
+
+                const body = r.substr(1, r.length - 2);
+                raw.push(...Array.from(body).map((c) => Math.min(c.charCodeAt(0), 255)).concat(0));
+           
+                this.currentLine.next(); // Eat last "
+            } else {
+                const r = this.currentLine.eatWhile((c) => c !== ";" && c !== ",").trim();
+
+                if (r === "") break;
+                if (r === "?") {
+                    raw.push(null);
+                } else {
+                    const asInt = parseInt(r);
+                    if (isNaN(asInt))
+                        throw new CompilerError(
+                            CompilerErrorCode.invalidTokenNumber,
+                            r,
+                            lineIdx,
+                            { from: preEat, to: this.currentLine.position }
+                        );
+    
+                    raw.push(asInt);
+                }
+            }
         }
 
         programm.data.push(
             new DataConstant(w, defSize, raw, lineIdx)
         );
-
     }
 }

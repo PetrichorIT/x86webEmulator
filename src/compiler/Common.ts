@@ -36,6 +36,7 @@ export enum CompilerErrorCode {
 	undefinedConstant = "C031 - Missing defintion for constant ",
 	illegalNamingScheme = "C032 - Invalid naming scheme. Expected [A-z][A-z0-9_-]*. Got ",
 	illegalSizeScheme = "C033 - Invalid size scheme. Expected DD DB DW. Got ",
+	illegalStringSizeScheme = "C034 - Invalid size scheme. Expected DB(1byte) at String. Got size ",
 
 	// Operand checkers,
 	illegalOperands = "C040 - Invalid operands. ",

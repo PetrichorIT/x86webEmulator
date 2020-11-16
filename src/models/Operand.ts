@@ -28,7 +28,8 @@ export class Operand {
 		return !(
 			this.type === OperandTypes.register ||
 			this.type === OperandTypes.const ||
-			this.type === OperandTypes.string
+			this.type === OperandTypes.string ||
+			this.type === OperandTypes.dataOffset
 		);
 	}
 
