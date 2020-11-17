@@ -1,3 +1,4 @@
+import { CompilerError, CompilerErrorCode } from "./Common";
 import { Compiler } from "./Compiler";
 
 describe("@Test Compiler:parse(_:)", () => {
@@ -59,7 +60,7 @@ describe("@Test Compiler:parse(_:)", () => {
             `)
             fail();
         } catch (e) {
-            expect(e.message.startsWith("C00X")).toBe(true);
+            expect(e.code === CompilerErrorCode.illegalOperands).toBe(true);
         }
     })
 
@@ -78,7 +79,7 @@ describe("@Test Compiler:parse(_:)", () => {
             `)
             fail();
         } catch (e) {
-            expect(e.message.startsWith("C006")).toBe(true);
+            expect(e.code === CompilerErrorCode.illegalOperands).toBe(true);
         }
     })
 
@@ -86,7 +87,7 @@ describe("@Test Compiler:parse(_:)", () => {
         try {
             let res = compiler.parse(`
             .text:
-                BT EAX, 133
+                BT EAX, 3
                 CLC
                 SBB [1], ECX
                 ADD EAX, EBX
@@ -97,7 +98,7 @@ describe("@Test Compiler:parse(_:)", () => {
             `)
             fail();
         } catch (e) {
-            expect(e.message.startsWith("C006")).toBe(true);
+            expect(e.code === CompilerErrorCode.undefinedLabel).toBe(true);
         }
     })
 })
