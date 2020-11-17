@@ -136,6 +136,8 @@ export class Compiler {
                         pushUniq(requestedLabels, { label: operand.value, line: instrc.lineNumber });
                     if (operand.type === OperandTypes.dataOffset)
                         pushUniq(requestedDConst, { name: operand.value, line: instrc.lineNumber });
+                    if (operand.type === OperandTypes.dataMReference)
+                        pushUniq(requestedDConst, { name: operand.value, line: instrc.lineNumber });
 				}
 			}
 		}
@@ -489,54 +491,49 @@ export class Compiler {
                             );
                         } else {
                             // Expect either indirect or dynamic indexed memory
-                            // Extract first [...] content (register)
+                            // Extract first [...] content (register or dConst)
                             const fReg = contents.toLowerCase();
-                            if (!syn_registers.test(fReg))
-                                throw new CompilerError(
-                                    CompilerErrorCode.invalidTokenRegister,
-                                    fReg,
-                                    lineIdx,
-                                    {
-                                        from: preOpParse,
-                                        to: this.currentLine.position
-                                    }
-                                );
+                            if (!syn_registers.test(fReg)) {
+                                // Expect: dConst ref
 
-                            this.currentLine.eatWhitespaces();
+                                params.push(new Operand(OperandTypes.dataMReference, fReg))
+                            } else {
+                                this.currentLine.eatWhitespaces();
                             
-                            // Check for second [...] opernad 
-                            let preSecondParse = this.currentLine.position;
-                            if (this.currentLine.peek() === '[') {
-                                // Expect: DIndexed
-                                this.currentLine.next();
-
-                                // Read second [...] operand (register)
-                                let sReg = this.currentLine.eatWhile((c) => c !== ']');
-                                if (this.currentLine.peek() !== ']')
-                                    throw new CompilerError(
-                                        CompilerErrorCode.missingToken, "]", lineIdx, {
-                                        from: preSecondParse,
-                                        to: this.currentLine.position
-                                    });
-                                this.currentLine.next();
-                                sReg = sReg.toLowerCase();
-
-                                if (!syn_registers.test(sReg))
-                                    throw new CompilerError(
-                                        CompilerErrorCode.invalidTokenRegister,
-                                        sReg,
-                                        lineIdx,
-                                        {
+                                // Check for second [...] opernad 
+                                let preSecondParse = this.currentLine.position;
+                                if (this.currentLine.peek() === '[') {
+                                    // Expect: DIndexed
+                                    this.currentLine.next();
+    
+                                    // Read second [...] operand (register)
+                                    let sReg = this.currentLine.eatWhile((c) => c !== ']');
+                                    if (this.currentLine.peek() !== ']')
+                                        throw new CompilerError(
+                                            CompilerErrorCode.missingToken, "]", lineIdx, {
                                             from: preSecondParse,
                                             to: this.currentLine.position
-                                        }
-                                    );
-
-                                // Register dynamic indexed memory
-                                params.push(new Operand(OperandTypes.mDIndexed, [ fReg, sReg ]));
-                            } else {
-                                // Expect: Indirect (all done, just register)
-                                params.push(new Operand(OperandTypes.mIndirect, fReg));
+                                        });
+                                    this.currentLine.next();
+                                    sReg = sReg.toLowerCase();
+    
+                                    if (!syn_registers.test(sReg))
+                                        throw new CompilerError(
+                                            CompilerErrorCode.invalidTokenRegister,
+                                            sReg,
+                                            lineIdx,
+                                            {
+                                                from: preSecondParse,
+                                                to: this.currentLine.position
+                                            }
+                                        );
+    
+                                    // Register dynamic indexed memory
+                                    params.push(new Operand(OperandTypes.mDIndexed, [ fReg, sReg ]));
+                                } else {
+                                    // Expect: Indirect (all done, just register)
+                                    params.push(new Operand(OperandTypes.mIndirect, fReg));
+                                }
                             }
                         }
                     }

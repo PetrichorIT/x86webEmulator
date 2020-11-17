@@ -47,8 +47,8 @@ export class Programm {
         const commands: Command[] = this.text.filter((v: Label) => v.label === undefined) as Command[]
         const textPos = memoryPosition - 4*commands.length;                            
         
-        /// RESOLVE DATA
-        const dataPos = textPos - this.data.reduce((p, dc) => p + dc.totalRequiredMemSpace, 0)
+        /// RESOLVE DATA (+4bytes Padding)
+        const dataPos = textPos - this.data.reduce((p, dc) => p + dc.totalRequiredMemSpace, 0) - 4
         let dataPositions: { [key: string]: number } = {};
         pos = dataPos;
 
@@ -65,6 +65,8 @@ export class Programm {
             }
         }
 
+        pos += 4; // Padding
+
         // Replace label Operands
         for (let i = 0; i < commands.length; i++) {
             for (let j = 0; j < commands[i].params.length; j++) {
@@ -76,6 +78,10 @@ export class Programm {
                 // Replace offsets with direct memory addresses
                 if (commands[i].params[j].type === OperandTypes.dataOffset) {
                     commands[i].params[j] = new Operand(OperandTypes.const, dataPositions[commands[i].params[j].value]);
+                }
+
+                if (commands[i].params[j].type === OperandTypes.dataMReference) {
+                    commands[i].params[j] = new Operand(OperandTypes.mDirect, dataPositions[commands[i].params[j].value]);
                 }
             }
         }

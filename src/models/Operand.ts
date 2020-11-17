@@ -9,7 +9,8 @@ export enum OperandTypes {
 	mDIndexed,
 	label,
 	string,
-	dataOffset
+	dataOffset,
+	dataMReference
 }
 
 export class Operand {
