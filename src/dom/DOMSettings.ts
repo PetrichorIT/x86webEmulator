@@ -7,6 +7,8 @@ export class DOMSettings {
     private app: App;
     private domApp: DOMApp;
 
+    private emulatorFreqency: Setting<number> = new Setting("emulatorFreqency");
+
     private instuctionDelay: Setting<number> = new Setting("instructionDelay");
     private speedUpLibCode: Setting<boolean> = new Setting("speedUpLibCode");
     private debugCompiler: Setting<boolean> = new Setting("debugCompiler");
@@ -24,39 +26,49 @@ export class DOMSettings {
     private build() {
         const container = document.querySelector(".settings");
 
-        // Instruction Delay component
         {
-            const label = document.createElement("label");
-            label.innerHTML = "Delay between instructions";
+            const label = document.createElement("label")
+            label.innerHTML = "Emulator CPU Frequency";
 
-            const instructionDelaySilde = document.createElement("input");
-            instructionDelaySilde.type = "range";
-            instructionDelaySilde.min = "0";
-            instructionDelaySilde.max = "1000";
-            instructionDelaySilde.step = "1";
+            const freqencySlide = document.createElement("input");
+            freqencySlide.type = "range";
+            freqencySlide.min = "0";
+            freqencySlide.max = "100";
+            freqencySlide.step = "1";
 
+            const resLabel = document.createElement("span");
+            resLabel.textContent = " 10Hz";
 
-            this.instuctionDelay.subscribe((v) => {
-                this.domApp.instructionDelay = v;
+            this.emulatorFreqency.subscribe((v) => {
+                /*
+                Freq = (Max - (Min - 1))^perc + (Min - 1)
+                */
+                const freq = Math.floor(Math.pow(2_000_000 - 9, v / 100)  + 9);
+                
+                const instructionDelay = Math.floor(freq > 200 ? 0 : 1000/freq);
+                const batchSize = Math.floor(freq > 200 ? freq / 200 : 1);
 
-                // Remove markings for speedup (check for existence cause editor is init afterwards)
-                if (v === 0 && this.domApp.editor)
+                resLabel.innerHTML = freqencyToString(freq);
+
+                this.domApp.instructionDelay = instructionDelay;
+                this.domApp.batchSize = batchSize;
+
+                if (instructionDelay === 0 && this.domApp.editor)
                     this.domApp.editor.getDoc().getAllMarks().forEach((m) => m.clear());
-            })
+            });
 
-            instructionDelaySilde.addEventListener("change", () => {
-                this.instuctionDelay.set(parseInt(instructionDelaySilde.value));
-            })
+            freqencySlide.addEventListener("change", () => {
+                this.emulatorFreqency.set(parseInt(freqencySlide.value));
+            });
 
-            instructionDelaySilde.value = ""+this.instuctionDelay.init(100);
+            freqencySlide.value = ""+this.emulatorFreqency.init(10);
 
             const group = document.createElement("div");
-            group.classList.add("form-group")
-            group.append(label, instructionDelaySilde);
+            group.classList.add("form-group");
+            group.append(label, freqencySlide, resLabel);
 
             container.append(group);
-        }  
-
+        }
         // Speed up component
         {
             const label = document.createElement("label");
@@ -137,4 +149,10 @@ class Setting<T> {
         this.set(sV);
         return sV;
     }
+}
+
+function freqencyToString(freq:number):string {
+    if (freq < 1000) return freq + "Hz";
+    if (freq < 1_000_000) return Math.floor(freq / 1000) + "kHz";
+    return Math.floor(freq / 1000000) + "MHz";
 }

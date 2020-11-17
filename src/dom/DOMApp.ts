@@ -44,6 +44,7 @@ export class DOMApp {
 	private preferredFilename = 'code.txt';
 
 	// Configguarzion Options
+	public batchSize: number = 1;
 	public instructionDelay: number = 100;
 	public speedUpLibaryCode: boolean = true;
 
@@ -98,6 +99,7 @@ export class DOMApp {
 	 * Prints debug output to the debug component in the DOM
 	 */
 	private debug(message: string, type?: 'error' | 'info') {
+		if (!this.debugBox) return;
 		type = type || 'info';
 		const art = document.createElement('article');
 		art.classList.add(type);
@@ -362,6 +364,10 @@ export class DOMApp {
 		try {
 			// Run programm until stoped / finished (~5ms per cycle on no delay, no lib), (<1ms on lib)
 			while (this.running && this.app.instructionCycle()) {
+				let isValid: boolean = true;
+				for (let index = 0; index < this.batchSize; index++) {
+					isValid = this.app.instructionCycle()
+				} 
 				// If not in lib code or lib code does not required speed up => delay
 				if (!this.app.isInLibMode || !this.speedUpLibaryCode) await new Promise((r) => setTimeout(r, this.instructionDelay));
 			}
