@@ -545,7 +545,7 @@ export class Compiler {
                     // Check for next char (number => Operand const number)
                     if (!isNaN(parseInt(this.currentLine.peek()))) {
                         // Expect: Const Number (Extract from line)
-                        let numStr = this.currentLine.eatWhile((c) => c !== ',' && c !== ' ' && c !== ";");
+                        let numStr = this.currentLine.eatWhile((c) => c !== ',' && c !== ' ' && c !== ";" && c !== "\t");
                         if (numStr.match(syn_number)[0] !== numStr)
                             throw new CompilerError(
                                 CompilerErrorCode.invalidTokenNumber,
