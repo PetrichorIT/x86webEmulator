@@ -660,11 +660,12 @@ export class Compiler {
         };
 
         // Eat first non-whitespace symbol (as constant name)
-        const w = this.currentLine.eatWhile(/\w/)
-        if (!syn_label.test(w))
+        const w = this.currentLine.eatWhile(/\w/);
+        const matches = w.match(syn_label)
+        if (!matches || matches[0] !== w)
             throw new CompilerError(
                 CompilerErrorCode.illegalNamingScheme,
-                w, lineIdx)
+                w, lineIdx, { from: 0 });
 
         // Skip
         this.currentLine.eatWhitespaces();

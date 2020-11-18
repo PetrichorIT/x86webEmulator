@@ -14,8 +14,6 @@ export enum SourceMode {
 
 export enum CompilerErrorCode {
 
-	
-
 	// Instrutions
 	invalidInstuction = "C001 - Invalid instruction name ",
 	invalidTokenDirectMemory = "C002 - Invalid token for direct memory access. Expected [<number>]",
