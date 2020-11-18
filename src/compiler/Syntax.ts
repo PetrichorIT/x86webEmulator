@@ -139,6 +139,8 @@ function synModeText(stream: CodeMirror.StringStream, state: any): string {
                 return "global-marker";
             }
         }
+        if (char === "[" || char === "]") 
+            return null;
     }
 
     return "syntax-error";
