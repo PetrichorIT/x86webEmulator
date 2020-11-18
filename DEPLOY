@@ -1,0 +1,8 @@
+Deployrequirements
+===
+
+Content-Securitiy-Directive:
+    - script-src: 'self' 'unsave-eval' 'unsave-inline' kit.fontawesome.com cdn.jsdelvir.net
+    - connect-src: *.fontawesome.com
+
+Static file server
