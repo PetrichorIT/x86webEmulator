@@ -8,7 +8,7 @@ export function __mov(params: Operand[]) {
 	CommonCheckers.expectMutable(params[0]);
 
 	if (params[1].type === OperandTypes.string) {
-		if (!params[0].isMemory) throw new Error('C00X - Invalid operands. Expected left operand to be memory.');
+		if (!params[0].isMemory) throw new Error('Invalid operands. Expected left operand to be memory.');
 	}
 }
 export function mov(app: App, params: Operand[]) {

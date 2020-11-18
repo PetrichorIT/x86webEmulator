@@ -2,6 +2,15 @@ import { App } from '../App';
 import * as x86 from '../x86/index';
 import { Lib } from './lib';
 
+var inf: any;
+beforeAll(() => {
+	inf = console.info;
+	console.info = () => {};
+});
+afterAll(() => {
+	console.info = inf;
+});
+
 describe('@Test Lib load test', () => {
 	let app: App;
 
@@ -14,10 +23,10 @@ describe('@Test Lib load test', () => {
 	});
 
 	it('Test default lib  "fib"', () => {
-		expect(() => app.parser.parse('#include "fib.h"')).not.toThrow();
+		expect(() => app.compiler.parse('#include "fib.h"')).not.toThrow();
 	});
 
 	it('Test default lib "string"', () => {
-		expect(() => app.parser.parse('#include "string.h"')).not.toThrow();
+		expect(() => app.compiler.parse('#include "string.h"')).not.toThrow();
 	});
 });

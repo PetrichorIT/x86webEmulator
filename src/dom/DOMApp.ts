@@ -4,9 +4,8 @@ import { App } from '../App';
 import DOMRegister from './DOMRegister';
 import DOMMemory from './DOMMemory';
 import DOMFlag from './DOMFlag';
-import { initSyntax } from '../parsers/syntax';
 import SemiPersistentStorage from './common';
-import { CompilerError } from '../parsers/const';
+import { CompilerError } from '../compiler/Common';
 import { Lib } from '../lib/lib';
 import { DOMSettings } from './DOMSettings';
 import { DOMLibaryController } from './DOMLibaryController';
@@ -15,6 +14,9 @@ import { LeverRow } from '../io/LeverRow';
 import { SevenSegmentDisplay } from '../io/SevenSegementDisplay';
 import { MatrixKeyboard } from '../io/MatrixKeyboard';
 import { PIT } from '../io/PIT';
+import { Programm } from '../models/Programm';
+import { initCodemirrorSyntax } from '../compiler/Syntax';
+import { Compiler } from '../compiler/Compiler';
 
 /**
  * Indicates if a DOMApp is the initial build
@@ -42,6 +44,7 @@ export class DOMApp {
 	private preferredFilename = 'code.txt';
 
 	// Configguarzion Options
+	public batchSize: number = 1;
 	public instructionDelay: number = 100;
 	public speedUpLibaryCode: boolean = true;
 
@@ -96,6 +99,7 @@ export class DOMApp {
 	 * Prints debug output to the debug component in the DOM
 	 */
 	private debug(message: string, type?: 'error' | 'info') {
+		if (!this.debugBox) return;
 		type = type || 'info';
 		const art = document.createElement('article');
 		art.classList.add(type);
@@ -126,7 +130,7 @@ export class DOMApp {
 		if (!this.memory) this.memory = new DOMMemory(this);
 
 		// Initializes the syntax checker for codemirror
-		if (_firstBuild) initSyntax();
+		if (_firstBuild) initCodemirrorSyntax();
 
 		// Loads other components
 		new DOMSettings(this.app, this);
@@ -159,7 +163,7 @@ export class DOMApp {
 
 		// Launches the editor with the last snapshot from SessionStorage
 		// Primes the editor to remove marks on editing
-		this.editor.getDoc().setValue(SemiPersistentStorage.getData('editor:snapshot') || '');
+		this.editor.getDoc().setValue(SemiPersistentStorage.getData('editor:snapshot') || '.text:\n\t\n\n.data:\n\t\n');
 		this.editor.on('inputRead', () => this.onEditorChange());
 
 		// Initilizes and primes the action buttons
@@ -320,22 +324,19 @@ export class DOMApp {
 		const tsmp = new Date().getMilliseconds() & 0xff;
 
 		try {
-			let p = this.app.parser.parse(this.editor.getDoc().getValue());
-
+			const p = this.app.compiler.parse(this.editor.getDoc().getValue());
 			this.app.runProgram(p);
 			this.updateUI();
 
 			// Save a valid programm in SessionStorage
 			SemiPersistentStorage.setData('editor:snapshot', this.editor.getDoc().getValue());
-			console.info(`[Parser] Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
+			console.info(`[Core] Done ... Snapshot $${tsmp} with EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		} catch (e) {
 			// Catch compiler errors
-			if (e.line !== undefined && e.position !== undefined) {
-				// Mark faulty code
-				let err = e as CompilerError;
+			if (e instanceof CompilerError) {
 				this.editor.markText(
-					{ line: err.line, ch: err.position.from },
-					{ line: err.line, ch: err.position.to || 255 },
+					{ line: e.line, ch: e.position.from },
+					{ line: e.line, ch: e.position.to || 255 },
 					{ css: 'background-color: rgba(200, 50, 30, 0.5);' }
 				);
 
@@ -363,6 +364,10 @@ export class DOMApp {
 		try {
 			// Run programm until stoped / finished (~5ms per cycle on no delay, no lib), (<1ms on lib)
 			while (this.running && this.app.instructionCycle()) {
+				let isValid: boolean = true;
+				for (let index = 0; index < this.batchSize; index++) {
+					isValid = this.app.instructionCycle()
+				} 
 				// If not in lib code or lib code does not required speed up => delay
 				if (!this.app.isInLibMode || !this.speedUpLibaryCode) await new Promise((r) => setTimeout(r, this.instructionDelay));
 			}
@@ -399,7 +404,6 @@ export class DOMApp {
 	 */
 	private onStep() {
 		if (this.running) return;
-		console.info(`Stepping to instruction at EIP 0x${this.app.registers.eip._32.toString(16)}`);
 		this.app.instructionCycle();
 	}
 
