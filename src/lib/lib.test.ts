@@ -2,6 +2,15 @@ import { App } from '../App';
 import * as x86 from '../x86/index';
 import { Lib } from './lib';
 
+var inf: any;
+beforeAll(() => {
+	inf = console.info;
+	console.info = () => {};
+});
+afterAll(() => {
+	console.info = inf;
+});
+
 describe('@Test Lib load test', () => {
 	let app: App;
 
