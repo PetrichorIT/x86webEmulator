@@ -33,7 +33,7 @@ class LibController {
 		const res = app.compiler.parseLib(libName, libCode);
 
 		// If only LibLabel and JMP LibLabel are included
-		if (res.text.length === 2) {			
+		if (res.text.length === 2 && res.data.length === 0) {			
 			FullPersistentStorage.removeData('_lib_' + libName);
 			this.localLibs.filter((ln) => ln !== libName);
 			delete app.compiler.libs[libName];

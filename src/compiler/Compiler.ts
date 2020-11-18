@@ -234,7 +234,7 @@ export class Compiler {
 
             // Pin the strings start position (including ")
             let preIdx = this.currentLine.position - 1;
-            let libName = this.currentLine.eatWhile(/[A-z._/]/);
+            let libName = this.currentLine.eatWhile(/[A-z0-9._/]/);
 
             // Check for terminating token
             if (this.currentLine.eol() || this.currentLine.peek() !== '"')
