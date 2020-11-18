@@ -6,6 +6,7 @@ import Operand, { OperandTypes } from "../models/Operand";
 
 import * as x86 from '../x86';
 
+// Ready to merge from "branch segmentedAssembler"
 export class Compiler {
 
     public debugMode: boolean = false;
