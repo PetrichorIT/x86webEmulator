@@ -27,16 +27,16 @@ class LibController {
 	}
 
 	/**
-	 * Loads a libary into parser storage.
+	 * Loads a libary into compiler storage.
 	 */
 	private loadLib(app: App, libName: string, libCode: string) {
-		const res = app.parser.parseLib(libName, libCode);
+		const res = app.compiler.parseLib(libName, libCode);
 
 		// If only LibLabel and JMP LibLabel are included
-		if (res.length === 2) {			
+		if (res.text.length === 2 && res.data.length === 0) {			
 			FullPersistentStorage.removeData('_lib_' + libName);
 			this.localLibs.filter((ln) => ln !== libName);
-			delete app.parser.libs[libName];
+			delete app.compiler.libs[libName];
 		}
 	}
 
@@ -120,7 +120,7 @@ class LibController {
 	public removeLib(app: App, libName: string): void {
 		if (!this.localLibs.includes(libName)) return;
 
-		delete app.parser.libs[libName];
+		delete app.compiler.libs[libName];
 		this.localLibs.splice(this.localLibs.findIndex((l) => l === libName), 1);
 
 		FullPersistentStorage.setData("_libs_list", JSON.stringify(this.localLibs));

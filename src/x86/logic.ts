@@ -124,6 +124,9 @@ export function shr(app: App, params: Operand[]) {
 
 export function __bt(params: Operand[]) {
 	CommonCheckers.expectCount(params, 2)
+	CommonCheckers.expectConst(params[1])
+	if (params[1].value < 0 || params[1].value > 31)
+		throw new Error("")
 }
 
 export function bt(app: App, params: Operand[]) {

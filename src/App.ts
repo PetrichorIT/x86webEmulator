@@ -1,7 +1,10 @@
 import Register32 from './models/Register32';
 import Operand, { OperandTypes } from './models/Operand';
-import Parser from './parsers/parser';
 import IODevice from './io/io'
+import { DataConstant, Programm } from './models/Programm';
+import { Compiler } from './compiler/Compiler';
+
+export type CompiledCode = (Command | Label)[];
 
 export type Label = { label: string; lineNumber: number };
 export type Command = { name: string; params: Operand[]; lineNumber: number; isLibCode?: boolean };
@@ -9,7 +12,7 @@ export type CommandFunction = (app: App, params: Operand[]) => void;
 export type CommandOperandChecker = (params: Operand[]) => void;
 
 export class App {
-	public parser: Parser;
+	public compiler: Compiler;
 
 	public registers: { [key: string]: Register32 };
 	public flags: { [key: string]: boolean };
@@ -34,8 +37,8 @@ export class App {
 			esi: new Register32(0),
 			edi: new Register32(0),
 
-			esp: new Register32(0x8000),
-			ebp: new Register32(0x8000),
+			esp: new Register32(0),
+			ebp: new Register32(0),
 
 			eip: new Register32(0)
 		};
@@ -54,7 +57,7 @@ export class App {
 
 		this.commandHandlers = commandHandlers;
 		this.instructions = [ undefined ];
-		this.parser = new Parser(this);
+		this.compiler = new Compiler(this);
 		this.ioDevices = []
 	}
 
@@ -84,49 +87,12 @@ export class App {
 
 
 	/**
-	 * Write a given set of instructions into the application memory at the given position (default 0x8000)
-	 * and prepares the app for execution of said programm
+	 * Write a given programm into the application memory at the given position (default 0x8000)
+	 * and prepares the app for execution of said programm.
 	 */
-	public runProgram(commands: (Command | Label)[], position?: number) {
+	public runProgram(programm: Programm, position?: number) {
 		position = position || 0x8000;
-		this.writeProgram(commands, position);
-		this.registers.eip._32 = position;
-	}
-
-	/**
-	 * Write a given set of instructions into the application memory at the given position.
-	 */
-	private writeProgram(commands: (Command | Label)[], position: number) {
-		let pos = position;
-		let labels: { [key: string]: number } = {};
-		let relPos = 0;
-
-		// Extract labels from source (matching relative positions)
-		for (let i = 0; i < commands.length; i++) {
-			if ((commands[i] as Label).label) {
-				labels[(commands[i] as Label).label] = pos + relPos;
-			} else {
-				relPos += 4;
-			}
-		}
-
-		// Replace label operand with direct jumps
-		commands = commands.filter((v: any) => v.label === undefined).map((c: Command) => {
-			for (let i = 0; i < c.params.length; i++) {
-				if (c.params[i].type === OperandTypes.label) {
-					c.params[i] = new Operand(OperandTypes.const, labels[c.params[i].value]);
-				}
-			}
-			return c;
-		});
-
-		// Write commands to memory
-		let idx = this.instructions.length;
-		for (const command of commands) {
-			this.instructions.push(command as Command);
-			this.memory.writeUInt32LE(idx++, pos);
-			pos += 4;
-		}
+		programm.write(this, position);
 	}
 
 	/**

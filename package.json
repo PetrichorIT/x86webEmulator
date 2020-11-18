@@ -5,6 +5,7 @@
 	"main": "prebuild/index.js",
 	"scripts": {
 		"test": "jest",
+		"test:compiler": "jest --verbose src/compiler/Compiler.test.ts",
 		"test:lib": "jest --verbose src/lib/lib.test.ts",
 		"test:register": "jest --verbose src/models/Register32.test.ts",
 		"test:x86": "jest --verbose src/x86/*.test.ts",

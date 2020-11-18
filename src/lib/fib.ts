@@ -1,4 +1,6 @@
 export const fib = `
+.text:
+
 @export fib:
 	mov eax, [esp + 8]
     mov ebx, 0
