@@ -7,9 +7,9 @@ export class DOMSettings {
     private app: App;
     private domApp: DOMApp;
 
-    private emulatorFreqency: Setting<number> = new Setting("emulatorFreqency");
+    private renderCycleDuration: number = 5; 
 
-    private instuctionDelay: Setting<number> = new Setting("instructionDelay");
+    private emulatorFreqency: Setting<number> = new Setting("emulatorFreqency");
     private speedUpLibCode: Setting<boolean> = new Setting("speedUpLibCode");
     private debugCompiler: Setting<boolean> = new Setting("debugCompiler");
 
@@ -18,6 +18,16 @@ export class DOMSettings {
         this.domApp = domApp;
 
         this.build();
+
+        setInterval(async () => {
+            const d = new Date();
+            await new Promise(r => setTimeout(r));
+            const duration = new Date().getTime() - d.getTime();
+
+            if (duration < this.renderCycleDuration*5) {
+                this.renderCycleDuration = 0.9*this.renderCycleDuration + 0.1*duration;
+            }
+        }, 5000)
     }
 
     /**
@@ -43,10 +53,11 @@ export class DOMSettings {
                 /*
                 Freq = (Max - (Min - 1))^perc + (Min - 1)
                 */
+                const baseFreq = 1000/this.renderCycleDuration
                 const freq = Math.floor(Math.pow(2_000_000 - 9, v / 100)  + 9);
                 
-                const instructionDelay = Math.floor(freq > 200 ? 0 : 1000/freq);
-                const batchSize = Math.floor(freq > 200 ? freq / 200 : 1);
+                const instructionDelay = Math.floor(freq > baseFreq ? 0 : 1000/freq);
+                const batchSize = Math.floor(freq > baseFreq ? freq / baseFreq : 1);
 
                 resLabel.innerHTML = freqencyToString(freq);
 
