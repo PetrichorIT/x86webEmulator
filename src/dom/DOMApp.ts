@@ -319,6 +319,7 @@ export class DOMApp {
 	 */
 	private onCompile() {
 		this.editor.getDoc().getAllMarks().forEach((m) => m.clear());
+		this.running = false;
 
 		// Get timestamp of compilation process
 		const tsmp = new Date().getMilliseconds() & 0xff;

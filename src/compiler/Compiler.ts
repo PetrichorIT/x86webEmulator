@@ -710,10 +710,10 @@ export class Compiler {
     /**
      * Parses string to number
      */
-    public parseNumber(str: string, lineIdx: number, fromIndex: number, toIndex?: number): number {
+    private parseNumber(str: string, lineIdx: number, fromIndex: number, toIndex?: number): number {
         // Test for any valid string format
         str = str.toLowerCase().trim();
-        if (str.match(syn_number)[0] !== str) 
+        if (str.match(syn_number) === null || str.match(syn_number)[0] !== str) 
             throw new CompilerError(
                 CompilerErrorCode.invalidTokenNumber,
                 str,

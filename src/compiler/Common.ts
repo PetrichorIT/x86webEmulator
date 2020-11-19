@@ -5,7 +5,7 @@ export const syn_registers = /^(eax|ax|ah|al|ebx|bx|bh|bl|ecx|cx|ch|cl|edx|dx|dh
 export const syn_label_def = /[A-z][A-z0-9_]*:/;
 export const syn_label = /[A-z][A-z0-9_-]*/;
 export const syn_string = /"[^"]*"/;
-export const syn_number = /[0-9][a-f0-9]+h|0x[a-f0-9]+|0b[01]+|[01]+b|[\d]+/
+export const syn_number = /[0-9][a-f0-9]+h|0x[a-f0-9]+|0b[01]+|[01]+b|[\d]+/i;
 export const syn_datasize = /^(dd|db|dw)/i;
 
 export enum SourceMode {

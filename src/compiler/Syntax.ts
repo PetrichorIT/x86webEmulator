@@ -156,6 +156,11 @@ function synModeData(stream: CodeMirror.StringStream, state: any): string {
         return "comment";
     }
 
+    if(stream.match(".text:", true)) {
+        state.mode = SourceMode.text;
+        return "global-marker";
+    }
+
     if (stream.match(syn_string, true)) {
         return "string";
     }
