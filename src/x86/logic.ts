@@ -96,6 +96,39 @@ export function shl(app: App, params: Operand[]) {
 	app.registers.eip._32 += 4;
 }
 
+export function __rol(params: Operand[]) {
+	CommonCheckers.expectCount(params, 2);
+
+	CommonCheckers.expectMutable(params[0]);
+	CommonCheckers.expectNoMem(params[0]);
+
+	CommonCheckers.expectConst(params[1]);
+}
+export function rol(app: App, params: Operand[]) {
+	let lhsOp = params[0];
+	let rhsOp = params[1];
+
+	let memSize = lhsOp.requiredMemSize;
+	const offset = rhsOp.getValue(app, 4);
+
+	const mask = ~(0xffffffff << memSize*8);
+
+	let lhs = lhsOp.getValue(app, memSize);
+	let res = lhs;
+	for (let i = 0; i < offset; i++) {
+		const old = res;
+		res = (res << 1) & mask;
+		
+		if (res >>> 1 !== old) {
+			res |= 0b1;
+		}
+	}
+	app.flags.ZF = res === 0;
+
+	lhsOp.setValue(app, memSize, res);
+	app.registers.eip._32 += 4;
+}
+
 export function __shr(params: Operand[]) {
 	CommonCheckers.expectCount(params, 2);
 
@@ -121,6 +154,39 @@ export function shr(app: App, params: Operand[]) {
 	app.registers.eip._32 += 4;
 }
 
+export function __ror(params: Operand[]) {
+	CommonCheckers.expectCount(params, 2);
+
+	CommonCheckers.expectMutable(params[0]);
+	CommonCheckers.expectNoMem(params[0]);
+
+	CommonCheckers.expectConst(params[1]);
+}
+export function ror(app: App, params: Operand[]) {
+	let lhsOp = params[0];
+	let rhsOp = params[1];
+
+	let memSize = lhsOp.requiredMemSize;
+	const offset = rhsOp.getValue(app, 4);
+
+	const mask = ~(0xffffffff << memSize*8);
+	const overlay = ((mask) & ~(mask >> 1));
+
+	let lhs = lhsOp.getValue(app, memSize);
+	let res = lhs;
+	for (let i = 0; i < offset; i++) {
+		const old = res;
+		res = (res >>> 1) & mask;
+		
+		if (res << 1 !== old) {
+			res |= overlay;
+		}
+	}
+	app.flags.ZF = res === 0;
+
+	lhsOp.setValue(app, memSize, res);
+	app.registers.eip._32 += 4;
+}
 
 export function __bt(params: Operand[]) {
 	CommonCheckers.expectCount(params, 2)
@@ -136,8 +202,6 @@ export function bt(app: App, params: Operand[]) {
 	if (bit < 0 || bit > ((reg.requiredMemSize || 1) * 8)) throw new Error("BT idx invalid");
 
 	let pattern = reg.getValue(app, reg.requiredMemSize) >>> bit;
-
-	console.info(pattern.toString(2), bit)
 
 	app.flags.CF = (pattern & 0x1) === 1 ? true : false
 	app.registers.eip._32 += 4;
