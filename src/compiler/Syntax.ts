@@ -105,7 +105,7 @@ function synModeText(stream: CodeMirror.StringStream, state: any): string {
         // Check for string like
         if (/[A-z][A-z0-9_]*/.test(w)) {
             // Capture prefixed numbers
-            if (w.startsWith("0b") || w.startsWith("0x")) return "number"
+            if (w.startsWith("0b") || w.startsWith("0x") || w.endsWith("b") || w.endsWith("h")) return "number"
             // Capture registers
             if (syn_registers.test(w)) return 'var2';
             // Assume label reference if in Operand (= keyword in line)

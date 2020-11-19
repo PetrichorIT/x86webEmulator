@@ -37,7 +37,6 @@ export class SevenSegmentDisplay implements IODevice {
         const id = "ssd:" + port.toString(16);
         for (let i = 0; i < 7; i++) {
             const isOn = (value & 0b1) === 1;
-            console.log(value, isOn)
             isOn ?
                 document.getElementById(id + ":" + i).classList.add("sevenSeg-segOn") :
                 document.getElementById(id + ":" + i).classList.remove("sevenSeg-segOn")
