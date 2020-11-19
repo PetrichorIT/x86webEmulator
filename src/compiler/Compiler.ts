@@ -383,11 +383,12 @@ export class Compiler {
             // Read Operands (max 4)
             let i = 0;
             while (!this.currentLine.eol() && i < 4) {
-                if (this.currentLine.peek() === ';') break;
-
+                
                 // Eat all whitspacing characters
                 this.currentLine.eat(',');
                 this.currentLine.eatWhitespaces();
+
+                if (this.currentLine.peek() === ';') break;
 
                 // Pin location for operand specific debug errors
                 let preOpParse = this.currentLine.position;
