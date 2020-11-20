@@ -1,13 +1,17 @@
 /**
 * Primary Configuration colors
 */
-$primary-bg: rgb(245, 245, 245);
+
+// $primary-bg: rgb(255, 255, 255);
+$primary-bg: rgb(40, 40, 40);
 $primary-bg-d: rgb(40, 40, 40);
 
-$primary-text: rgb(30, 30, 30);
+// $primary-text: rgb(30, 30, 30);
+$primary-text: rgb(240, 240, 240);
 $primary-text-d: rgb(240, 240, 240);
 
-$textbox-bg: rgb(235, 235, 235);
+// $textbox-bg: rgb(235, 235, 235);
+$textbox-bg: rgb(70, 70, 70);
 $textbox-bg-d: rgb(70, 70, 70);
 
 /**
@@ -15,10 +19,13 @@ $textbox-bg-d: rgb(70, 70, 70);
 * - accent must be different from primary bg
 * - bg can (not must) be primary bg
 */
-$dropdown-bg: $primary-bg;
-$dropdown-accent: rgb(225, 225, 225);
 
+// $dropdown-bg: $primary-bg;
+$dropdown-bg: $primary-bg-d;
 $dropdown-bg-d: $primary-bg-d;
+
+// $dropdown-accent: rgb(225, 225, 225);
+$dropdown-accent: rgb(70, 70, 70);
 $dropdown-accent-d: rgb(70, 70, 70);
 
 /**
@@ -28,6 +35,12 @@ $dropdown-accent-d: rgb(70, 70, 70);
 $button-green: rgb(57, 133, 14);
 $button-blue: rgb(5, 93, 151);
 $button-gray: rgb(120, 120, 120);
+
+/**
+* IO Colors
+*/
+$io-segementOff: rgb(71, 0, 0);
+$io-segementOff-d: rgb(71, 0, 0);
 
 /**
 * Remove and special settings on box model for any elements.
@@ -543,9 +556,9 @@ body {
 						padding-right: 5px;
 
 						use {
-							fill: rgb(207, 178, 178);
+							fill: $io-segementOff;
 							@media (prefers-color-scheme: dark) {
-								fill: rgb(71, 0, 0);
+								fill: $io-segementOff-d;
 							}
 						}
 
