@@ -156,6 +156,7 @@ export class DOMApp {
 			mode: 'x86',
 			theme: 'material-darker',
 			lineNumbers: true,
+			lineWrapping: true,
 			indentUnit: 4,
 			lineNumberFormatter: (i) => '0x' + i.toString(16)
 		});
