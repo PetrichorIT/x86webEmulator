@@ -4,6 +4,8 @@
 	"description": "An x86 Emulator. JS &amp; Webpack",
 	"main": "prebuild/index.js",
 	"scripts": {
+		"start": "cd public && static-server --index index.html --cors \"*\" --port $PORT",
+
 		"test": "jest",
 		"test:compiler": "jest --verbose src/compiler/Compiler.test.ts",
 		"test:lib": "jest --verbose src/lib/lib.test.ts",
@@ -47,6 +49,7 @@
 		"webpack-cli": "^3.3.12"
 	},
 	"dependencies": {
-		"codemirror": "^5.57.0"
+		"codemirror": "^5.57.0",
+		"static-server": "^2.2.1"
 	}
 }
