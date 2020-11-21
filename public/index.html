@@ -2,20 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="author" content="MkDev">
-    <meta name="keywords" content="x86, Assembler, Assembly, Emulator">
-    <meta name="robots" content="none">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <meta name="twitter:card" value="summary">
-
-    <meta property="og:title" content="x86 Emulator by MkDev">
-    <meta property="og:type" content="article">
-    <meta property="og:url" content="">
-    <meta property="og:description" content="A simple emulator for the x86 instruction set">
-    <meta property="og:locale" content="en_GB">
-
+    <!-- Primary Meta Tags -->
     <title>x86 Emulator</title>
+    <meta name="author" content="MkDev">
+    <meta name="robots" content="none">
+    <meta name="title" content="x86 Emulator">
+    <meta name="keywords" content="x86, Assembler, Assembly, Emulator">
+    <meta name="description" content="A emulator for a simplified x86 instruction set. Developed and maintained by MKDev.">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://x86emulator.herokuapp.com/">
+    <meta property="og:title" content="x86 Emulator">
+    <meta property="og:description" content="A emulator for a simplified x86 instruction set. Developed and maintained by MKDev.">
+    <meta property="og:image" content="https://x86emulator.herokuapp.com/preview.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://x86emulator.herokuapp.com/">
+    <meta property="twitter:title" content="x86 Emulator">
+    <meta property="twitter:description" content="A emulator for a simplified x86 instruction set. Developed and maintained by MKDev.">
+    <meta property="twitter:image" content="https://x86emulator.herokuapp.com/preview.png">
     
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/codemirror.css">
@@ -183,9 +192,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
     <script>
-        document
-            .querySelector('meta[property="og:url"]')
-            .setAttribute("content", window.location.protocol + "//" + window.location.hostname);
         window.cookieconsent.initialise({
             "palette": {
                 "popup": {
