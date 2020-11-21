@@ -11,7 +11,7 @@
 
     <meta property="og:title" content="x86 Emulator by MkDev">
     <meta property="og:type" content="article">
-    <meta property="og:url" content="http://127.0.0.1:5500">
+    <meta property="og:url" content="">
     <meta property="og:description" content="A simple emulator for the x86 instruction set">
     <meta property="og:locale" content="en_GB">
 
@@ -183,25 +183,27 @@
 
     <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
     <script>
-        // Temporarily disabled
-        // window.cookieconsent.initialise({
-        //     "palette": {
-        //         "popup": {
-        //         "background": "rgb(20, 20, 20)",
-        //         "text": "#d6d6d6"
-        //         },
-        //         "button": {
-        //         "background": "green"
-        //         }
-        //     },
-        //     "position": "bottom-left",
-        //     "content": {
-        //         "message": "This website uses cookies (or local storage) to ensure you get the best experience on our website",
-        //         "dismiss": "Got it!",
-        //         "link": "Learn more",
-        //         "href": "https://www.cookiesandyou.co"
-        //     }
-        // });
+        document
+            .querySelector('meta[property="og:url"]')
+            .setAttribute("content", window.location.protocol + "//" + window.location.hostname);
+        window.cookieconsent.initialise({
+            "palette": {
+                "popup": {
+                "background": "rgb(20, 20, 20)",
+                "text": "#d6d6d6"
+                },
+                "button": {
+                "background": "green"
+                }
+            },
+            "position": "bottom-left",
+            "content": {
+                "message": "This website uses cookies (or local storage) to ensure you get the best experience on our website",
+                "dismiss": "Got it!",
+                "link": "Learn more",
+                "href": "https://www.cookiesandyou.co"
+            }
+        });
     </script>
 </body>
 </html>
