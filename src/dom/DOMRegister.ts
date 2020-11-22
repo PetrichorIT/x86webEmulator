@@ -1,5 +1,4 @@
 import Register32 from '../models/Register32';
-import { App } from '../App';
 import { DOMApp } from './DOMApp';
 
 export class DOMRegister {

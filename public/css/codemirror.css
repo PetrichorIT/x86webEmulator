@@ -1,24 +1,5 @@
 /* BASICS */
 
-.cm-string-error {
-	color: #c3e88d;
-	text-decoration-line: underline;
-	text-decoration-style: wavy;
-	text-decoration-color: darkred;
-	/* text-decoration-color: red; */
-}
-
-.cm-syntax-error {
-	text-decoration-line: underline !important;
-	text-decoration-style: wavy !important;
-	text-decoration-color: darkred !important;
-}
-
-.cm-global-marker {
-	font-weight: bold;
-	color: #82aaff;
-}
-
 .CodeMirror-wrap pre {
 	word-break: break-word;
 }

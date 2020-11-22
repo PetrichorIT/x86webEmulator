@@ -14,9 +14,7 @@ import { LeverRow } from '../io/LeverRow';
 import { SevenSegmentDisplay } from '../io/SevenSegementDisplay';
 import { MatrixKeyboard } from '../io/MatrixKeyboard';
 import { PIT } from '../io/PIT';
-import { Programm } from '../models/Programm';
 import { initCodemirrorSyntax } from '../compiler/Syntax';
-import { Compiler } from '../compiler/Compiler';
 
 /**
  * Indicates if a DOMApp is the initial build
@@ -37,6 +35,7 @@ export class DOMApp {
 	private stepButton: HTMLButtonElement;
 	private runButton: HTMLButtonElement;
 
+	private fileInputButtonFrame: HTMLButtonElement;
 	private fileInputButton: HTMLInputElement;
 	private fileDownloadButton: HTMLButtonElement;
 
@@ -48,8 +47,9 @@ export class DOMApp {
 	public instructionDelay: number = 100;
 	public speedUpLibaryCode: boolean = true;
 
-	public libaryViewActive: boolean = false;
-	public libaryViewSourceBackup: string;
+	private libaryViewActive: boolean = false;
+	private libaryViewLibName: string;
+	private libaryViewSourceBackup: string;
 	private libaryViewCloseButton: HTMLButtonElement;
 
 	private subscribers: (() => void)[];
@@ -183,6 +183,7 @@ export class DOMApp {
 		this.fileInputButton = document.getElementById('fileInput') as HTMLInputElement;
 		this.fileInputButton.addEventListener('change', () => this.onFileInput());
 
+		this.fileInputButtonFrame = document.querySelector(".upload-btn-box > .btn") as HTMLButtonElement;
 		this.fileDownloadButton = document.getElementById('downloadButton') as HTMLButtonElement;
 		this.fileDownloadButton.addEventListener('click', () => this.onDownload());
 
@@ -250,12 +251,14 @@ export class DOMApp {
 		this.editor.setOption("readOnly", true)
 		this.libaryViewCloseButton.hidden = false;
 		this.libaryViewActive = true;
+		this.libaryViewLibName = libaryName;
 
 		{
 			this.compileButton.disabled = true;
 			this.runButton.disabled = true;
 			this.stepButton.disabled = true;
 			this.pauseButton.disabled = true;
+			this.fileInputButtonFrame.disabled = true;
 			this.fileInputButton.disabled = true;
 		}
 	}
@@ -274,6 +277,7 @@ export class DOMApp {
 			this.runButton.disabled = false;
 			this.stepButton.disabled = false;
 			this.pauseButton.disabled = false;
+			this.fileInputButtonFrame.disabled = false;
 			this.fileInputButton.disabled = false;
 		}
 	}
@@ -432,14 +436,19 @@ export class DOMApp {
 	 * Exports the current content of the editor as textfile, to be downloaded by the user.
 	 */
 	private onDownload() {
-		const prefix = `; x86 Assembler Export\n; Exported from ${location.origin}\n\n`;
 		let text = this.editor.getDoc().getValue();
-		if (!text.startsWith(prefix)) text = prefix + text;
+		let exportName = this.preferredFilename;
+		if (this.libaryViewActive && this.libaryViewLibName) {
+			text = `; Libary export "${this.libaryViewLibName}"` + text;
+			exportName = this.libaryViewLibName;
+
+			if (!exportName.endsWith(".h")) exportName += ".txt"
+		}
 
 		const url = URL.createObjectURL(new Blob([ text ], { type: 'octet/stream' }));
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = this.preferredFilename;
+		a.download = exportName;
 		a.click();
 		URL.revokeObjectURL(url);
 	}

@@ -1,4 +1,4 @@
-import { App, Command, CommandOperandChecker, CompiledCode, Label } from "../App";
+import { App, Command, CommandOperandChecker, Label } from "../App";
 import { DataConstant, Programm } from "../models/Programm";
 import { StringStream } from "./StringStream";
 import { CompilerError, SourceMode, syn_label_def, syn_label, syn_registers, syn_number, syn_keywords, syn_string, CompilerErrorCode } from "./Common";
