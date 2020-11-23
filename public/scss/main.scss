@@ -718,3 +718,25 @@ body {
 		margin: 6px 6px 0 6px;
 	}
 }
+
+/**
+* Footer
+*/
+footer {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	text-align: center;
+
+	background: linear-gradient(to top, rgba($primary-bg, 1) 0%, rgba($primary-bg, 0) 100%);
+	color: rgba($primary-text, 0.25);
+
+	a {
+		color: rgba($primary-text, 0.25);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		background: linear-gradient(to top, rgba($primary-bg-d, 1) 0%, rgba($primary-bg-d, 0) 100%);
+	}
+}
