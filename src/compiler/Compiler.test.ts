@@ -503,4 +503,30 @@ describe("@Test Compiler:parse(_:) (core)", () => {
             fail("Unexpected Error: " + e);
         }
     });
+
+    it("#31 Valid (number patterns)", () => {
+
+        type PublicCompiler = { parseNumber: (str: string, lineIdx: number, fromIndex: number, toIndex?: number) => number };
+        let parser = (compiler as any as PublicCompiler).parseNumber
+
+        // Decimal
+        expect(parser("123", 0, 0)).toBe(123);
+        expect(parser("0099", 0, 0)).toBe(99);
+        expect(parser("32415151", 0, 0)).toBe(32415151);
+
+        // Hex 
+        expect(parser("0x123", 0, 0)).toBe(0x123);
+        expect(parser("0x123a", 0, 0)).toBe(0x123a);
+        expect(parser("0x123A", 0, 0)).toBe(0x123A);
+        expect(parser("0xBBB", 0, 0)).toBe(0xBBB);
+
+        expect(parser("0aff01H", 0, 0)).toBe(0xaff01)
+        expect(parser("0b001H", 0, 0)).toBe(0x0b001)
+
+        // Binary
+        expect(parser("0b00101", 0, 0)).toBe(0b00101);
+        expect(parser("0b100101", 0, 0)).toBe(0b100101);
+        expect(parser("010010B", 0, 0)).toBe(0b010010);
+
+    })
 })

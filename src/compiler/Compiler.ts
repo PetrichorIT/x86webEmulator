@@ -403,7 +403,7 @@ export class Compiler {
                     if (!isNaN(parseInt(this.currentLine.peek()))) {
                         // Expect: Direct Memory, Read raw number until terminator ]
                         let matches = this.currentLine.match(
-                            /((0x[\dabcdef]+)|(0b[01]+)|([\d]+))[ ]*]/
+                            /((0x[\dabcdefABCDEF]+)|(0b[01]+)|([\d]+))[ ]*]/
                         ) as RegExpMatchArray;
 
                         // Catch missing results
@@ -732,7 +732,7 @@ export class Compiler {
             num = parseInt(str, 2);
         // Capture [0-9a-f]+H format
         if (str.endsWith("h"))
-            num = parseInt(str, 16)
+            num = parseInt(str.substr(0, str.length - 1), 16)   
 
         if (isNaN(num))
             throw new CompilerError(

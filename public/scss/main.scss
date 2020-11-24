@@ -740,3 +740,15 @@ footer {
 		background: linear-gradient(to top, rgba($primary-bg-d, 1) 0%, rgba($primary-bg-d, 0) 100%);
 	}
 }
+
+/**
+* NoScript
+*/
+noscript {
+	position: fixed;
+	width: 100vw;
+	height: 100vh;
+	background-color: $primary-bg;
+	color: $primary-text;
+	text-align: center;
+}
