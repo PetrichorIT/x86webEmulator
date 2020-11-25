@@ -107,7 +107,7 @@ function synModeText(stream: CodeMirror.StringStream, state: any): string {
             // Capture registers
             if (syn_registers.test(w)) return 'var2';
             // Capture prefixed numbers
-            if (w.startsWith("0b") || w.startsWith("0x") || w.endsWith("b") || w.endsWith("h")) return "number"
+            if ((w.match(syn_number) || [ "" ])[0] === w) return "number"
             // Assume label reference if in Operand (= keyword in line)
             return state.gotKeyword === true ? "def" : "syntax-error";
         }
