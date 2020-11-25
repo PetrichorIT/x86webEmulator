@@ -520,8 +520,9 @@ describe("@Test Compiler:parse(_:) (core)", () => {
         expect(parser("0x123A", 0, 0)).toBe(0x123A);
         expect(parser("0xBBB", 0, 0)).toBe(0xBBB);
 
-        expect(parser("0aff01H", 0, 0)).toBe(0xaff01)
-        expect(parser("0b001H", 0, 0)).toBe(0x0b001)
+        expect(parser("0aff01H", 0, 0)).toBe(0xaff01);
+        expect(parser("0b001H", 0, 0)).toBe(0x0b001);
+        expect(parser("9H", 0, 0)).toBe(0x9);
 
         // Binary
         expect(parser("0b00101", 0, 0)).toBe(0b00101);
