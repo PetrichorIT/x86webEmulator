@@ -554,11 +554,11 @@ export class Compiler {
                     } else {
                         // Expect: Register or Label
                         // Extract descriptor
-                        let desc = this.currentLine.eatWhile((c) => c !== ',' && c !== ';').trim().toLowerCase();
+                        let desc = this.currentLine.eatWhile((c) => c !== ',' && c !== ';').trim();
                         
                         // Check if register
-                        if (syn_registers.test(desc)) {
-                            params.push(new Operand(OperandTypes.register, desc));
+                        if (syn_registers.test(desc.toLowerCase())) {
+                            params.push(new Operand(OperandTypes.register, desc.toLowerCase()));
                         } else {
                             // Default as label (if not existent, captured at post-parse tests)
                             params.push(new Operand(OperandTypes.label, desc));
