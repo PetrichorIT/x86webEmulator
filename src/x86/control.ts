@@ -99,7 +99,7 @@ export function jnc(app: App, params: Operand[]) {
 	let memSize = op.requiredMemSize || 4;
 
 	let newEIP = op.getValue(app, memSize);
-	if (app.flags.CF === true) {
+	if (app.flags.CF === false) {
 		app.registers.eip._32 = newEIP;
 	} else {
 		app.registers.eip._32 += 4;
