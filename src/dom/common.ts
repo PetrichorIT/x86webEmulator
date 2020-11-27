@@ -1,5 +1,5 @@
 // Time interval that a edit is stored if not loaded in between
-const _storageTimeToLife = 60 * 60 * 1000;
+const maxCookieLife = 60 * 60 * 1000;
 
 // Check if sessionStorage is avilable
 function storageAvaiable(storage: Storage) {
@@ -24,11 +24,10 @@ function setDataFull(key: string, value: string): void {
 
 function setData(key: string, value: string, st: Storage): void {
 	if (storageAvaiable(st)) {
-		st.setItem(key + '_timestamp', Date.now().toString());
 		st.setItem(key, value);
 	} else {
 		var d = new Date();
-		d.setTime(d.getTime() + _storageTimeToLife);
+		d.setTime(d.getTime() + maxCookieLife);
 		var expires = 'expires=' + d.toUTCString();
 		document.cookie = key + '=' + value + ';' + expires + ';path=/';
 	}
@@ -44,17 +43,6 @@ function getDataFull(key: string): string {
 
 function getData(key: string, st: Storage): string {
 	if (storageAvaiable(st)) {
-		let d = parseInt(st.getItem(key + '_timestamp'));
-
-		if (Date.now() - d > _storageTimeToLife) {
-			st.removeItem(key);
-			st.removeItem(key + '_timestamp');
-			return '';
-		} else {
-			// Update timestamp
-			st.setItem(key + '_timestamp', Date.now().toString());
-		}
-
 		return st.getItem(key) || '';
 	} else {
 		var name = key + '=';
