@@ -115,3 +115,16 @@ export const __exit = CommonCheckers.noParams;
 export function exit(app: App, params: Operand[]) {
 	throw new Error('NOP');
 }
+
+export const __loop = CommonCheckers.jumpLike;
+export function loop(app: App, params: Operand[]) {
+	let op = params[0];
+	let memSize = op.requiredMemSize || 4;
+	
+	app.registers.ecx._32 -= 1;
+	if (app.registers.ecx._32 !== 0) {
+		app.registers.eip._32 = op.getValue(app, memSize);
+	} else {
+		app.registers.eip._32 += 4;
+	}
+}
