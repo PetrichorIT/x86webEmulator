@@ -25,7 +25,7 @@ export class Compiler {
     /**
      * Parses a programm source , producing a libary unit (name as provided).
      */
-    public parseLib(libName: string, text: string): Programm {
+    public parseLib(libName: string | null, text: string): Programm {
         // Defines libary internal prefix
         const prefix = `__lib_${libName}_`;
         if (this.debugMode) console.info(`[Compiler] Preparing libary "${libName}" for compiling.`)
@@ -34,6 +34,10 @@ export class Compiler {
         let entryPoints: string[] = [];
         let compiled = this.parse(text, entryPoints);
         
+        libName = libName || compiled.options["name"];
+        if (!libName) libName = prompt("Enter a libary name", "myLib")
+        compiled.options["name"] = libName;
+
         // Prefixes labels with a libary prefix
 		for (let i = 0; i < compiled.text.length; i++) {
 			if ((compiled.text[i] as Label).label) {

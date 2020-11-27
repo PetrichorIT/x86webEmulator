@@ -27,9 +27,9 @@ class LibController {
 	}
 
 	/**
-	 * Loads a libary into compiler storage.
+	 * Loads a libary into compiler storage. Retuns LibName
 	 */
-	private loadLib(app: App, libName: string, libCode: string) {
+	private loadLib(app: App, libName: string | null, libCode: string): string {
 		const res = app.compiler.parseLib(libName, libCode);
 
 		// If only LibLabel and JMP LibLabel are included
@@ -37,7 +37,8 @@ class LibController {
 			FullPersistentStorage.removeData('_lib_' + libName);
 			this.localLibs.filter((ln) => ln !== libName);
 			delete app.compiler.libs[libName];
-		}
+		} 
+		return res.options["name"];
 	}
 
 	/**
@@ -103,15 +104,17 @@ class LibController {
 	}
 
 	/**
-	 * Updates or creates a local libary and stores it.
+	 * Updates or creates a local libary and stores it. Retuns libName
 	 */
-	public setLib(app: App, libName: string, libCode: string): void {
-		this.loadLib(app, libName, libCode);
+	public setLib(app: App, libName: string | null, libCode: string): string {
+		libName = this.loadLib(app, libName, libCode);
 
 		if (!this.localLibs.includes(libName)) this.localLibs.push(libName);
 
 		FullPersistentStorage.setData('_libs_list', JSON.stringify(this.localLibs));
 		FullPersistentStorage.setData('_lib_' + libName, libCode);
+
+		return libName;
 	}
 
 	/**
