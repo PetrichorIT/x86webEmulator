@@ -368,11 +368,12 @@ export class DOMApp {
 
 		try {
 			// Run programm until stoped / finished (~5ms per cycle on no delay, no lib), (<1ms on lib)
-			while (this.running && this.app.instructionCycle()) {
+			while (this.running) {
 				let isValid: boolean = true;
 				for (let index = 0; index < this.batchSize; index++) {
 					isValid = this.app.instructionCycle()
 				} 
+				if (isValid === false) break;
 				// If not in lib code or lib code does not required speed up => delay
 				if (!this.app.isInLibMode || !this.speedUpLibaryCode) await new Promise((r) => setTimeout(r, this.instructionDelay));
 			}

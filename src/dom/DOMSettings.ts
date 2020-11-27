@@ -54,7 +54,7 @@ export class DOMSettings {
                 Freq = (Max - (Min - 1))^perc + (Min - 1)
                 */
                 const baseFreq = 1000/this.renderCycleDuration
-                const freq = Math.floor(Math.pow(2_000_000 - 9, v / 100)  + 9);
+                const freq = Math.floor(Math.pow(2_000_000, v / 100));
                 
                 const instructionDelay = Math.floor(freq > baseFreq ? 0 : 1000/freq);
                 const batchSize = Math.floor(freq > baseFreq ? freq / baseFreq : 1);
