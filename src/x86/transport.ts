@@ -84,7 +84,7 @@ module.exports.in = function (app: App, params: Operand[]) {
 	if (al.type !== OperandTypes.register && al.value !== "al") throw new Error("Only AL")
 	if (port.type !== OperandTypes.const) throw new Error("Invalid PORT")
 
-	app.registers.eax._8L = app.ioRead(port.getValue(app, 4));
+	app.registers.eax._8L = app.ioRead(port.getValue(app, 2));
 	app.registers.eip._32 += 4;
 }
 

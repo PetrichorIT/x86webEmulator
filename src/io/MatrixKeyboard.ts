@@ -60,7 +60,7 @@ export class MatrixKeyboard implements IODevice {
 
     private rowRead(row: number): number {
         let res = 0;
-        for (let i = 0; i < 4; i++) {
+        for (let i = 3; i >= 0; i--) {
             res = res << 1;
             if (this.boxes[row][i].checked) res |= 0b1
         }

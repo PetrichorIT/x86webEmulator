@@ -1,4 +1,7 @@
+import { CompilerError } from "../compiler/Common";
+import { Compiler } from "../compiler/Compiler";
 import { Lib } from "../lib/lib";
+import SemiPersistentStorage from "./common";
 import { DOMApp } from "./DOMApp";
 
 export class DOMLibaryController {
@@ -79,18 +82,32 @@ export class DOMLibaryController {
 	 * Handles the creation of a Lib from the current code of the editor
 	 */
 	private saveLibary(): void {
-        const libName = prompt('Enter a libary name', 'myLib');
-        if (!libName) return;
         
-        const isNew = !Lib.libs.includes(libName);
+        const text = this.domApp.editor.getDoc().getValue()
+        const libLen = Lib.libs.length;
 
-        Lib.setLib(this.domApp.app, libName, this.domApp.editor.getDoc().getValue());
-        if (isNew) {
-            const li = this.generateListElement(libName);
-            document.querySelector(".libary-list").append(li)
+        try {
+            const libName = Lib.setLib(this.domApp.app, null , text);
+            SemiPersistentStorage.setData('editor:snapshot', this.domApp.editor.getDoc().getValue());
 
-            // Resize Dropdown Container
-            document.getElementById("libary-dropdown:body").style.height = document.getElementById("libary-dropdown:body").scrollHeight + "px";
+            if (libLen !== Lib.libs.length) {
+                const li = this.generateListElement(libName);
+                document.querySelector(".libary-list").append(li)
+
+                // Resize Dropdown Container
+                document.getElementById("libary-dropdown:body").style.height = document.getElementById("libary-dropdown:body").scrollHeight + "px";
+            }
+        } catch (e) {
+            if (e instanceof CompilerError) {
+                this.domApp.editor.markText(
+					{ line: e.line, ch: e.position.from },
+					{ line: e.line, ch: e.position.to || 255 },
+					{ css: 'background-color: rgba(200, 50, 30, 0.5);' }
+                );
+                console.error(e);
+            } else {
+                throw e;
+            }
         }
     }
 }

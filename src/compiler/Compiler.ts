@@ -1,4 +1,4 @@
-import { App, Command, CommandOperandChecker, CompiledCode, Label } from "../App";
+import { App, Command, CommandOperandChecker, Label } from "../App";
 import { DataConstant, Programm } from "../models/Programm";
 import { StringStream } from "./StringStream";
 import { CompilerError, SourceMode, syn_label_def, syn_label, syn_registers, syn_number, syn_keywords, syn_string, CompilerErrorCode } from "./Common";
@@ -25,7 +25,7 @@ export class Compiler {
     /**
      * Parses a programm source , producing a libary unit (name as provided).
      */
-    public parseLib(libName: string, text: string): Programm {
+    public parseLib(libName: string | null, text: string): Programm {
         // Defines libary internal prefix
         const prefix = `__lib_${libName}_`;
         if (this.debugMode) console.info(`[Compiler] Preparing libary "${libName}" for compiling.`)
@@ -34,6 +34,10 @@ export class Compiler {
         let entryPoints: string[] = [];
         let compiled = this.parse(text, entryPoints);
         
+        libName = libName || compiled.options["name"];
+        if (!libName) libName = prompt("Enter a libary name", "myLib")
+        compiled.options["name"] = libName;
+
         // Prefixes labels with a libary prefix
 		for (let i = 0; i < compiled.text.length; i++) {
 			if ((compiled.text[i] as Label).label) {
@@ -172,7 +176,7 @@ export class Compiler {
             if (exportLabels.length !== 0)
                 console.info(`[Compiler] Captured ${exportLabels.length} public symbols`);
             if (programm.depenencies.length !== 0)
-                console.log(`[Compiler] Included ${programm.depenencies.length} dependencies`)
+                console.info(`[Compiler] Included ${programm.depenencies.length} dependencies`)
 		}
 
         // Reset mode to default
@@ -383,11 +387,12 @@ export class Compiler {
             // Read Operands (max 4)
             let i = 0;
             while (!this.currentLine.eol() && i < 4) {
-                if (this.currentLine.peek() === ';') break;
-
+                
                 // Eat all whitspacing characters
                 this.currentLine.eat(',');
                 this.currentLine.eatWhitespaces();
+
+                if (this.currentLine.peek() === ';') break;
 
                 // Pin location for operand specific debug errors
                 let preOpParse = this.currentLine.position;
@@ -402,7 +407,7 @@ export class Compiler {
                     if (!isNaN(parseInt(this.currentLine.peek()))) {
                         // Expect: Direct Memory, Read raw number until terminator ]
                         let matches = this.currentLine.match(
-                            /((0x[\dabcdef]+)|(0b[01]+)|([\d]+))[ ]*]/
+                            /((0x[\dabcdefABCDEF]+)|(0b[01]+)|([\d]+))[ ]*]/
                         ) as RegExpMatchArray;
 
                         // Catch missing results
@@ -415,14 +420,7 @@ export class Compiler {
                             );
 
                         // Parse raw extracted string to number (not including last char "]")
-                        let number = parseInt(matches[0].substr(0, matches[0].length - 1));
-                        if (isNaN(number))
-                            throw new CompilerError(
-                                CompilerErrorCode.invalidTokenNumber,
-                                matches[0].substr(0, matches[0].length - 1),
-                                lineIdx,
-                                { from: preOpParse }
-                            );
+                        let number = this.parseNumber(matches[0].substr(0, matches[0].length - 1), lineIdx, preOpParse, this.currentLine.position);
 
                         // register operand as direct memory [<number>]
                         params.push(new Operand(OperandTypes.mDirect, number));
@@ -459,29 +457,7 @@ export class Compiler {
 
                             // Expect second operand to be number (const)
                             let offsetStr = contents.substr(idx + 1).trim();
-                            if (!offsetStr.match(syn_number) || offsetStr.match(syn_number)[0] !== offsetStr)
-                                throw new CompilerError(
-                                    CompilerErrorCode.invalidTokenNumber,
-                                    offsetStr,
-                                    lineIdx,
-                                    {
-                                        from: preOpParse,
-                                        to: this.currentLine.position
-                                    }
-                                );
-
-                            // Check for parsing results
-                            let offset = parseInt(offsetStr);
-                            if (isNaN(offset))
-                                throw new CompilerError(
-                                    CompilerErrorCode.invalidTokenNumber,
-                                    offsetStr,
-                                    lineIdx,
-                                    {
-                                        from: preOpParse,
-                                        to: this.currentLine.position
-                                    }
-                                );
+                            let offset = this.parseNumber(offsetStr, lineIdx, preOpParse, this.currentLine.position)
 
                             // register indexed memory acces operand
                             params.push(
@@ -544,30 +520,10 @@ export class Compiler {
                     if (!isNaN(parseInt(this.currentLine.peek()))) {
                         // Expect: Const Number (Extract from line)
                         let numStr = this.currentLine.eatWhile((c) => c !== ',' && c !== ' ' && c !== ";" && c !== "\t");
-                        if (numStr.match(syn_number)[0] !== numStr)
-                            throw new CompilerError(
-                                CompilerErrorCode.invalidTokenNumber,
-                                numStr,
-                                lineIdx,
-                                {
-                                    from: preOpParse
-                                }
-                            );
 
                         // Parse to Int (capture special 0b format)
-                        let num = parseInt(numStr);
-                        if (numStr.toLowerCase().startsWith("0b")) num = parseInt(numStr.substr(2), 2)
-                        
-                        if (isNaN(num))
-                            throw new CompilerError(
-                                CompilerErrorCode.invalidTokenNumber,
-                                numStr,
-                                lineIdx,
-                                {
-                                    from: preOpParse
-                                }
-                            );
-
+                        let num = this.parseNumber(numStr, lineIdx, preOpParse, this.currentLine.position);
+                       
                         // Register Const Number operand
                         params.push(new Operand(OperandTypes.const, num));
                     } else if (this.currentLine.peek() === '"') {
@@ -602,11 +558,11 @@ export class Compiler {
                     } else {
                         // Expect: Register or Label
                         // Extract descriptor
-                        let desc = this.currentLine.eatWhile((c) => c !== ',' && c !== ';').trim().toLowerCase();
+                        let desc = this.currentLine.eatWhile((c) => c !== ',' && c !== ';').trim();
                         
                         // Check if register
-                        if (syn_registers.test(desc)) {
-                            params.push(new Operand(OperandTypes.register, desc));
+                        if (syn_registers.test(desc.toLowerCase())) {
+                            params.push(new Operand(OperandTypes.register, desc.toLowerCase()));
                         } else {
                             // Default as label (if not existent, captured at post-parse tests)
                             params.push(new Operand(OperandTypes.label, desc));
@@ -736,29 +692,14 @@ export class Compiler {
                         );
 
                     // Cast as int or null (not NaN)
-                    const n = parseInt(sp[0]);
-                    const v = sp[1] === '?' ? null : parseInt(sp[1]);
+                    const n = this.parseNumber(sp[0], lineIdx, preEat, this.currentLine.position);
+                    const v = sp[1] === '?' ? null : this.parseNumber(sp[1], lineIdx, preEat, this.currentLine.position);
 
-                    // Gurantee valid values to write to dConst memory
-                    if (isNaN(v) || isNaN(n)) 
-                        throw new CompilerError(
-                            CompilerErrorCode.invalidTokenNumber,
-                            r,
-                            lineIdx,
-                            { from: preEat, to: this.currentLine.position }
-                        );
                     raw.push(...Array(n).fill(v));
                 } else {
                     // In case of emerency, capture as number
-                    const asInt = parseInt(r);
-                    if (isNaN(asInt) || !syn_number.test(r))
-                        throw new CompilerError(
-                            CompilerErrorCode.invalidTokenNumber,
-                            r,
-                            lineIdx,
-                            { from: preEat, to: this.currentLine.position }
-                        );
-    
+                    const asInt = this.parseNumber(r, lineIdx, preEat, this.currentLine.position);
+
                     raw.push(asInt);
                 }
             }
@@ -768,5 +709,45 @@ export class Compiler {
         programm.data.push(
             new DataConstant(w, defSize, raw, lineIdx)
         );
+    }
+
+    /**
+     * Parses string to number
+     */
+    private parseNumber(str: string, lineIdx: number, fromIndex: number, toIndex?: number): number {
+        // Test for any valid string format
+        str = str.toLowerCase().trim();
+        if (str.match(syn_number) === null || str.match(syn_number)[0] !== str) 
+            throw new CompilerError(
+                CompilerErrorCode.invalidTokenNumber,
+                str,
+                lineIdx,
+                { from: fromIndex, to: toIndex }
+            );
+
+        // Use default parse at start
+        let num = parseInt(str) || 0;
+
+        // Capture 0b[01]+ format
+        if (str.startsWith("0b") && !str.endsWith("h")) 
+            num = parseInt(str.substr(2), 2);
+        // Capture [01]+B format
+        if (str.endsWith("b") && str.substr(0, str.length - 2).match(/[01]+/)[0] === str.substr(0, str.length -2 )) 
+            num = parseInt(str, 2);
+        // Capture [0-9a-f]+H format
+        if (str.endsWith("h"))
+            num = parseInt(str.substr(0, str.length - 1), 16)   
+
+        if (isNaN(num))
+            throw new CompilerError(
+                CompilerErrorCode.invalidTokenNumber,
+                str,
+                lineIdx,
+                {
+                    from: fromIndex, to: toIndex
+                }
+            );
+
+        return num;
     }
 }

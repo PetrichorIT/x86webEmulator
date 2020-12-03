@@ -1,7 +1,7 @@
 import Register32 from './models/Register32';
-import Operand, { OperandTypes } from './models/Operand';
+import Operand from './models/Operand';
 import IODevice from './io/io'
-import { DataConstant, Programm } from './models/Programm';
+import { Programm } from './models/Programm';
 import { Compiler } from './compiler/Compiler';
 
 export type CompiledCode = (Command | Label)[];

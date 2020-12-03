@@ -2,30 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="author" content="MkDev">
-    <meta name="keywords" content="x86, Assembler, Assembly, Emulator">
-    <meta name="robots" content="none">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <meta name="twitter:card" value="summary">
+    <meta http-equiv="cache-control" content="43200"/>
+    <meta name="robots" content="index,nofollow">
 
-    <meta property="og:title" content="x86 Emulator by MkDev">
-    <meta property="og:type" content="article">
-    <meta property="og:url" content="http://127.0.0.1:5500">
-    <meta property="og:description" content="A simple emulator for the x86 instruction set">
-    <meta property="og:locale" content="en_GB">
+    <!-- Primary Meta Tags -->
+    <title>x86 Emulator - Write assembler yourself</title>
+    <meta name="author" content="MKDev (https://github.com/Unamed001)">
+    <meta name="copyright" content="MKDev (https://github.com/Unamed001)">
+    <meta name="keywords" content="x86, Assembler, Assembly, Emulator">
+    <meta name="title" content="x86 Emulator - Write assembler yourself">
+    <meta name="description" content="A simple emulator for a simplified x86 instruction set. Developed and maintained by MKDev.">
+    <meta name="language" content="English">
 
-    <title>x86 Emulator</title>
-    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://x86emulator.herokuapp.com/">
+    <meta property="og:title" content="x86 Emulator - Write assembler yourself">
+    <meta property="og:description" content="A simple emulator for a simplified x86 instruction set. Developed and maintained by MKDev.">
+    <meta property="og:image" content="https://x86emulator.herokuapp.com/preview.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://x86emulator.herokuapp.com/">
+    <meta property="twitter:title" content="x86 Emulator - Write assembler yourself">
+    <meta property="twitter:description" content="A simple emulator for a simplified x86 instruction set. Developed and maintained by MKDev.">
+    <meta property="twitter:image" content="https://x86emulator.herokuapp.com/preview.png">
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/codemirror.css">
     <link rel="stylesheet" href="css/material-darker.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
 
+    <!-- Scripts -->
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
 </head>
 <body>
-    <div class="popover-box"></div>
+
+    <noscript>
+        This application requires JavaScript.
+    </noscript>
+
     <div class="content-box">
         <div class="header-box">
             x86 Emulator
@@ -62,7 +81,7 @@
                         <button class="btn">
                             <i class="fas fa-file-upload"></i>
                         </button>
-                        <input type="file" id="fileInput" accept="text/*">
+                        <input type="file" id="fileInput" accept="asm|text/*">
                     </div>
                     <div class="upload-btn-box">
                         <button class="btn" id="downloadButton">
@@ -178,30 +197,21 @@
         </div>
     </div>
 
-    <!-- Main Script -->
-    <script async src="js/main.js"></script>
+    <!-- Footer -->
+    <footer>
+        Using 
+        <a href="https://codemirror.net">CodeMirror 5.57.0</a>, 
+        <a href="https://fontawesome.com">FontAwesome</a>,
+        <a href="https://www.npmjs.com/package/cookieconsent">cookieconsent</a> and
+        <a href="https://www.npmjs.com/package/static-server">static-server</a>.
+        Developed by
+        <a href="https://github.com/Unamed001">MKDev</a>
+    </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
-    <script>
-        // Temporarily disabled
-        // window.cookieconsent.initialise({
-        //     "palette": {
-        //         "popup": {
-        //         "background": "rgb(20, 20, 20)",
-        //         "text": "#d6d6d6"
-        //         },
-        //         "button": {
-        //         "background": "green"
-        //         }
-        //     },
-        //     "position": "bottom-left",
-        //     "content": {
-        //         "message": "This website uses cookies (or local storage) to ensure you get the best experience on our website",
-        //         "dismiss": "Got it!",
-        //         "link": "Learn more",
-        //         "href": "https://www.cookiesandyou.co"
-        //     }
-        // });
-    </script>
+    <!-- Main Script -->
+    <script defer src="js/main.js"></script>
+
+    <!-- Cookie Consent -->
+    <script defer src="js/cookieconsent.js"></script>
 </body>
 </html>

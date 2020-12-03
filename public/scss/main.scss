@@ -1,13 +1,17 @@
 /**
 * Primary Configuration colors
 */
-$primary-bg: rgb(245, 245, 245);
+
+// $primary-bg: rgb(255, 255, 255);
+$primary-bg: rgb(40, 40, 40);
 $primary-bg-d: rgb(40, 40, 40);
 
-$primary-text: rgb(30, 30, 30);
+// $primary-text: rgb(30, 30, 30);
+$primary-text: rgb(240, 240, 240);
 $primary-text-d: rgb(240, 240, 240);
 
-$textbox-bg: rgb(235, 235, 235);
+// $textbox-bg: rgb(235, 235, 235);
+$textbox-bg: rgb(70, 70, 70);
 $textbox-bg-d: rgb(70, 70, 70);
 
 /**
@@ -15,10 +19,13 @@ $textbox-bg-d: rgb(70, 70, 70);
 * - accent must be different from primary bg
 * - bg can (not must) be primary bg
 */
-$dropdown-bg: $primary-bg;
-$dropdown-accent: rgb(225, 225, 225);
 
+// $dropdown-bg: $primary-bg;
+$dropdown-bg: $primary-bg-d;
 $dropdown-bg-d: $primary-bg-d;
+
+// $dropdown-accent: rgb(225, 225, 225);
+$dropdown-accent: rgb(70, 70, 70);
 $dropdown-accent-d: rgb(70, 70, 70);
 
 /**
@@ -28,6 +35,18 @@ $dropdown-accent-d: rgb(70, 70, 70);
 $button-green: rgb(57, 133, 14);
 $button-blue: rgb(5, 93, 151);
 $button-gray: rgb(120, 120, 120);
+
+/**
+* IO Colors
+*/
+$io-segementOff: rgb(71, 0, 0);
+$io-segementOff-d: rgb(71, 0, 0);
+
+/**
+* Border Radii
+*/
+$border-radius-major: 5px;
+$border-radius-minor: 2.5px;
 
 /**
 * Remove and special settings on box model for any elements.
@@ -65,7 +84,7 @@ body {
 	* Build mini header.
 	*/
 	.header-box {
-		padding: 15px;
+		padding: 15px 0 10px 25px;
 		font-size: 25px;
 		font-weight: 600;
 	}
@@ -101,7 +120,7 @@ body {
 				margin-right: 10px;
 				margin-top: 10px;
 
-				border-radius: 5px;
+				border-radius: $border-radius-major;
 				overflow: hidden;
 
 				#closeLibaryView {
@@ -151,7 +170,7 @@ body {
 					width: 40px;
 					font-size: 20px;
 					color: $primary-text-d;
-					border-radius: 5px;
+					border-radius: $border-radius-major;
 					transition: .2s;
 					cursor: pointer;
 					font-weight: bold;
@@ -191,7 +210,7 @@ body {
 				.upload-btn-box,
 				.download-btn-box {
 					font-size: 20px;
-					border-radius: 5px;
+					border-radius: $border-radius-major;
 					transition: .2s;
 
 					height: 40px;
@@ -212,10 +231,14 @@ body {
 						border: none;
 						color: $primary-text-d;
 						background-color: $button-gray;
-						border-radius: 8px;
+						border-radius: $border-radius-major;
 						font-size: 20px;
 						font-weight: bold;
 						transition: .2s;
+
+						&:disabled {
+							background-color: rgba($button-gray, 0.5);
+						}
 					}
 
 					&:hover {
@@ -317,7 +340,7 @@ body {
 					.libaryOptionButton {
 						margin-right: 10px;
 						padding: .5px 5px;
-						border-radius: 5px;
+						border-radius: $border-radius-major;
 						outline: none;
 						border: none;
 						color: $primary-text;
@@ -334,7 +357,7 @@ body {
 					margin-left: 10px;
 					margin-top: 10px;
 					padding: 5px 10px;
-					border-radius: 5px;
+					border-radius: $border-radius-major;
 					outline: none;
 					border: none;
 					color: $primary-text;
@@ -370,7 +393,7 @@ body {
 						.byte {
 							outline: none;
 							border: none;
-							border-radius: 2.5px;
+							border-radius: $border-radius-minor;
 							padding: 2.5px 5px;
 							width: 40px;
 							margin: 0 2.5px;
@@ -402,7 +425,7 @@ body {
 						.checkbox {
 							outline: none;
 							border: none;
-							border-radius: 2.5px;
+							border-radius: $border-radius-minor;
 							padding: 2.5px 2.5px;
 							width: 23px;
 							height: 23px;
@@ -457,7 +480,7 @@ body {
 					.memAsInt {
 						outline: none;
 						border: none;
-						border-radius: 2.5px;
+						border-radius: $border-radius-minor;
 						// padding: 2.5px 2.5px;
 						width: 23px;
 						height: 23px;
@@ -484,7 +507,7 @@ body {
 							text-align: center;
 							margin: .5%;
 							font-size: 15px;
-							border-radius: 2.5px;
+							border-radius: $border-radius-minor;
 
 							color: $primary-text;
 							background-color: $textbox-bg;
@@ -496,17 +519,17 @@ body {
 
 						.mem8 {
 							width: 7%;
-							border-radius: 2.5px;
+							border-radius: $border-radius-minor;
 						}
 
 						.mem16 {
 							width: 15%;
-							border-radius: 2.5px;
+							border-radius: $border-radius-minor;
 						}
 
 						.mem32 {
 							width: 30%;
-							border-radius: 2.5px;
+							border-radius: $border-radius-minor;
 						}
 					}
 				}
@@ -525,7 +548,7 @@ body {
 						margin: 2.5px;
 						width: 25px;
 						height: 25px;
-						border-radius: 5px;
+						border-radius: $border-radius-major;
 
 						background-color: gray;
 					}
@@ -543,9 +566,9 @@ body {
 						padding-right: 5px;
 
 						use {
-							fill: rgb(207, 178, 178);
+							fill: $io-segementOff;
 							@media (prefers-color-scheme: dark) {
-								fill: rgb(71, 0, 0);
+								fill: $io-segementOff-d;
 							}
 						}
 
@@ -594,7 +617,7 @@ body {
 		padding: 2.5px;
 		padding-left: 10px;
 		background-color: $dropdown-accent;
-		border-radius: 2.5px;
+		border-radius: $border-radius-minor;
 
 		@media (prefers-color-scheme: dark) {
 			background-color: $dropdown-accent-d;
@@ -694,4 +717,38 @@ body {
 	> * {
 		margin: 6px 6px 0 6px;
 	}
+}
+
+/**
+* Footer
+*/
+footer {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	text-align: center;
+
+	background: linear-gradient(to top, rgba($primary-bg, 1) 0%, rgba($primary-bg, 0) 100%);
+	color: rgba($primary-text, 0.25);
+
+	a {
+		color: rgba($primary-text, 0.25);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		background: linear-gradient(to top, rgba($primary-bg-d, 1) 0%, rgba($primary-bg-d, 0) 100%);
+	}
+}
+
+/**
+* NoScript
+*/
+noscript {
+	position: fixed;
+	width: 100vw;
+	height: 100vh;
+	background-color: $primary-bg;
+	color: $primary-text;
+	text-align: center;
 }

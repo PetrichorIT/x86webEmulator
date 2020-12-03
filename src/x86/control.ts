@@ -80,6 +80,32 @@ export function jnz(app: App, params: Operand[]) {
 	}
 }
 
+export const __jc = CommonCheckers.jumpLike;
+export function jc(app: App, params: Operand[]) {
+	let op = params[0];
+	let memSize = op.requiredMemSize || 4;
+
+	let newEIP = op.getValue(app, memSize);
+	if (app.flags.CF === true) {
+		app.registers.eip._32 = newEIP;
+	} else {
+		app.registers.eip._32 += 4;
+	}
+}
+
+export const __jnc = CommonCheckers.jumpLike;
+export function jnc(app: App, params: Operand[]) {
+	let op = params[0];
+	let memSize = op.requiredMemSize || 4;
+
+	let newEIP = op.getValue(app, memSize);
+	if (app.flags.CF === false) {
+		app.registers.eip._32 = newEIP;
+	} else {
+		app.registers.eip._32 += 4;
+	}
+}
+
 export const __nop = CommonCheckers.noParams;
 export function nop(app: App, params: Operand[]) {
 	app.registers.eip._32 += 4;
@@ -88,4 +114,17 @@ export function nop(app: App, params: Operand[]) {
 export const __exit = CommonCheckers.noParams;
 export function exit(app: App, params: Operand[]) {
 	throw new Error('NOP');
+}
+
+export const __loop = CommonCheckers.jumpLike;
+export function loop(app: App, params: Operand[]) {
+	let op = params[0];
+	let memSize = op.requiredMemSize || 4;
+	
+	app.registers.ecx._32 -= 1;
+	if (app.registers.ecx._32 !== 0) {
+		app.registers.eip._32 = op.getValue(app, memSize);
+	} else {
+		app.registers.eip._32 += 4;
+	}
 }
