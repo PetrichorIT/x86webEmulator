@@ -39,8 +39,8 @@
 	"homepage": "https://github.com/Unamed001/x86webEmulator#readme",
 	"devDependencies": {
 		"@types/codemirror": "0.0.98",
-		"codemirror": "^5.57.0",
 		"@types/jest": "^26.0.10",
+		"codemirror": "^5.57.0",
 		"jest": "^26.4.1",
 		"node-sass": "^4.14.1",
 		"ts-jest": "^26.2.0",
