@@ -5,7 +5,7 @@ See Wiki for more information.
 # Installation
 
 ```bash
-$ git clone https://github.com/Unamed001/x86webEmulator.git && cd x86webEmulator
+$ git clone https://github.com/PetrichorIT/x86webEmulator.git && cd x86webEmulator
 $ npm install
 $ npm start
 ```
@@ -19,7 +19,7 @@ $ npm start
 
 MIT License
 
-Copyright (c) 2020 Petrichor
+Copyright (c) 2020 [Petrichor](https://github.com/PetrichorIT)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
